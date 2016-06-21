@@ -10,21 +10,41 @@ buildscript {
 }
 apply plugin: "io.spring.dependency-management"
 
-repositories {
-    jcenter()
-}
-
 dependencyManagement {
     imports {
         mavenBom 'com.amazonaws:aws-java-sdk-bom:1.10.47'
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.5'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.8'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.8'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.8'
     testCompile 'junit:junit:4.+'
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+apply plugin: 'application'
+
+mainClassName = 'org.bricolages.streaming.Preprocessor'
+
+task xjar(type: Jar, dependsOn: jar)  {
+    archiveName = "bricolage-streaming-preprocessor.jar"
+    manifest {
+        attributes 'Main-Class' : mainClassName
+    }
+
+    from configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
+    from "$buildDir/classes/main"
+    from "$buildDir/resources/main"
 }
