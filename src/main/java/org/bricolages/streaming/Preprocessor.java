@@ -1,8 +1,12 @@
 package org.bricolages.streaming;
 
+import com.amazonaws.auth.*;
 import com.amazonaws.auth.profile.*;
 import com.amazonaws.services.s3.*;
 import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.event.*;
+import com.amazonaws.services.sqs.*;
+import com.amazonaws.services.sqs.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
@@ -14,21 +18,54 @@ import lombok.*;
 
 public class Preprocessor {
     static public void main(String[] args) throws Exception {
-        S3ObjectLocation loc = new S3ObjectLocation(args[0], args[1]);
+        //S3ObjectLocation loc = new S3ObjectLocation(args[0], args[1]);
+        //S3ObjectLocation dest = new S3ObjectLocation(args[2], args[3]);
         Preprocessor pp = new Preprocessor();
         //pp.download(loc);
         //pp.s3cat(loc);
-        S3ObjectLocation d = new S3ObjectLocation(args[2], args[3]);
-        pp.s3filter(loc, d);
+        //pp.s3filter(loc, dest);
+        pp.receiveQueue();
     }
 
+    final AWSCredentialsProvider credentials;
+    final AmazonSQS sqs;
+    final String queueUrl = "https://sqs.ap-northeast-1.amazonaws.com/789035092620/log-stream-dev";
     final AmazonS3 s3client;
+
     final ObjectMapper mapper;
 
     public Preprocessor() {
         super();
-        this.s3client = new AmazonS3Client(new ProfileCredentialsProvider());
+        this.credentials = new ProfileCredentialsProvider();
+        this.sqs = new AmazonSQSClient(credentials);
+        this.s3client = new AmazonS3Client(credentials);
         this.mapper = new ObjectMapper();
+    }
+
+    void receiveQueue() throws IOException {
+        String queueUrl = "https://sqs.ap-northeast-1.amazonaws.com/789035092620/log-stream-dev";
+        ReceiveMessageRequest req = new ReceiveMessageRequest(queueUrl);
+        req.setWaitTimeSeconds(20);   // long poll; max wait value
+        req.setVisibilityTimeout(30);
+        req.setMaxNumberOfMessages(3);
+        ReceiveMessageResult res = sqs.receiveMessage(req);
+        for (Message msg : res.getMessages()) {
+            S3EventNotification body = S3EventNotification.parseJson(msg.getBody());
+            System.out.println("------");
+            System.out.println(body.toJson());
+
+            S3EventNotification.S3EventNotificationRecord rec = body.getRecords().get(0);
+            System.out.println("bucket: " + rec.getS3().getBucket().getName());
+            System.out.println("key   : " + rec.getS3().getObject().getKey());
+            System.out.println("size  : " + rec.getS3().getObject().getSizeAsLong());
+
+            //deleteMessage(msg);
+        }
+    }
+
+    void deleteMessage(Message msg) {
+        DeleteMessageRequest req = new DeleteMessageRequest(queueUrl, msg.getReceiptHandle());
+        DeleteMessageResult res = sqs.deleteMessage(req);
     }
 
     void download(S3ObjectLocation loc) throws IOException {
