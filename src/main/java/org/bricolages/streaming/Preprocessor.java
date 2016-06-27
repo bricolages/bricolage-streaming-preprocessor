@@ -1,19 +1,10 @@
 package org.bricolages.streaming;
-
-import com.amazonaws.auth.*;
-import com.amazonaws.auth.profile.*;
-import com.amazonaws.services.s3.*;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.s3.event.*;
-import com.amazonaws.services.sqs.*;
-import com.amazonaws.services.sqs.model.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.zip.GZIPInputStream;
 import lombok.*;
 
 public class Preprocessor {
@@ -22,127 +13,38 @@ public class Preprocessor {
         //S3ObjectLocation dest = new S3ObjectLocation(args[2], args[3]);
         Preprocessor pp = new Preprocessor();
         //pp.download(loc);
-        //pp.s3cat(loc);
         //pp.s3filter(loc, dest);
         pp.receiveQueue();
     }
 
-    final AWSCredentialsProvider credentials;
-    final AmazonSQS sqs;
-    final String queueUrl = "https://sqs.ap-northeast-1.amazonaws.com/789035092620/log-stream-dev";
-    final AmazonS3 s3client;
-
-    final ObjectMapper mapper;
+    final EventQueue eventQueue;
+    final S3Agent s3;
+    final ObjectFilter filter = new ObjectFilter();
 
     public Preprocessor() {
         super();
-        this.credentials = new ProfileCredentialsProvider();
-        this.sqs = new AmazonSQSClient(credentials);
-        this.s3client = new AmazonS3Client(credentials);
-        this.mapper = new ObjectMapper();
+        String queueUrl = "****";
+        AWSCredentialsProvider credentials = new ProfileCredentialsProvider();
+        this.eventQueue = new EventQueue(new SQSQueue(credentials, queueUrl));
+        this.s3 = new S3Agent(credentials);
     }
 
     void receiveQueue() throws IOException {
-        String queueUrl = "https://sqs.ap-northeast-1.amazonaws.com/789035092620/log-stream-dev";
-        ReceiveMessageRequest req = new ReceiveMessageRequest(queueUrl);
-        req.setWaitTimeSeconds(20);   // long poll; max wait value
-        req.setVisibilityTimeout(30);
-        req.setMaxNumberOfMessages(3);
-        ReceiveMessageResult res = sqs.receiveMessage(req);
-        for (Message msg : res.getMessages()) {
-            S3EventNotification body = S3EventNotification.parseJson(msg.getBody());
-            System.out.println("------");
-            System.out.println(body.toJson());
-
-            S3EventNotification.S3EventNotificationRecord rec = body.getRecords().get(0);
-            System.out.println("bucket: " + rec.getS3().getBucket().getName());
-            System.out.println("key   : " + rec.getS3().getObject().getKey());
-            System.out.println("size  : " + rec.getS3().getObject().getSizeAsLong());
-
-            //deleteMessage(msg);
-        }
-    }
-
-    void deleteMessage(Message msg) {
-        DeleteMessageRequest req = new DeleteMessageRequest(queueUrl, msg.getReceiptHandle());
-        DeleteMessageResult res = sqs.deleteMessage(req);
-    }
-
-    void download(S3ObjectLocation loc) throws IOException {
-        try (InputStream in = s3open(loc)) {
-            Files.copy(in, loc.basename());
-        }
-    }
-
-    void s3cat(S3ObjectLocation loc) throws IOException {
-        OutputStream out = System.out;
-        try (InputStream in = s3open(loc)) {
-            GZIPInputStream gz = new GZIPInputStream(in);
-            byte[] buf = new byte[4096];
-            int n;
-            while ((n = gz.read(buf)) >= 0) {
-                out.write(buf, 0, n);
-            }
-        }
-    }
-
-    void s3filter(S3ObjectLocation src, S3ObjectLocation dest) throws IOException {
-        try (BufferedWriter out = Files.newBufferedWriter(dest.basename(), Charset.defaultCharset())) {
-            PrintWriter w = new PrintWriter(out);
-            try (InputStream in = s3open(src)) {
-                BufferedReader r = new BufferedReader(new InputStreamReader(new GZIPInputStream(in)));
-                filterStream(r, w);
-            }
-        }
-    }
-
-    void filterStream(BufferedReader r, PrintWriter w) throws IOException {
-        r.lines().forEach((line) -> {
-            String result = filterJsonString(line);
-            if (result != null) {
-                w.println(result);
-            }
+        eventQueue.events().forEach(e -> {
+            System.out.println("object: " + e.getLocation());
+            System.out.println("size  : " + e.getObjectSize());
         });
     }
 
-    String filterJsonString(String json) {
-        try {
-            Map<String, Object> obj = mapper.readValue(json, Map.class);
-            Object result = filterJsonObject(obj);
-            return mapper.writeValueAsString(result);
-        }
-        catch (JsonProcessingException ex) {
-            // FIXME
-            return null;
-        }
-        catch (IOException ex) {
-            // FIXME
-            return null;
-        }
+    void download(S3ObjectLocation loc) throws IOException {
+        s3.download(loc, loc.basename());
     }
 
-    Object filterJsonObject(Map<String, Object> obj) {
-        obj.put("extra", "value");
-        return obj;
-    }
-
-    InputStream s3open(S3ObjectLocation loc) throws IOException {
-        S3Object obj = s3client.getObject(loc.getRequest());
-        return obj.getObjectContent();
-    }
-
-    @AllArgsConstructor
-    @Getter
-    static class S3ObjectLocation {
-        final String bucket;
-        final String key;
-
-        Path basename() {
-            return Paths.get(key).getFileName();
-        }
-
-        GetObjectRequest getRequest() {
-            return new GetObjectRequest(bucket, key);
+    void s3filter(S3ObjectLocation src, S3ObjectLocation dest) throws IOException {
+        try (BufferedWriter w = Files.newBufferedWriter(dest.basename(), Charset.defaultCharset())) {
+            try (BufferedReader r = s3.openBufferedReader(src)) {
+                filter.apply(r, w);
+            }
         }
     }
 }
