@@ -31,7 +31,7 @@ class ObjectFilter {
                 }
             }
             catch (JsonProcessingException ex) {
-                log.trace("JSON parse error: {}:{}: {}", sourceName, result.inputLines, ex.getMessage());
+                log.debug("JSON parse error: {}:{}: {}", sourceName, result.inputLines, ex.getMessage());
                 result.jsonParseError++;
             }
         });

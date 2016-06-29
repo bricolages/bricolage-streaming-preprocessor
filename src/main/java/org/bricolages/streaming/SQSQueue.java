@@ -74,7 +74,7 @@ class SQSQueue implements Iterable<Message> {
         log.info("receiveMessage queue={}, visibilityTimeout={}, maxNumberOfMessages={}, waitTimeSeconds={}",
             queueUrl, visibilityTimeout, maxNumberOfMessages, waitTimeSeconds);
         ReceiveMessageResult res = sqs.receiveMessage(req);
-        log.trace("receiveMessage return");
+        log.debug("receiveMessage returned");
         return res.getMessages();
     }
 

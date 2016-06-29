@@ -38,11 +38,11 @@ class S3Agent {
     InputStream openInputStream(S3ObjectLocation loc) throws IOException {
         InputStream in = openInputStreamRaw(loc);
         if (loc.isGzip()) {
-            log.trace("gzip -dc {}", loc);
+            log.debug("reading gzip: {}", loc);
             return new GZIPInputStream(in);
         }
         else {
-            log.trace("cat {}", loc);
+            log.debug("reading raw: {}", loc);
             return in;
         }
     }

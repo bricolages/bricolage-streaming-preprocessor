@@ -32,7 +32,7 @@ class EventQueue {
                     return Stream.of(S3Event.forMessage(msg));
                 }
                 else {
-                    System.out.println("unknown kind of message: " + msg.getBody());
+                    log.warn("unknown kind of message: {}", msg.getBody());
                     return Stream.empty();
                 }
             }
