@@ -1,23 +1,44 @@
 package org.bricolages.streaming;
 import com.amazonaws.services.s3.event.*;
+import com.amazonaws.services.sqs.model.Message;
 import java.util.stream.Stream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import lombok.*;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
+@Slf4j
 class EventQueue {
     final SQSQueue queue;
 
     // FIXME: <Event>
-    Stream<S3Event> events() {
-        return queue.stream().map(msg -> {
+    public Stream<S3Event> stream() {
+        return convertMessages(queue.stream());
+    }
+
+    // FIXME: <Event>
+    public Stream<S3Event> finiteStream() throws IOException {
+        return convertMessages(queue.receiveMessages().stream());
+    }
+
+    // FIXME: <Event>
+    Stream<S3Event> convertMessages(Stream<Message> s) {
+        return s.flatMap(msg -> {
             // FIXME: polymorphic
             try {
-                return S3Event.forMessage(msg);
+                if (msg.getBody().contains("ObjectCreated:")) {
+                    return Stream.of(S3Event.forMessage(msg));
+                }
+                else {
+                    System.out.println("unknown kind of message: " + msg.getBody());
+                    return Stream.empty();
+                }
             }
             catch (IOException ex) {
-                throw new UncheckedIOException(ex);
+                log.error("could not map SQS message", ex);
+                return Stream.empty();
             }
         });
     }

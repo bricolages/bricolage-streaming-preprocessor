@@ -12,7 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Files;
 import java.util.zip.GZIPInputStream;
 import lombok.*;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class S3Agent {
     final AmazonS3 s3client;
 
@@ -34,7 +37,14 @@ class S3Agent {
 
     InputStream openInputStream(S3ObjectLocation loc) throws IOException {
         InputStream in = openInputStreamRaw(loc);
-        return loc.isGzip() ? new GZIPInputStream(in) : in;
+        if (loc.isGzip()) {
+            log.trace("gzip -dc {}", loc);
+            return new GZIPInputStream(in);
+        }
+        else {
+            log.trace("cat {}", loc);
+            return in;
+        }
     }
 
     InputStream openInputStreamRaw(S3ObjectLocation loc) throws IOException {

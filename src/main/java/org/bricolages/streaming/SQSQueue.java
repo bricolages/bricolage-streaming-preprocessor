@@ -16,11 +16,17 @@ import java.util.stream.StreamSupport;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import lombok.*;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class SQSQueue implements Iterable<Message> {
     final AWSCredentialsProvider credentials;
     final String queueUrl;
     final AmazonSQS sqs;
+    int visibilityTimeout = 30;     // sec
+    int maxNumberOfMessages = 10;   // max value
+    int waitTimeSeconds = 20;       // max value; enables long poll
 
     public SQSQueue(AWSCredentialsProvider credentials, String queueUrl) {
         super();
@@ -49,7 +55,7 @@ class SQSQueue implements Iterable<Message> {
         public Message next() {
             while (iter == null || !iter.hasNext()) {
                 try {
-                    this.iter = receiveQueue().listIterator();
+                    this.iter = receiveMessages().listIterator();
                 }
                 catch (IOException ex) {
                     // FIXME: retry, log
@@ -60,23 +66,25 @@ class SQSQueue implements Iterable<Message> {
         }
     }
 
-    static final int SQS_VISIBILITY_TIMEOUT = 30;   // sec
-
-    public List<Message> receiveQueue() throws IOException {
-        String queueUrl = "https://sqs.ap-northeast-1.amazonaws.com/789035092620/log-stream-dev";
+    public List<Message> receiveMessages() throws IOException {
         ReceiveMessageRequest req = new ReceiveMessageRequest(queueUrl);
-        req.setVisibilityTimeout(SQS_VISIBILITY_TIMEOUT);
-        req.setMaxNumberOfMessages(10);   // max value
-        req.setWaitTimeSeconds(20);       // max value; enables long poll
+        req.setVisibilityTimeout(visibilityTimeout);
+        req.setMaxNumberOfMessages(maxNumberOfMessages);
+        req.setWaitTimeSeconds(waitTimeSeconds);
+        log.info("receiveMessage queue={}, visibilityTimeout={}, maxNumberOfMessages={}, waitTimeSeconds={}",
+            queueUrl, visibilityTimeout, maxNumberOfMessages, waitTimeSeconds);
         ReceiveMessageResult res = sqs.receiveMessage(req);
+        log.trace("receiveMessage return");
         return res.getMessages();
     }
 
     public void deleteMessage(String receiptHandle) {
         DeleteMessageRequest req = new DeleteMessageRequest(queueUrl, receiptHandle);
+        log.info("deleteMessage queue={}, receiptHandle={}", queueUrl, receiptHandle);
         DeleteMessageResult res = sqs.deleteMessage(req);
         // FIXME: check result
     }
 
     // FIXME: batch delete
+    //public void deleteMessages(List<String> receiptHandle) {}
 }

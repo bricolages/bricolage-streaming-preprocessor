@@ -10,6 +10,14 @@ class S3ObjectLocation {
     final String bucket;
     final String key;
 
+    public String toString() {
+        return urlString();
+    }
+
+    public String urlString() {
+        return "s3://" + bucket + "/" + key;
+    }
+
     public Path basename() {
         return Paths.get(key).getFileName();
     }
@@ -19,6 +27,6 @@ class S3ObjectLocation {
     }
 
     public boolean isGzip() {
-        return Paths.get(key).endsWith(".gz");
+        return key.endsWith(".gz");
     }
 }

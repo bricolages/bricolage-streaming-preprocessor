@@ -7,7 +7,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import lombok.*;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class ObjectFilter {
     static final ObjectMapper mapper = new ObjectMapper();
 
@@ -15,28 +18,37 @@ class ObjectFilter {
         super();
     }
 
-    public void apply(BufferedReader r, BufferedWriter w) throws IOException {
+    public FilterResult apply(BufferedReader r, BufferedWriter w, String sourceName) throws IOException {
+        final FilterResult result = FilterResult.empty();
         final PrintWriter out = new PrintWriter(w);
         r.lines().forEach((line) -> {
-            String result = applyString(line);
-            if (result != null) {
-                out.println(result);
+            result.inputLines++;
+            try {
+                String outStr = applyString(line);
+                if (outStr != null) {
+                    out.println(outStr);
+                    result.outputLines++;
+                }
+            }
+            catch (JsonProcessingException ex) {
+                log.trace("JSON parse error: {}:{}: {}", sourceName, result.inputLines, ex.getMessage());
+                result.jsonParseError++;
             }
         });
+        return result;
     }
 
-    public String applyString(String json) {
+    public String applyString(String json) throws JsonProcessingException {
         try {
             Map<String, Object> obj = mapper.readValue(json, Map.class);
             Object result = applyObject(obj);
             return mapper.writeValueAsString(result);
         }
         catch (JsonProcessingException ex) {
-            // FIXME
-            return null;
+            throw ex;
         }
         catch (IOException ex) {
-            // FIXME
+            log.error("IO exception while processing JSON???", ex);
             return null;
         }
     }
