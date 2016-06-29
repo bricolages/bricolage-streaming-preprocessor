@@ -54,3 +54,9 @@ task xjar(type: Jar, dependsOn: jar)  {
     from "$buildDir/classes/main"
     from "$buildDir/resources/main"
 }
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+}
