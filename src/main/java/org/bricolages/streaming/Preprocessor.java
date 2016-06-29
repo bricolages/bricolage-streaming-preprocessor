@@ -14,17 +14,28 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Preprocessor {
     static public void main(String[] args) throws Exception {
-        String queueUrl = args[0];
+        val config = Config.load(args[0]);
+        dumpConfig(config);
+        build(config).run();
+    }
+
+    static Preprocessor build(Config config) {
         AWSCredentialsProvider credentials = new ProfileCredentialsProvider();
-        SQSQueue sqs = new SQSQueue(credentials, queueUrl);
+        SQSQueue sqs = new SQSQueue(credentials, config.queue.url);
         sqs.maxNumberOfMessages = 1;
-        Preprocessor pp = new Preprocessor(
+        return new Preprocessor(
             new EventQueue(sqs),
             new S3Agent(credentials),
-            new ObjectMapper(),
+            new ObjectMapper(config.mapping),
             new ObjectFilter()
         );
-        pp.run();
+    }
+
+    static void dumpConfig(Config config) {
+        System.out.println("queue url: " + config.queue.url);
+        for (ObjectMapper.Entry map : config.mapping) {
+            System.out.println("mapping: " + map.src + " -> " + map.dest);
+        }
     }
 
     final EventQueue eventQueue;

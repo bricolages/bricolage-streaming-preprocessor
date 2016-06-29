@@ -15,3 +15,4 @@ hs_err_pid*
 /build
 
 /data/
+/config/streaming-preprocessor.yml
