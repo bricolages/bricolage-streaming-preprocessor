@@ -6,6 +6,10 @@ import lombok.*;
 class Event {
     final Message message;
 
+    String getMessageBody() {
+        return message.getBody();
+    }
+
     String getReceiptHandle() {
         return message.getReceiptHandle();
     }

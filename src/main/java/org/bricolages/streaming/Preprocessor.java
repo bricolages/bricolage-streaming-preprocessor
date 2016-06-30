@@ -2,16 +2,7 @@ package org.bricolages.streaming;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.util.zip.GZIPOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import lombok.*;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +42,7 @@ public class Preprocessor {
 
     public void run() throws IOException {
         eventQueue.finiteStream().forEach(event -> {
+            log.debug("processing message: {}", event.getMessageBody());
             S3ObjectLocation src = event.getLocation();
             S3ObjectLocation dest = mapper.map(src);
             try {
@@ -65,21 +57,14 @@ public class Preprocessor {
         });
     }
 
-    static final String TMPDIR = "/tmp";   // FIXME: parameterize
-    static final Charset DATA_FILE_CHARSET = StandardCharsets.UTF_8;
-
     FilterResult applyFilter(S3ObjectLocation src, S3ObjectLocation dest) throws IOException {
         FilterResult result;
-        Path tmp = Paths.get(TMPDIR, dest.basename());
-        try (OutputStream s = Files.newOutputStream(tmp)) {
-            OutputStream out = dest.isGzip() ? new GZIPOutputStream(s) : s;
-            BufferedWriter w = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
-            try (BufferedReader r = s3.openBufferedReader(src, DATA_FILE_CHARSET)) {
-                result = filter.apply(r, w, src.toString());
+        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
+            try (BufferedReader r = s3.openBufferedReader(src)) {
+                result = filter.apply(r, buf.getBufferedWriter(), src.toString());
             }
-            w.close();
+            buf.commit();
         }
-        s3.upload(tmp, dest);
         return result;
     }
 }
