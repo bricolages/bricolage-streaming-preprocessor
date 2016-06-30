@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @Slf4j
-public class Preprocessor {
+public class Preprocessor implements EventHandlers {
     static public void main(String[] args) throws Exception {
         val config = Config.load(args[0]);
         dumpConfig(config);
@@ -43,18 +43,36 @@ public class Preprocessor {
     public void run() throws IOException {
         eventQueue.finiteStream().forEach(event -> {
             log.debug("processing message: {}", event.getMessageBody());
-            S3ObjectLocation src = event.getLocation();
-            S3ObjectLocation dest = mapper.map(src);
-            try {
-                FilterResult result = applyFilter(src, dest);
-                // FIXME: write to the log table
-                log.info("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputLines, result.outputLines);
-            }
-            catch (S3IOException ex) {   // S3 I/O error
-                // FIXME: write to the log table
-                log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
-            }
+            event.callHandler(this);
         });
+    }
+
+    @Override
+    public void handleUnknownEvent(UnknownEvent event) {
+        // FIXME: notify?
+        log.warn("unknown message: {}", event.getMessageBody());
+    }
+
+    @Override
+    public void handleShutdownEvent(ShutdownEvent event) {
+        // FIXME: graceful shutdown
+    }
+
+    @Override
+    public void handleS3Event(S3Event event) {
+        S3ObjectLocation src = event.getLocation();
+        S3ObjectLocation dest = mapper.map(src);
+        try {
+            FilterResult result = applyFilter(src, dest);
+            // FIXME: write to the log table
+            log.info("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputLines, result.outputLines);
+            // FIXME
+            //eventQueue.deleteMessage()
+        }
+        catch (S3IOException ex) {
+            // FIXME: write to the log table
+            log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
+        }
     }
 
     FilterResult applyFilter(S3ObjectLocation src, S3ObjectLocation dest) throws S3IOException {

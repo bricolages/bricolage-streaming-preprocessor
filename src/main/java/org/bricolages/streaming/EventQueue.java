@@ -14,33 +14,16 @@ class EventQueue {
     final SQSQueue queue;
 
     // FIXME: <Event>
-    public Stream<S3Event> stream() {
+    public Stream<Event> stream() {
         return convertMessages(queue.stream());
     }
 
-    // FIXME: <Event>
-    public Stream<S3Event> finiteStream() throws IOException {
+    public Stream<Event> finiteStream() throws IOException {
         return convertMessages(queue.receiveMessages().stream());
     }
 
-    // FIXME: <Event>
-    Stream<S3Event> convertMessages(Stream<Message> s) {
-        return s.flatMap(msg -> {
-            // FIXME: polymorphic
-            try {
-                if (msg.getBody().contains("ObjectCreated:")) {
-                    return Stream.of(S3Event.forMessage(msg));
-                }
-                else {
-                    log.warn("unknown kind of message: {}", msg.getBody());
-                    return Stream.empty();
-                }
-            }
-            catch (IOException ex) {
-                log.error("could not map SQS message", ex);
-                return Stream.empty();
-            }
-        });
+    Stream<Event> convertMessages(Stream<Message> s) {
+        return s.flatMap(Event::streamForMessage);
     }
 
     void commit(Event event) {
