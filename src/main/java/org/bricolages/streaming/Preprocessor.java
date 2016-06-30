@@ -4,16 +4,16 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import java.io.BufferedReader;
 import java.io.IOException;
 import lombok.*;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class Preprocessor implements EventHandlers {
     static public void main(String[] args) throws Exception {
         val config = Config.load(args[0]);
         dumpConfig(config);
-        build(config).run();
+        build(config).handleEvents();
+        //build(config).run();
     }
 
     static Preprocessor build(Config config) {
@@ -41,7 +41,27 @@ public class Preprocessor implements EventHandlers {
     final ObjectFilter filter;
 
     public void run() throws IOException {
-        eventQueue.finiteStream().forEach(event -> {
+        log.info("server started");
+        trapSignals();
+        try {
+            while (!isTerminating()) {
+                // FIXME: insert sleep on empty result
+                try {
+                    handleEvents();
+                }
+                catch (SQSException ex) {
+                    safeSleep(5);
+                }
+            }
+        }
+        catch (ApplicationAbort ex) {
+            // ignore
+        }
+        log.info("application is gracefully shut down");
+    }
+
+    void handleEvents() {
+        eventQueue.stream().forEach(event -> {
             log.debug("processing message: {}", event.getMessageBody());
             event.callHandler(this);
         });
@@ -51,11 +71,66 @@ public class Preprocessor implements EventHandlers {
     public void handleUnknownEvent(UnknownEvent event) {
         // FIXME: notify?
         log.warn("unknown message: {}", event.getMessageBody());
+        // Keep message in the queue.
     }
 
     @Override
     public void handleShutdownEvent(ShutdownEvent event) {
-        // FIXME: graceful shutdown
+        eventQueue.delete(event);
+        initiateShutdown();
+    }
+
+    Thread mainThread;
+    boolean isTerminating = false;
+
+    void trapSignals() {
+        mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                initiateShutdown();
+                waitMainThread();
+            }
+        });
+    }
+
+    void initiateShutdown() {
+        log.info("initiate shutdown; mainThread={}", mainThread);
+        this.isTerminating = true;
+        if (mainThread != null) {
+            mainThread.interrupt();
+        }
+    }
+
+    boolean isTerminating() {
+        if (isTerminating) return true;
+        if (mainThread.isInterrupted()) {
+            this.isTerminating = true;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    void waitMainThread() {
+        if (mainThread == null) return;
+        try {
+            log.info("waiting main thread...");
+            mainThread.join();
+        }
+        catch (InterruptedException ex) {
+            // ignore
+        }
+    }
+
+    void safeSleep(int sec) {
+        try {
+            Thread.sleep(sec * 1000);
+        }
+        catch (InterruptedException ex) {
+            this.isTerminating = true;
+        }
     }
 
     @Override
@@ -66,8 +141,7 @@ public class Preprocessor implements EventHandlers {
             FilterResult result = applyFilter(src, dest);
             // FIXME: write to the log table
             log.info("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputLines, result.outputLines);
-            // FIXME
-            //eventQueue.deleteMessage()
+            eventQueue.delete(event);
         }
         catch (S3IOException ex) {
             // FIXME: write to the log table

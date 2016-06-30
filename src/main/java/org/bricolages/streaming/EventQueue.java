@@ -13,20 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 class EventQueue {
     final SQSQueue queue;
 
-    // FIXME: <Event>
     public Stream<Event> stream() {
         return convertMessages(queue.stream());
-    }
-
-    public Stream<Event> finiteStream() throws IOException {
-        return convertMessages(queue.receiveMessages().stream());
     }
 
     Stream<Event> convertMessages(Stream<Message> s) {
         return s.flatMap(Event::streamForMessage);
     }
 
-    void commit(Event event) {
+    void delete(Event event) {
         queue.deleteMessage(event.getReceiptHandle());
     }
 }

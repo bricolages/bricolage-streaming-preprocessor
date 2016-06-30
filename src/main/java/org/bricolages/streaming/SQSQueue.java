@@ -7,6 +7,8 @@ import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageResult;
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AbortedException;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -16,7 +18,6 @@ import java.util.stream.StreamSupport;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import lombok.*;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -40,49 +41,42 @@ class SQSQueue implements Iterable<Message> {
     }
 
     public Iterator<Message> iterator() {
-        return new MessageIterator();
+        return receiveMessages().iterator();
     }
 
-    final class MessageIterator implements Iterator<Message> {
-        ListIterator<Message> iter = null;
-
-        @Override
-        public boolean hasNext() {
-            return true;
+    public List<Message> receiveMessages() {
+        try {
+            ReceiveMessageRequest req = new ReceiveMessageRequest(queueUrl);
+            req.setVisibilityTimeout(visibilityTimeout);
+            req.setMaxNumberOfMessages(maxNumberOfMessages);
+            req.setWaitTimeSeconds(waitTimeSeconds);
+            log.info("receiveMessage queue={}, visibilityTimeout={}, maxNumberOfMessages={}, waitTimeSeconds={}",
+                queueUrl, visibilityTimeout, maxNumberOfMessages, waitTimeSeconds);
+            ReceiveMessageResult res = sqs.receiveMessage(req);
+            log.debug("receiveMessage returned");
+            return res.getMessages();
         }
-
-        @Override
-        public Message next() {
-            while (iter == null || !iter.hasNext()) {
-                try {
-                    this.iter = receiveMessages().listIterator();
-                }
-                catch (IOException ex) {
-                    // FIXME: retry, log
-                    throw new UncheckedIOException(ex);
-                }
-            }
-            return iter.next();
+        catch (AbortedException ex) {
+            throw new ApplicationAbort(ex);
         }
-    }
-
-    public List<Message> receiveMessages() throws IOException {
-        ReceiveMessageRequest req = new ReceiveMessageRequest(queueUrl);
-        req.setVisibilityTimeout(visibilityTimeout);
-        req.setMaxNumberOfMessages(maxNumberOfMessages);
-        req.setWaitTimeSeconds(waitTimeSeconds);
-        log.info("receiveMessage queue={}, visibilityTimeout={}, maxNumberOfMessages={}, waitTimeSeconds={}",
-            queueUrl, visibilityTimeout, maxNumberOfMessages, waitTimeSeconds);
-        ReceiveMessageResult res = sqs.receiveMessage(req);
-        log.debug("receiveMessage returned");
-        return res.getMessages();
+        catch (AmazonClientException ex) {
+            String msg = "receiveMessage failed: " + ex.getMessage();
+            log.error(msg);
+            throw new SQSException(msg);
+        }
     }
 
     public void deleteMessage(String receiptHandle) {
-        DeleteMessageRequest req = new DeleteMessageRequest(queueUrl, receiptHandle);
-        log.info("deleteMessage queue={}, receiptHandle={}", queueUrl, receiptHandle);
-        DeleteMessageResult res = sqs.deleteMessage(req);
-        // FIXME: check result
+        try {
+            DeleteMessageRequest req = new DeleteMessageRequest(queueUrl, receiptHandle);
+            log.info("deleteMessage queue={}, receiptHandle={}", queueUrl, receiptHandle);
+            DeleteMessageResult res = sqs.deleteMessage(req);
+        }
+        catch (AmazonClientException ex) {
+            String msg = "deleteMessage failed: " + ex.getMessage();
+            log.error(msg);
+            throw new SQSException(msg);
+        }
     }
 
     // FIXME: batch delete

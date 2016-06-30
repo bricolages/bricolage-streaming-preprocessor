@@ -40,7 +40,7 @@ class ObjectFilter {
 
     public String applyString(String json) throws JsonProcessingException {
         try {
-            Map<String, Object> obj = mapper.readValue(json, Map.class);
+            Map<String, Object> obj = (Map<String, Object>)mapper.readValue(json, Map.class);
             Object result = applyObject(obj);
             return mapper.writeValueAsString(result);
         }
