@@ -50,21 +50,26 @@ public class Preprocessor {
                 // FIXME: write to the log table
                 log.info("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputLines, result.outputLines);
             }
-            catch (IOException ex) {   // S3 I/O error
+            catch (S3IOException ex) {   // S3 I/O error
                 // FIXME: write to the log table
                 log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
             }
         });
     }
 
-    FilterResult applyFilter(S3ObjectLocation src, S3ObjectLocation dest) throws IOException {
-        FilterResult result;
-        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
-            try (BufferedReader r = s3.openBufferedReader(src)) {
-                result = filter.apply(r, buf.getBufferedWriter(), src.toString());
+    FilterResult applyFilter(S3ObjectLocation src, S3ObjectLocation dest) throws S3IOException {
+        try {
+            FilterResult result;
+            try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
+                try (BufferedReader r = s3.openBufferedReader(src)) {
+                    result = filter.apply(r, buf.getBufferedWriter(), src.toString());
+                }
+                buf.commit();
             }
-            buf.commit();
+            return result;
         }
-        return result;
+        catch (IOException ex) {
+            throw new S3IOException("I/O error: " + ex.getMessage());
+        }
     }
 }

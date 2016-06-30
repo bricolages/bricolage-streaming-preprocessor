@@ -1,5 +1,6 @@
 package org.bricolages.streaming;
 import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.S3Object;
@@ -35,39 +36,59 @@ public class S3Agent {
         this.s3client = new AmazonS3Client(credentials);
     }
 
-    public void download(S3ObjectLocation src, Path dest) throws IOException {
-        try (InputStream in = openInputStream(src)) {
-            Files.copy(in, dest);
+    public void download(S3ObjectLocation src, Path dest) throws S3IOException {
+        try {
+            try (InputStream in = openInputStream(src)) {
+                Files.copy(in, dest);
+            }
+        }
+        catch (IOException ex) {
+            throw new S3IOException("I/O error: " + ex.getMessage());
         }
     }
 
-    public BufferedReader openBufferedReader(S3ObjectLocation loc) throws IOException {
-        InputStream in = openInputStream(loc);
+    public BufferedReader openBufferedReader(S3ObjectLocation loc) throws S3IOException {
+        InputStream in = openInputStreamAuto(loc);
         return new BufferedReader(new InputStreamReader(in, DATA_FILE_CHARSET));
     }
 
-    public InputStream openInputStream(S3ObjectLocation loc) throws IOException {
-        InputStream in = openInputStreamRaw(loc);
-        if (loc.isGzip()) {
-            log.debug("reading gzip: {}", loc);
-            return new GZIPInputStream(in);
+    InputStream openInputStreamAuto(S3ObjectLocation loc) throws S3IOException {
+        try {
+            InputStream in = openInputStream(loc);
+            if (loc.isGzip()) {
+                log.debug("reading gzip: {}", loc);
+                return new GZIPInputStream(in);
+            }
+            else {
+                log.debug("reading raw: {}", loc);
+                return in;
+            }
         }
-        else {
-            log.debug("reading raw: {}", loc);
-            return in;
+        catch (IOException ex) {
+            throw new S3IOException("I/O error: " + ex.getMessage());
         }
     }
 
-    public InputStream openInputStreamRaw(S3ObjectLocation loc) throws IOException {
-        S3Object obj = s3client.getObject(loc.newGetRequest());
-        return obj.getObjectContent();
+    public InputStream openInputStream(S3ObjectLocation loc) throws S3IOException {
+        try {
+            S3Object obj = s3client.getObject(loc.newGetRequest());
+            return obj.getObjectContent();
+        }
+        catch (AmazonClientException ex) {
+            throw new S3IOException("S3 error in GetObject: " + ex.getMessage());
+        }
     }
 
-    public void upload(Path src, S3ObjectLocation dest) throws IOException {
-        s3client.putObject(dest.newPutRequest(src));
+    public void upload(Path src, S3ObjectLocation dest) throws S3IOException {
+        try {
+            s3client.putObject(dest.newPutRequest(src));
+        }
+        catch (AmazonClientException ex) {
+            throw new S3IOException("S3 error in PutObject: " + ex.getMessage());
+        }
     }
 
-    Buffer openWriteBuffer(S3ObjectLocation dest) throws IOException {
+    public Buffer openWriteBuffer(S3ObjectLocation dest) throws S3IOException {
         Path tmp = Paths.get(TMPDIR, dest.basename());
         return new Buffer(tmp, dest);
     }
@@ -78,19 +99,29 @@ public class S3Agent {
         final S3ObjectLocation dest;
         final BufferedWriter bufferedWriter;
 
-        Buffer(Path path, S3ObjectLocation dest) throws IOException {
+        Buffer(Path path, S3ObjectLocation dest) throws S3IOException {
             this.path = path;
             this.dest = dest;
 
-            Path tmp = Paths.get(TMPDIR, dest.basename());
-            OutputStream s = Files.newOutputStream(tmp);
-            OutputStream out = dest.isGzip() ? new GZIPOutputStream(s) : s;
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
+            try {
+                Path tmp = Paths.get(TMPDIR, dest.basename());
+                OutputStream s = Files.newOutputStream(tmp);
+                OutputStream out = dest.isGzip() ? new GZIPOutputStream(s) : s;
+                this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
+            }
+            catch (IOException ex) {
+                throw new S3IOException("I/O error: " + ex.getMessage());
+            }
         }
 
-        public void commit() throws IOException {
-            bufferedWriter.close();   // flush() does not work
-            upload(path, dest);
+        public void commit() throws S3IOException {
+            try {
+                bufferedWriter.close();   // flush() does not work
+                upload(path, dest);
+            }
+            catch (IOException ex) {
+                throw new S3IOException("I/O error: " + ex.getMessage());
+            }
         }
 
         @Override
