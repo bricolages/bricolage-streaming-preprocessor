@@ -1,6 +1,7 @@
 package org.bricolages.streaming;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.*;
@@ -8,9 +9,14 @@ import lombok.*;
 @Getter
 @EqualsAndHashCode(of={"urlString"})
 public class S3ObjectLocation {
-    static public S3ObjectLocation forUrl(String url) {
-        val u = new AmazonS3URI(url);
-        return new S3ObjectLocation(u.getBucket(), u.getKey());
+    static public S3ObjectLocation forUrl(String url) throws S3UrlParseException {
+        try {
+            val u = new AmazonS3URI(url);
+            return new S3ObjectLocation(u.getBucket(), u.getKey());
+        }
+        catch (IllegalArgumentException ex) {
+            throw new S3UrlParseException("could not parse S3 URL: " + url);
+        }
     }
 
     final String bucket;
@@ -31,12 +37,16 @@ public class S3ObjectLocation {
         return this.urlString;
     }
 
-    public Path basename() {
-        return Paths.get(key).getFileName();
+    public String basename() {
+        return Paths.get(key).getFileName().toString();
     }
 
-    public GetObjectRequest getRequest() {
+    public GetObjectRequest newGetRequest() {
         return new GetObjectRequest(bucket, key);
+    }
+
+    public PutObjectRequest newPutRequest(Path src) {
+        return new PutObjectRequest(bucket, key, src.toFile());
     }
 
     public boolean isGzip() {

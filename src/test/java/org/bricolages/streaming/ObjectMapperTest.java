@@ -12,11 +12,11 @@ public class ObjectMapperTest {
         return new ObjectMapper.Entry(src, dest);
     }
 
-    S3ObjectLocation loc(String url) {
+    S3ObjectLocation loc(String url) throws S3UrlParseException {
         return S3ObjectLocation.forUrl(url);
     }
 
-    @Test public void testMap() {
+    @Test public void testMap() throws Exception {
         ObjectMapper map = newMapper(entry("s3://src-bucket/src-prefix/(.*\\.gz)", "s3://dest-bucket/dest-prefix/$1"));
         map.check();
         assertEquals(loc("s3://dest-bucket/dest-prefix/datafile.json.gz"), map.map(loc("s3://src-bucket/src-prefix/datafile.json.gz")));

@@ -7,25 +7,25 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 class Config {
-    static public Config load(String path) throws ConfigurationException {
+    static public Config load(String path) throws ConfigError {
         try {
             try (InputStream in = new FileInputStream(path)) {
                 return loadFromStream(in);
             }
         }
         catch (IOException ex) {
-            throw new ConfigurationException(ex);
+            throw new ConfigError(ex);
         }
     }
 
-    static public Config loadResource(String name) throws ConfigurationException {
+    static public Config loadResource(String name) throws ConfigError {
         try {
             try (InputStream in = ClassLoader.getSystemResourceAsStream(name)) {
                 return loadFromStream(in);
             }
         }
         catch (IOException ex) {
-            throw new ConfigurationException(ex);
+            throw new ConfigError(ex);
         }
     }
 

@@ -1,8 +1,10 @@
 package org.bricolages.streaming;
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.services.s3.*;
-import com.amazonaws.services.s3.model.*;
-import com.amazonaws.services.s3.event.*;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
@@ -10,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.nio.file.Path;
 import java.nio.file.Files;
+import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 import lombok.*;
 import lombok.extern.java.Log;
@@ -24,18 +27,22 @@ class S3Agent {
         this.s3client = new AmazonS3Client(credentials);
     }
 
-    void download(S3ObjectLocation src, Path dest) throws IOException {
+    public void download(S3ObjectLocation src, Path dest) throws IOException {
         try (InputStream in = openInputStream(src)) {
             Files.copy(in, dest);
         }
     }
 
-    BufferedReader openBufferedReader(S3ObjectLocation loc) throws IOException {
-        InputStream in = openInputStream(loc);
-        return new BufferedReader(new InputStreamReader(in));
+    public void upload(Path src, S3ObjectLocation dest) throws IOException {
+        s3client.putObject(dest.newPutRequest(src));
     }
 
-    InputStream openInputStream(S3ObjectLocation loc) throws IOException {
+    public BufferedReader openBufferedReader(S3ObjectLocation loc, Charset cs) throws IOException {
+        InputStream in = openInputStream(loc);
+        return new BufferedReader(new InputStreamReader(in, cs));
+    }
+
+    public InputStream openInputStream(S3ObjectLocation loc) throws IOException {
         InputStream in = openInputStreamRaw(loc);
         if (loc.isGzip()) {
             log.debug("reading gzip: {}", loc);
@@ -47,8 +54,8 @@ class S3Agent {
         }
     }
 
-    InputStream openInputStreamRaw(S3ObjectLocation loc) throws IOException {
-        S3Object obj = s3client.getObject(loc.getRequest());
+    public InputStream openInputStreamRaw(S3ObjectLocation loc) throws IOException {
+        S3Object obj = s3client.getObject(loc.newGetRequest());
         return obj.getObjectContent();
     }
 }

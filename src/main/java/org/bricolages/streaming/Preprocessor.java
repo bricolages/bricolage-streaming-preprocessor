@@ -3,9 +3,15 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.zip.GZIPOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import lombok.*;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +28,7 @@ public class Preprocessor {
     static Preprocessor build(Config config) {
         AWSCredentialsProvider credentials = new ProfileCredentialsProvider();
         SQSQueue sqs = new SQSQueue(credentials, config.queue.url);
-        sqs.maxNumberOfMessages = 1;
+        sqs.maxNumberOfMessages = 3;
         return new Preprocessor(
             new EventQueue(sqs),
             new S3Agent(credentials),
@@ -59,16 +65,21 @@ public class Preprocessor {
         });
     }
 
+    static final String TMPDIR = "/tmp";   // FIXME: parameterize
+    static final Charset DATA_FILE_CHARSET = StandardCharsets.UTF_8;
+
     FilterResult applyFilter(S3ObjectLocation src, S3ObjectLocation dest) throws IOException {
         FilterResult result;
-        // FIXME: write to tmp fs
-        try (BufferedWriter w = Files.newBufferedWriter(dest.basename(), Charset.defaultCharset())) {
-            try (BufferedReader r = s3.openBufferedReader(src)) {
+        Path tmp = Paths.get(TMPDIR, dest.basename());
+        try (OutputStream s = Files.newOutputStream(tmp)) {
+            OutputStream out = dest.isGzip() ? new GZIPOutputStream(s) : s;
+            BufferedWriter w = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
+            try (BufferedReader r = s3.openBufferedReader(src, DATA_FILE_CHARSET)) {
                 result = filter.apply(r, w, src.toString());
             }
+            w.close();
         }
-        // FIXME: upload to S3
-        //uploadFile();
+        s3.upload(tmp, dest);
         return result;
     }
 }

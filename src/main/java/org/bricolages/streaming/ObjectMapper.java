@@ -17,11 +17,16 @@ public class ObjectMapper {
         }
     }
 
-    public S3ObjectLocation map(S3ObjectLocation src) {
+    public S3ObjectLocation map(S3ObjectLocation src) throws ConfigError {
         for (Entry ent : entries) {
             Matcher m = ent.sourcePattern().matcher(src.urlString());
             if (m.matches()) {
-                return S3ObjectLocation.forUrl(m.replaceFirst(ent.dest));
+                try {
+                    return S3ObjectLocation.forUrl(m.replaceFirst(ent.dest));
+                }
+                catch (S3UrlParseException ex) {
+                    throw new ConfigError(ex);
+                }
             }
         }
         // FIXME: error??
