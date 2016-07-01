@@ -1,5 +1,7 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.*;
+import org.bricolages.streaming.event.*;
+import org.bricolages.streaming.s3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -123,24 +125,19 @@ public class Preprocessor implements EventHandlers {
             repos.save(result);
             eventQueue.delete(event);
         }
-        catch (S3IOException ex) {
+        catch (S3IOException | IOException ex) {
             log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
             result.failed(ex.getMessage());
             repos.save(result);
         }
     }
 
-    void applyFilter(S3ObjectLocation src, S3ObjectLocation dest, FilterResult result) throws S3IOException {
-        try {
-            try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
-                try (BufferedReader r = s3.openBufferedReader(src)) {
-                    filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
-                }
-                buf.commit();
+    void applyFilter(S3ObjectLocation src, S3ObjectLocation dest, FilterResult result) throws S3IOException, IOException {
+        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
+            try (BufferedReader r = s3.openBufferedReader(src)) {
+                filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
             }
-        }
-        catch (IOException ex) {
-            throw new S3IOException("I/O error: " + ex.getMessage());
+            buf.commit();
         }
     }
 }

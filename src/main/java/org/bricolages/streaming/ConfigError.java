@@ -1,11 +1,11 @@
 package org.bricolages.streaming;
 
 public class ConfigError extends ApplicationError {
-    ConfigError(String message) {
+    public ConfigError(String message) {
         super(message);
     }
 
-    ConfigError(Exception cause) {
+    public ConfigError(Exception cause) {
         super(cause);
     }
 }

@@ -1,8 +1,8 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
 import com.amazonaws.services.sqs.model.Message;
 
 public class ShutdownEvent extends Event {
-    static public final class Parser implements MessageParser {
+    static final class Parser implements MessageParser {
         @Override
         public boolean isCompatible(Message msg) {
             return msg.getBody().contains("\"eventName\":\"shutdown");
@@ -18,7 +18,7 @@ public class ShutdownEvent extends Event {
         super(msg);
     }
 
-    void callHandler(EventHandlers h) {
+    public void callHandler(EventHandlers h) {
         h.handleShutdownEvent(this);
     }
 }

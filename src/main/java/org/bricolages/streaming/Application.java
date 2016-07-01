@@ -1,5 +1,9 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.ObjectFilter;
+import org.bricolages.streaming.event.EventQueue;
+import org.bricolages.streaming.event.SQSQueue;
+import org.bricolages.streaming.s3.S3Agent;
+import org.bricolages.streaming.s3.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -48,7 +52,6 @@ public class Application {
     @Bean
     public EventQueue eventQueue() {
         val sqs = new SQSQueue(new AmazonSQSClient(), getConfig().queue.url);
-        sqs.maxNumberOfMessages = 3;   // FIXME
         return new EventQueue(sqs);
     }
 

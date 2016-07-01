@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
 import com.amazonaws.services.sqs.model.Message;
 
 interface MessageParser {

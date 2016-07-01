@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
 import com.amazonaws.services.sqs.model.Message;
 import java.util.stream.Stream;
 import java.util.List;
@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @Slf4j
-abstract class Event {
+public abstract class Event {
     static final List<MessageParser> PARSERS = new ArrayList<MessageParser>();
     static {
         PARSERS.add(new S3Event.Parser());
@@ -44,5 +44,5 @@ abstract class Event {
         return message.getReceiptHandle();
     }
 
-    abstract void callHandler(EventHandlers h);
+    public abstract void callHandler(EventHandlers h);
 }

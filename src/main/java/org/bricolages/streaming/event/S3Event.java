@@ -1,4 +1,5 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
+import org.bricolages.streaming.s3.S3ObjectLocation;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.AmazonClientException;
@@ -7,7 +8,7 @@ import lombok.*;
 
 @Getter
 public class S3Event extends Event {
-    static public final class Parser implements MessageParser {
+    static final class Parser implements MessageParser {
         @Override
         public boolean isCompatible(Message msg) {
             return msg.getBody().contains("\"eventName\":\"ObjectCreated:");
@@ -19,7 +20,7 @@ public class S3Event extends Event {
         }
     }
 
-    static public S3Event forMessage(Message msg) throws MessageParseException {
+    static S3Event forMessage(Message msg) throws MessageParseException {
         try {
             S3EventNotification body = S3EventNotification.parseJson(msg.getBody());
             // FIXME: check record size
@@ -50,7 +51,7 @@ public class S3Event extends Event {
         this.record = record;
     }
 
-    void callHandler(EventHandlers h) {
+    public void callHandler(EventHandlers h) {
         h.handleS3Event(this);
     }
 }

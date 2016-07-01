@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
 import com.amazonaws.services.s3.event.*;
 import com.amazonaws.services.sqs.model.Message;
 import java.util.stream.Stream;
@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
 @Slf4j
-class EventQueue {
+public class EventQueue {
     final SQSQueue queue;
 
     public Stream<Event> stream() {
@@ -21,7 +21,7 @@ class EventQueue {
         return s.flatMap(Event::streamForMessage);
     }
 
-    void delete(Event event) {
+    public void delete(Event event) {
         queue.deleteMessage(event.getReceiptHandle());
     }
 }

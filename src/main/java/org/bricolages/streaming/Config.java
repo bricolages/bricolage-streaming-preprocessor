@@ -1,4 +1,5 @@
 package org.bricolages.streaming;
+import org.bricolages.streaming.s3.ObjectMapper;
 import org.yaml.snakeyaml.Yaml;
 import java.util.List;
 import java.util.Map;

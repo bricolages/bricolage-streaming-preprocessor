@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.s3;
 import com.amazonaws.services.s3.AmazonS3URI;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;

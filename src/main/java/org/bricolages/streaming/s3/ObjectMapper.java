@@ -1,4 +1,5 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.s3;
+import org.bricolages.streaming.ConfigError;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;

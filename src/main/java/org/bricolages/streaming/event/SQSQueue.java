@@ -1,4 +1,5 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
+import org.bricolages.streaming.ApplicationAbort;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
-class SQSQueue implements Iterable<Message> {
+public class SQSQueue implements Iterable<Message> {
     final AmazonSQS sqs;
     final String queueUrl;
     int visibilityTimeout = 30;     // sec

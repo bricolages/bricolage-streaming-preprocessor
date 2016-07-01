@@ -1,4 +1,5 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.event;
+import org.bricolages.streaming.ApplicationError;
 
 public class SQSException extends ApplicationError {
     SQSException(String message) {

@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.s3;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;

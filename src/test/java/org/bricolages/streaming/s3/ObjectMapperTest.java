@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.s3;
 import java.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
