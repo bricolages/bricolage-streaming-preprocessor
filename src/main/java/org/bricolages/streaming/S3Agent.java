@@ -1,8 +1,6 @@
 package org.bricolages.streaming;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -21,20 +19,15 @@ import java.nio.file.Files;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import lombok.*;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 public class S3Agent {
     static final Charset DATA_FILE_CHARSET = StandardCharsets.UTF_8;
     static final String TMPDIR = "/tmp";   // FIXME: parameterize
 
     final AmazonS3 s3client;
-
-    public S3Agent(AWSCredentialsProvider credentials) {
-        super();
-        this.s3client = new AmazonS3Client(credentials);
-    }
 
     public void download(S3ObjectLocation src, Path dest) throws S3IOException {
         try {

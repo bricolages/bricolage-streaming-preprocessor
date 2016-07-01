@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.sqs.AmazonSQSClient;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,24 +46,14 @@ public class Application {
 
     @Bean
     public EventQueue eventQueue() {
-        val sqs = sqs();
+        val sqs = new SQSQueue(new AmazonSQSClient(), getConfig().queue.url);
         sqs.maxNumberOfMessages = 3;   // FIXME
         return new EventQueue(sqs);
     }
 
     @Bean
-    public SQSQueue sqs() {
-        return new SQSQueue(awsCredentials(), getConfig().queue.url);
-    }
-
-    @Bean
     public S3Agent s3() {
-        return new S3Agent(awsCredentials());
-    }
-
-    @Bean
-    public AWSCredentialsProvider awsCredentials() {
-        return new ProfileCredentialsProvider();
+        return new S3Agent(new AmazonS3Client());
     }
 
     @Bean

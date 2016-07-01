@@ -1,7 +1,5 @@
 package org.bricolages.streaming;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.sqs.AmazonSQS;
-import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
@@ -20,21 +18,14 @@ import java.io.UncheckedIOException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 class SQSQueue implements Iterable<Message> {
-    final AWSCredentialsProvider credentials;
-    final String queueUrl;
     final AmazonSQS sqs;
+    final String queueUrl;
     int visibilityTimeout = 30;     // sec
     int maxNumberOfMessages = 10;   // max value
     int waitTimeSeconds = 20;       // max value; enables long poll
-
-    public SQSQueue(AWSCredentialsProvider credentials, String queueUrl) {
-        super();
-        this.queueUrl = queueUrl;
-        this.credentials = credentials;
-        this.sqs = new AmazonSQSClient(credentials);
-    }
 
     public Stream<Message> stream() {
         return StreamSupport.stream(spliterator(), true);
