@@ -18,31 +18,34 @@ class ObjectFilter {
         super();
     }
 
-    public FilterResult apply(BufferedReader r, BufferedWriter w, String sourceName) throws IOException {
-        final FilterResult result = FilterResult.empty();
+    public void apply(BufferedReader r, BufferedWriter w, String sourceName, FilterResult result) throws IOException {
         final PrintWriter out = new PrintWriter(w);
         r.lines().forEach((line) -> {
-            result.inputLines++;
+            result.inputRows++;
             try {
                 String outStr = applyString(line);
                 if (outStr != null) {
                     out.println(outStr);
-                    result.outputLines++;
+                    result.outputRows++;
                 }
             }
             catch (JsonProcessingException ex) {
-                log.debug("JSON parse error: {}:{}: {}", sourceName, result.inputLines, ex.getMessage());
-                result.jsonParseError++;
+                log.debug("JSON parse error: {}:{}: {}", sourceName, result.inputRows, ex.getMessage());
+                result.errorRows++;
             }
         });
-        return result;
     }
 
     public String applyString(String json) throws JsonProcessingException {
         try {
             Map<String, Object> obj = (Map<String, Object>)mapper.readValue(json, Map.class);
-            Object result = applyObject(obj);
-            return mapper.writeValueAsString(result);
+            Object outObj = applyObject(obj);
+            if (outObj != null) {
+                return mapper.writeValueAsString(outObj);
+            }
+            else {
+                return null;
+            }
         }
         catch (JsonProcessingException ex) {
             throw ex;

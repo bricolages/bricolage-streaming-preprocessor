@@ -1,6 +1,5 @@
 package org.bricolages.streaming;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
 import java.io.IOException;
 import lombok.*;
@@ -9,32 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class Preprocessor implements EventHandlers {
-    static public void main(String[] args) throws Exception {
-        val config = Config.load(args[0]);
-        dumpConfig(config);
-        build(config).handleEvents();
-        //build(config).run();
-    }
-
-    static Preprocessor build(Config config) {
-        AWSCredentialsProvider credentials = new ProfileCredentialsProvider();
-        SQSQueue sqs = new SQSQueue(credentials, config.queue.url);
-        sqs.maxNumberOfMessages = 3;
-        return new Preprocessor(
-            new EventQueue(sqs),
-            new S3Agent(credentials),
-            new ObjectMapper(config.mapping),
-            new ObjectFilter()
-        );
-    }
-
-    static void dumpConfig(Config config) {
-        System.out.println("queue url: " + config.queue.url);
-        for (ObjectMapper.Entry map : config.mapping) {
-            System.out.println("mapping: " + map.src + " -> " + map.dest);
-        }
-    }
-
     final EventQueue eventQueue;
     final S3Agent s3;
     final ObjectMapper mapper;
@@ -133,32 +106,37 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
+    @Autowired
+    FilterResultRepository repos;
+
     @Override
     public void handleS3Event(S3Event event) {
         S3ObjectLocation src = event.getLocation();
         S3ObjectLocation dest = mapper.map(src);
+        FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
-            FilterResult result = applyFilter(src, dest);
-            // FIXME: write to the log table
-            log.info("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputLines, result.outputLines);
+            repos.save(result);
+            applyFilter(src, dest, result);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
+            result.succeeded();
+            repos.save(result);
             eventQueue.delete(event);
         }
         catch (S3IOException ex) {
-            // FIXME: write to the log table
             log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
+            result.failed(ex.getMessage());
+            repos.save(result);
         }
     }
 
-    FilterResult applyFilter(S3ObjectLocation src, S3ObjectLocation dest) throws S3IOException {
+    void applyFilter(S3ObjectLocation src, S3ObjectLocation dest, FilterResult result) throws S3IOException {
         try {
-            FilterResult result;
             try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
                 try (BufferedReader r = s3.openBufferedReader(src)) {
-                    result = filter.apply(r, buf.getBufferedWriter(), src.toString());
+                    filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
                 }
                 buf.commit();
             }
-            return result;
         }
         catch (IOException ex) {
             throw new S3IOException("I/O error: " + ex.getMessage());

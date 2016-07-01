@@ -1,19 +1,17 @@
-apply plugin: 'java'
-
-compileJava {
-    options.deprecation = true
-    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-}
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:0.5.4.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.3.5.RELEASE"
     }
 }
-apply plugin: "io.spring.dependency-management"
+
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'spring-boot'
 
 dependencyManagement {
     imports {
@@ -21,7 +19,12 @@ dependencyManagement {
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////
+compileJava {
+    options.deprecation = true
+    options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+}
+
+///// dependency //////////////////////////////////////////////////////////////////
 
 repositories {
     jcenter()
@@ -30,32 +33,40 @@ repositories {
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.5'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.6'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.6.6'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.6.6'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.8'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.8'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.8'
+    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '1.10.2.RELEASE'
+    compile group: 'org.springframework.data', name: 'spring-data-commons', version: '+'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.3.5.RELEASE'
+    compile group: 'postgresql', name: 'postgresql', version: '9.4.1208-jdbc42-atlassian-hosted'
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.8'
     testCompile group: 'org.projectlombok', name: 'lombok', version: '1.16.8'
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
-///////////////////////////////////////////////////////////////////////////////////
+///// xjar //////////////////////////////////////////////////////////////////////////////
 
-apply plugin: 'application'
-
-mainClassName = 'org.bricolages.streaming.Preprocessor'
+mainClassName = 'org.bricolages.streaming.Application'
 
 task xjar(type: Jar, dependsOn: jar)  {
-    archiveName = "bricolage-streaming-preprocessor.jar"
+    archiveName = 'bricolage-streaming-preprocessor.jar'
     manifest {
         attributes 'Main-Class' : mainClassName
     }
-
-    from configurations.compile.collect {it.isDirectory() ? it : zipTree(it)}
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     from "$buildDir/classes/main"
     from "$buildDir/resources/main"
 }
+
+jar.baseName = 'bricolage-streaming-preprocessor'
+
+///// test ///////////////////////////////////////////////////////////////////////////////
 
 test {
     testLogging {

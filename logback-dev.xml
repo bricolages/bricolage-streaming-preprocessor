@@ -5,9 +5,9 @@
     </encoder>
   </appender>
 
-  <logger name="com.tasknotes.slf4j" level="INFO"/>
-
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="console" />
   </root>
+
+  <logger name="org.bricolages" level="DEBUG" />
 </configuration>

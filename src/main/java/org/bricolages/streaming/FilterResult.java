@@ -1,13 +1,78 @@
 package org.bricolages.streaming;
+import javax.persistence.Entity;
 import lombok.AllArgsConstructor;
+import lombok.ToString;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import java.util.Date;
+import java.sql.Timestamp;
 
 @AllArgsConstructor
-class FilterResult {
-    static FilterResult empty() {
-        return new FilterResult(0, 0, 0);
+@ToString
+@Entity
+@Table(name="preproc_log")
+public class FilterResult {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    long id;
+
+    @Column(name="src_data_file")
+    String srcDataFile;
+
+    @Column(name="dest_data_file")
+    String destDataFile;
+
+    @Column(name="input_rows")
+    long inputRows = 0;
+
+    @Column(name="output_rows")
+    long outputRows = 0;
+
+    @Column(name="error_rows")
+    long errorRows = 0;
+
+    @Column(name="status")
+    String status = STATUS_STARTED;
+
+    static final String STATUS_STARTED = "started";
+    static final String STATUS_SUCCESS = "success";
+    static final String STATUS_FAILURE = "failure";
+
+    @Column(name="start_time")
+    Timestamp startTime = null;
+
+    @Column(name="end_time")
+    Timestamp endTime = null;
+
+    @Column(name="message")
+    String message;
+
+    public FilterResult() {
     }
 
-    long inputLines;
-    long outputLines;
-    long jsonParseError;
+    FilterResult(String src, String dest) {
+        this.srcDataFile = src;
+        this.destDataFile = dest;
+        this.startTime = currentTimestamp();
+    }
+
+    public void succeeded() {
+        this.status = STATUS_SUCCESS;
+        this.endTime = currentTimestamp();
+    }
+
+    public void failed(String msg) {
+        this.status = STATUS_FAILURE;
+        this.endTime = currentTimestamp();
+        this.message = msg;
+    }
+
+    Timestamp currentTimestamp() {
+        return new Timestamp(System.currentTimeMillis());
+    }
 }
