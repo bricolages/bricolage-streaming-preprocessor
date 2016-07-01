@@ -2,10 +2,10 @@ package org.bricolages.streaming.filter;
 import java.time.*;
 import lombok.*;
 
-class UnixTimeConversionOp extends Op {
+class UnixTimeOp extends Op {
     final ZoneOffset zoneOffset;
 
-    public UnixTimeConversionOp(String offset) {
+    public UnixTimeOp(String offset) {
         this.zoneOffset = ZoneOffset.of(offset);
     }
 
