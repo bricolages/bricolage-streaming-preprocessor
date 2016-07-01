@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.filter;
 import javax.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
@@ -28,13 +28,13 @@ public class FilterResult {
     String destDataFile;
 
     @Column(name="input_rows")
-    long inputRows = 0;
+    public long inputRows = 0;
 
     @Column(name="output_rows")
-    long outputRows = 0;
+    public long outputRows = 0;
 
     @Column(name="error_rows")
-    long errorRows = 0;
+    public long errorRows = 0;
 
     @Column(name="status")
     String status = STATUS_STARTED;
@@ -55,7 +55,7 @@ public class FilterResult {
     public FilterResult() {
     }
 
-    FilterResult(String src, String dest) {
+    public FilterResult(String src, String dest) {
         this.srcDataFile = src;
         this.destDataFile = dest;
         this.startTime = currentTimestamp();

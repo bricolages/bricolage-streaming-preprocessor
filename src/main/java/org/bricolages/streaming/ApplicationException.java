@@ -1,11 +1,11 @@
 package org.bricolages.streaming;
 
 public class ApplicationException extends Exception {
-    ApplicationException(String message) {
+    public ApplicationException(String message) {
         super(message);
     }
 
-    ApplicationException(Exception cause) {
+    public ApplicationException(Exception cause) {
         super(cause);
     }
 }

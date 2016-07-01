@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.filter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
@@ -7,11 +7,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import lombok.*;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-class ObjectFilter {
+public class ObjectFilter {
     static final ObjectMapper mapper = new ObjectMapper();
 
     public ObjectFilter() {
