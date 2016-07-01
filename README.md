@@ -8,12 +8,12 @@ This software is written in working time in Cookpad, Inc.
 
 Building Executable JAR file:
 ```
-% gradle xjar
+% gradle build
 ```
 
 Executing built program:
 ```
-% ./run.sh SQS_QUEUE_URL
+% ./run.sh [APP_CONFIG_FILE]
 ```
 
 ## License
