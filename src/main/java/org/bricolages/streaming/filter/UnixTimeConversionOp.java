@@ -11,6 +11,7 @@ class UnixTimeConversionOp extends Op {
 
     @Override
     public Object apply(Object value) throws FilterException {
+        if (value == null) return null;
         return formatSqlTimestamp(unixTimeToOffsetDateTime(getInteger(value), zoneOffset));
     }
 }

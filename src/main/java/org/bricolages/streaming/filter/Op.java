@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.Instant;
@@ -44,7 +45,9 @@ abstract class Op {
         }
     }
 
-    static final DateTimeFormatter SQL_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    // Redshift does not support timezone, but COPY just ignores zone.
+    // So keeping timezone information in the JSON data file does not hurt loading task and is a good thing.
+    static final DateTimeFormatter SQL_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     protected String formatSqlTimestamp(OffsetDateTime dt) throws FilterException {
         try {
@@ -52,6 +55,43 @@ abstract class Op {
         }
         catch (DateTimeException ex) {
             throw new FilterException(ex);
+        }
+    }
+
+    static protected final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
+
+    protected OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset) throws FilterException {
+        if (value instanceof String) {
+            val str = ((String)value).trim();
+            // Order DOES matter
+            try {
+                // "2016-07-01T12:34:56Z": This representation appears most
+                return OffsetDateTime.parse(str, DateTimeFormatter.ISO_INSTANT);
+            }
+            catch (DateTimeException e1) {
+                try {
+                    // "2016-07-01T12:34:56+00:00": Some log file have this.  Old Fluentd format?
+                    return OffsetDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                }
+                catch (DateTimeException e2) {
+                    try {
+                        // "2016-07-01 12:34:56 +0000": Ruby Time#to_s
+                        return OffsetDateTime.parse(str, RUBY_DATE_TIME);
+                    }
+                    catch (DateTimeException e3) {
+                        try {
+                            // "2016-07-01T12:34:56": No offset.
+                            return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
+                        }
+                        catch (DateTimeException e4) {
+                            throw new FilterException("could not parse a timestamp: " + str);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            throw new FilterException("is not a timestamp: " + value);
         }
     }
 }
