@@ -2,15 +2,30 @@ package org.bricolages.streaming.filter;
 import java.time.*;
 import lombok.*;
 
-class UnixTimeOp extends Op {
+class UnixTimeOp extends SingleColumnOp {
+    static {
+        Op.registerOperator("unixtime", (def) ->
+            new UnixTimeOp(def, def.mapParameters(Parameters.class))
+        );
+    }
+
+    static class Parameters {
+        String zoneOffset;
+    }
+
     final ZoneOffset zoneOffset;
 
-    public UnixTimeOp(String offset) {
+    UnixTimeOp(OperatorDefinition def, Parameters params) {
+        this(def, params.zoneOffset);
+    }
+
+    UnixTimeOp(OperatorDefinition def, String offset) {
+        super(def);
         this.zoneOffset = ZoneOffset.of(offset);
     }
 
     @Override
-    public Object apply(Object value) throws FilterException {
+    public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
         return formatSqlTimestamp(unixTimeToOffsetDateTime(getInteger(value), zoneOffset));
     }

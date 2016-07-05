@@ -1,4 +1,8 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.ConfigError;
+import java.util.function.Function;
+import java.util.Map;
+import java.util.HashMap;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -7,8 +11,32 @@ import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;
 import lombok.*;
 
-abstract class Op {
-    abstract Object apply(Object value) throws FilterException;
+public abstract class Op {
+    static final Map<String, Function<OperatorDefinition, Op>> BUILDERS = new HashMap<String, Function<OperatorDefinition, Op>>();
+
+    static final public void registerOperator(String id, Function<OperatorDefinition, Op> builder) {
+        BUILDERS.put(id, builder);
+    }
+
+    static final public Op build(OperatorDefinition def) {
+        val builder = BUILDERS.get(def.getOperatorId());
+        if (builder == null) {
+            throw new ConfigError("unknown operator ID: " + def.getOperatorId());
+        }
+        return builder.apply(def);
+    }
+
+    final OperatorDefinition def;
+
+    Op(OperatorDefinition def) {
+        this.def = def;
+    }
+
+    protected String getColumnName() {
+        return def.getTargetColumn();
+    }
+
+    public abstract Record apply(Record record);
 
     protected long getInteger(Object value) throws FilterException {
         if (value instanceof Integer) {

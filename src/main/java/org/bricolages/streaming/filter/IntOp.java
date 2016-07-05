@@ -1,10 +1,19 @@
 package org.bricolages.streaming.filter;
 import lombok.*;
 
-@NoArgsConstructor
-class IntOp extends Op {
+class IntOp extends SingleColumnOp {
+    static {
+        Op.registerOperator("int", (def) ->
+            new IntOp(def)
+        );
+    }
+
+    IntOp(OperatorDefinition def) {
+        super(def);
+    }
+
     @Override
-    public Object apply(Object value) throws FilterException {
+    public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
         long i = getInteger(value);
         if (Integer.MIN_VALUE <= i && i <= Integer.MAX_VALUE) {

@@ -1,10 +1,10 @@
 package org.bricolages.streaming.s3;
 import org.bricolages.streaming.ConfigError;
+import org.bricolages.streaming.filter.TableId;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import lombok.*;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @AllArgsConstructor
@@ -18,12 +18,14 @@ public class ObjectMapper {
         }
     }
 
-    public S3ObjectLocation map(S3ObjectLocation src) throws ConfigError {
+    public Result map(S3ObjectLocation src) throws ConfigError {
         for (Entry ent : entries) {
             Matcher m = ent.sourcePattern().matcher(src.urlString());
             if (m.matches()) {
                 try {
-                    return S3ObjectLocation.forUrl(m.replaceFirst(ent.dest));
+                    val dest = S3ObjectLocation.forUrl(m.replaceFirst(ent.dest));
+                    val table = new TableId("tmp.dest");   // FIXME: implement
+                    return new Result(dest, table);
                 }
                 catch (S3UrlParseException ex) {
                     throw new ConfigError(ex);
@@ -52,5 +54,11 @@ public class ObjectMapper {
             pat = Pattern.compile("^" + src + "$");
             return pat;
         }
+    }
+
+    @RequiredArgsConstructor
+    public static final class Result {
+        @Getter final S3ObjectLocation destLocation;
+        @Getter final TableId tableId;
     }
 }

@@ -14,7 +14,7 @@ public class Preprocessor implements EventHandlers {
     final EventQueue eventQueue;
     final S3Agent s3;
     final ObjectMapper mapper;
-    final ObjectFilter filter;
+    final ObjectFilterFactory filterFactory;
 
     public void run() throws IOException {
         log.info("server started");
@@ -115,11 +115,14 @@ public class Preprocessor implements EventHandlers {
     @Override
     public void handleS3Event(S3Event event) {
         S3ObjectLocation src = event.getLocation();
-        S3ObjectLocation dest = mapper.map(src);
+        val mapResult = mapper.map(src);
+        if (mapResult == null) return;
+        S3ObjectLocation dest = mapResult.getDestLocation();
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
             repos.save(result);
-            applyFilter(src, dest, result);
+            ObjectFilter filter = filterFactory.load(mapResult.getTableId());
+            applyFilter(filter, src, dest, result);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
@@ -132,7 +135,7 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    void applyFilter(S3ObjectLocation src, S3ObjectLocation dest, FilterResult result) throws S3IOException, IOException {
+    void applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result) throws S3IOException, IOException {
         try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, buf.getBufferedWriter(), src.toString(), result);

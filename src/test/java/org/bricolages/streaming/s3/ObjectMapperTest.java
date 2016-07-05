@@ -2,6 +2,7 @@ package org.bricolages.streaming.s3;
 import java.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import lombok.*;
 
 public class ObjectMapperTest {
     ObjectMapper newMapper(ObjectMapper.Entry... entries) {
@@ -16,10 +17,13 @@ public class ObjectMapperTest {
         return S3ObjectLocation.forUrl(url);
     }
 
-    @Test public void testMap() throws Exception {
-        ObjectMapper map = newMapper(entry("s3://src-bucket/src-prefix/(.*\\.gz)", "s3://dest-bucket/dest-prefix/$1"));
+    @Test
+    public void test_map() throws Exception {
+        val map = newMapper(entry("s3://src-bucket/src-prefix/(.*\\.gz)", "s3://dest-bucket/dest-prefix/$1"));
         map.check();
-        assertEquals(loc("s3://dest-bucket/dest-prefix/datafile.json.gz"), map.map(loc("s3://src-bucket/src-prefix/datafile.json.gz")));
+        val result = map.map(loc("s3://src-bucket/src-prefix/datafile.json.gz"));
+        assertEquals(loc("s3://dest-bucket/dest-prefix/datafile.json.gz"), result.getDestLocation());
+        //FIXME: assertEquals(new TableId("tmp.table"), result.getTableId());
         assertNull(map.map(loc("s3://src-bucket-2/src-prefix/datafile.json.gz")));
     }
 }

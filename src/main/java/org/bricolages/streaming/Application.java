@@ -1,5 +1,5 @@
 package org.bricolages.streaming;
-import org.bricolages.streaming.filter.ObjectFilter;
+import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.event.EventQueue;
 import org.bricolages.streaming.event.SQSQueue;
 import org.bricolages.streaming.s3.S3Agent;
@@ -46,7 +46,7 @@ public class Application {
 
     @Bean
     public Preprocessor preprocessor() {
-        return new Preprocessor(eventQueue(), s3(), mapper(), filter());
+        return new Preprocessor(eventQueue(), s3(), mapper(), filterFactory());
     }
 
     @Bean
@@ -65,8 +65,7 @@ public class Application {
         return new ObjectMapper(getConfig().mapping);
     }
 
-    @Bean
-    public ObjectFilter filter() {
-        return new ObjectFilter();
+    public ObjectFilterFactory filterFactory() {
+        return new ObjectFilterFactory();
     }
 }

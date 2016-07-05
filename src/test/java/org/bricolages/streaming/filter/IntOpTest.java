@@ -6,20 +6,20 @@ import lombok.*;
 public class IntOpTest {
     @Test
     public void apply() throws Exception {
-        val f = new IntOp();
-        assertEquals(Integer.valueOf(1), f.apply(Integer.valueOf(1)));
-        assertEquals(Integer.valueOf(1), f.apply("1"));
+        val f = new IntOp(null);
+        assertEquals(Integer.valueOf(1), f.applyValue(Integer.valueOf(1), null));
+        assertEquals(Integer.valueOf(1), f.applyValue("1", null));
     }
 
     @Test(expected = FilterException.class)
     public void apply_invalid() throws Exception {
-        val f = new IntOp();
-        f.apply("junk value");
+        val f = new IntOp(null);
+        f.applyValue("junk value", null);
     }
 
     @Test(expected = FilterException.class)
     public void apply_unsupported() throws Exception {
-        val f = new IntOp();
-        f.apply(new Object());
+        val f = new IntOp(null);
+        f.applyValue(new Object(), null);
     }
 }
