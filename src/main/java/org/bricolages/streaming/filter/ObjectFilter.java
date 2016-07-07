@@ -1,5 +1,4 @@
 package org.bricolages.streaming.filter;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.List;
 import java.io.IOException;
 import java.io.BufferedReader;
@@ -28,14 +27,14 @@ public class ObjectFilter {
                     result.outputRows++;
                 }
             }
-            catch (JsonProcessingException ex) {
+            catch (JSONException ex) {
                 log.debug("JSON parse error: {}:{}: {}", sourceName, result.inputRows, ex.getMessage());
                 result.errorRows++;
             }
         });
     }
 
-    public String applyString(String json) throws JsonProcessingException {
+    public String applyString(String json) throws JSONException {
         Record record = Record.parse(json);
         if (record == null) return null;
         for (Op op : operators) {

@@ -1,5 +1,4 @@
 package org.bricolages.streaming.filter;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.*;
 import java.io.*;
 import org.junit.Test;
@@ -53,7 +52,7 @@ public class ObjectFilterTest {
         assertNull(f.applyString("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}"));
     }
 
-    @Test(expected=JsonProcessingException.class)
+    @Test(expected=JSONException.class)
     public void applyString_parseError() throws Exception {
         val f = newFilter();
         f.applyString("{");

@@ -28,6 +28,7 @@ public abstract class Op {
         TimeZoneOp.register();
         UnixTimeOp.register();
         RemoveNullOp.register();
+        AggregateOp.register();
     }
 
     static final public Op build(OperatorDefinition def) {

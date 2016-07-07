@@ -12,13 +12,13 @@ import lombok.*;
 public class Record {
     static final ObjectMapper MAPPER = new ObjectMapper();
 
-    static public Record parse(String json) throws JsonProcessingException {
+    static public Record parse(String json) throws JSONException {
         try {
             Map<String, Object> obj = (Map<String, Object>)MAPPER.readValue(json, Map.class);
             return new Record(obj);
         }
         catch (JsonProcessingException ex) {
-            throw ex;
+            throw new JSONException(ex.getMessage());
         }
         catch (IOException ex) {
             log.error("IO exception while processing JSON???", ex);
@@ -36,8 +36,13 @@ public class Record {
         this.object = object;
     }
 
-    public String serialize() throws JsonProcessingException {
-        return MAPPER.writeValueAsString(object);
+    public String serialize() throws JSONException {
+        try {
+            return MAPPER.writeValueAsString(object);
+        }
+        catch (JsonProcessingException ex) {
+            throw new JSONException(ex.getMessage());
+        }
     }
 
     public Map<String, Object> getObject() {

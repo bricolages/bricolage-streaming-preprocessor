@@ -71,5 +71,6 @@ jar.baseName = 'bricolage-streaming-preprocessor'
 test {
     testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"
+        exceptionFormat "full"
     }
 }
