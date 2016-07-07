@@ -27,6 +27,7 @@ public abstract class Op {
         TextOp.register();
         TimeZoneOp.register();
         UnixTimeOp.register();
+        RemoveNullOp.register();
     }
 
     static final public Op build(OperatorDefinition def) {

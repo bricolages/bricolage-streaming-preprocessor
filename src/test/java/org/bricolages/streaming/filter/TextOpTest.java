@@ -34,7 +34,7 @@ public class TextOpTest {
     @Test
     public void apply_overflowFlag() throws Exception {
         val def = new OperatorDefinition(0, "text", "schema.table", "text_col", null);
-        val rec = Record.empty();
+        val rec = new Record();
         val f = new TextOp(def, 4, false, true, null);
 
         assertEquals("aaaa", f.applyValue("aaaa", rec));
