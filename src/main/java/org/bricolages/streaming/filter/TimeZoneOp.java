@@ -3,7 +3,7 @@ import java.time.ZoneOffset;
 import lombok.*;
 
 class TimeZoneOp extends SingleColumnOp {
-    static {
+    static final void register() {
         Op.registerOperator("timezone", (def) ->
             new TimeZoneOp(def, def.mapParameters(Parameters.class))
         );

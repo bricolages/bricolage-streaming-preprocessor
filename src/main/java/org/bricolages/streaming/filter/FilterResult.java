@@ -1,17 +1,10 @@
 package org.bricolages.streaming.filter;
-import javax.persistence.Entity;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
-import javax.persistence.Id;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
 import java.util.Date;
 import java.sql.Timestamp;
+import lombok.*;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Entity
@@ -51,9 +44,6 @@ public class FilterResult {
 
     @Column(name="message")
     String message;
-
-    public FilterResult() {
-    }
 
     public FilterResult(String src, String dest) {
         this.srcDataFile = src;

@@ -3,7 +3,7 @@ import java.time.*;
 import lombok.*;
 
 class UnixTimeOp extends SingleColumnOp {
-    static {
+    static final void register() {
         Op.registerOperator("unixtime", (def) ->
             new UnixTimeOp(def, def.mapParameters(Parameters.class))
         );

@@ -1,0 +1,10 @@
+create table preproc_definition
+( id bigserial primary key
+, target_table text not null
+, target_column text not null
+, operator_id text not null
+, params text not null   -- JSON format
+)
+;
+
+create index preproc_definition_target_table_idx on preproc_definition (target_table);

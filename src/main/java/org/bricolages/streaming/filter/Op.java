@@ -9,13 +9,24 @@ import java.time.ZoneOffset;
 import java.time.Instant;
 import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;
+import lombok.extern.slf4j.Slf4j;
 import lombok.*;
 
+@Slf4j
 public abstract class Op {
     static final Map<String, Function<OperatorDefinition, Op>> BUILDERS = new HashMap<String, Function<OperatorDefinition, Op>>();
 
     static final public void registerOperator(String id, Function<OperatorDefinition, Op> builder) {
+        log.debug("new operator builder registered: '{}' -> {}", id, builder);
         BUILDERS.put(id, builder);
+    }
+
+    static {
+        IntOp.register();
+        BigIntOp.register();
+        TextOp.register();
+        TimeZoneOp.register();
+        UnixTimeOp.register();
     }
 
     static final public Op build(OperatorDefinition def) {

@@ -1,26 +1,21 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.ConfigError;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
-import javax.persistence.Id;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
 import java.util.List;
 import java.io.IOException;
 import lombok.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Entity
 @Table(name="preproc_definition")
-@RequiredArgsConstructor
-class OperatorDefinition {
+public class OperatorDefinition {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     long id;
 
-    @Column(name="opereator_id")
+    @Column(name="operator_id")
     @Getter
     String operatorId;
 

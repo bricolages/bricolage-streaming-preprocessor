@@ -2,7 +2,7 @@ package org.bricolages.streaming.filter;
 import lombok.*;
 
 class BigIntOp extends SingleColumnOp {
-    static {
+    static final void register() {
         Op.registerOperator("bigint", (def) ->
             new BigIntOp(def)
         );

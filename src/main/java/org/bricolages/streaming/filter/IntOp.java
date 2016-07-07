@@ -2,7 +2,7 @@ package org.bricolages.streaming.filter;
 import lombok.*;
 
 class IntOp extends SingleColumnOp {
-    static {
+    static final void register() {
         Op.registerOperator("int", (def) ->
             new IntOp(def)
         );

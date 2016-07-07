@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import lombok.*;
 
 class TextOp extends SingleColumnOp {
-    static {
+    static final void register() {
         Op.registerOperator("text", (def) ->
             new TextOp(def, def.mapParameters(Parameters.class))
         );

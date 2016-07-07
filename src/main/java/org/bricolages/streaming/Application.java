@@ -65,6 +65,7 @@ public class Application {
         return new ObjectMapper(getConfig().mapping);
     }
 
+    @Bean
     public ObjectFilterFactory filterFactory() {
         return new ObjectFilterFactory();
     }
