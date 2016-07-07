@@ -19,6 +19,7 @@ public class ObjectFilter {
     public void apply(BufferedReader r, BufferedWriter w, String sourceName, FilterResult result) throws IOException {
         final PrintWriter out = new PrintWriter(w);
         r.lines().forEach((line) -> {
+            if (line.trim().isEmpty()) return;  // should not count blank line
             result.inputRows++;
             try {
                 String outStr = applyString(line);

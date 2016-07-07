@@ -27,7 +27,6 @@ public class Record {
     }
 
     final Map<String, Object> object;
-    final boolean wasEmpty;
 
     public Record() {
         this(new HashMap<String, Object>());
@@ -35,7 +34,6 @@ public class Record {
 
     public Record(Map<String, Object> object) {
         this.object = object;
-        this.wasEmpty = object.isEmpty();
     }
 
     public String serialize() throws JsonProcessingException {
@@ -59,7 +57,7 @@ public class Record {
     }
 
     public boolean isEmpty() {
-        return object.isEmpty() && !wasEmpty;
+        return object.isEmpty();
     }
 
     public Iterator<Map.Entry<String, Object>> entries() {
