@@ -9,6 +9,8 @@ class TimeZoneOp extends SingleColumnOp {
         );
     }
 
+    @Getter
+    @Setter
     static class Parameters {
         String sourceOffset;
         String targetOffset;

@@ -1,9 +1,19 @@
 package org.bricolages.streaming.filter;
+import java.time.ZoneOffset;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import lombok.*;
 
 public class TimeZoneOpTest {
+    @Test
+    public void build() throws Exception {
+        val def = new OperatorDefinition(0, "timezone", "schema.table", "tz_col", "{\"sourceOffset\":\"+00:00\",\"targetOffset\":\"+09:00\"}");
+        val op = (TimeZoneOp)Op.build(def);
+        assertEquals("tz_col", op.targetColumnName());
+        assertEquals(ZoneOffset.of("+00:00"), op.sourceOffset);
+        assertEquals(ZoneOffset.of("+09:00"), op.targetOffset);
+    }
+
     @Test
     public void apply() throws Exception {
         val f = new TimeZoneOp(null, "+0000", "+0900");

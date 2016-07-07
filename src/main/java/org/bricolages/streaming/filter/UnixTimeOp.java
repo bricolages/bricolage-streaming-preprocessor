@@ -9,6 +9,8 @@ class UnixTimeOp extends SingleColumnOp {
         );
     }
 
+    @Getter
+    @Setter
     static class Parameters {
         String zoneOffset;
     }
