@@ -1,6 +1,8 @@
 package org.bricolages.streaming.filter;
 import lombok.*;
 
+@ToString
+@EqualsAndHashCode
 public class TableId {
     final String spec;
 

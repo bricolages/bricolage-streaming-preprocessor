@@ -1,9 +1,11 @@
 package org.bricolages.streaming.s3;
 import org.bricolages.streaming.ConfigError;
 import org.bricolages.streaming.filter.TableId;
+import java.util.Objects;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.PatternSyntaxException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,9 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ObjectMapper {
     final List<Entry> entries;
 
-    void check() {
+    void check() throws ConfigError {
         for (Entry ent : entries) {
-            ent.sourcePattern();
+            try {
+                ent.sourcePattern();
+            }
+            catch (PatternSyntaxException ex) {
+                throw new ConfigError("source pattern syntax error: " + ent.src);
+            }
         }
     }
 
@@ -23,12 +30,12 @@ public class ObjectMapper {
             Matcher m = ent.sourcePattern().matcher(src.urlString());
             if (m.matches()) {
                 try {
-                    val dest = S3ObjectLocation.forUrl(m.replaceFirst(ent.dest));
-                    val table = new TableId("tmp.dest");   // FIXME: implement
+                    val dest = S3ObjectLocation.forUrl(safeSubst(ent.dest, m, src));
+                    val table = new TableId(safeSubst(ent.table, m, src));
                     return new Result(dest, table);
                 }
                 catch (S3UrlParseException ex) {
-                    throw new ConfigError(ex);
+                    throw new ConfigError("S3 URL parse error: " + ex.getMessage());
                 }
             }
         }
@@ -37,14 +44,30 @@ public class ObjectMapper {
         return null;
     }
 
+    String safeSubst(String template, Matcher m, S3ObjectLocation src) {
+        String result;
+        try {
+            result = m.replaceFirst(template);
+        }
+        catch (IndexOutOfBoundsException ex) {
+            throw new ConfigError("bad replacement: " + template + ", src=" + src);
+        }
+        if (Objects.equals(src.toString(), result)) {
+            throw new ConfigError("could not map object url: src=" + src + ", template=" + template);
+        }
+        return result;
+    }
+
     @NoArgsConstructor
     public static final class Entry {
         @Getter @Setter String src;
         @Getter @Setter String dest;
+        @Getter @Setter String table;
 
-        Entry(String src, String dest) {
+        Entry(String src, String dest, String table) {
             this.src = src;
             this.dest = dest;
+            this.table = table;
         }
 
         Pattern pat = null;
