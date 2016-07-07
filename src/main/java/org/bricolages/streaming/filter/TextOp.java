@@ -11,23 +11,28 @@ class TextOp extends SingleColumnOp {
         );
     }
 
+    @Getter
+    @Setter
     static final class Parameters {
         long maxByteLength;
+        boolean dropIfOverflow;
         boolean createOverflowFlag;
         String pattern;
     }
 
     final long maxByteLength;
+    final boolean dropIfOverflow;
     final boolean createOverflowFlag;
     final Pattern pattern;
 
     TextOp(OperatorDefinition def, Parameters params) {
-        this(def, params.maxByteLength, params.createOverflowFlag, params.pattern);
+        this(def, params.maxByteLength, params.dropIfOverflow, params.createOverflowFlag, params.pattern);
     }
 
-    TextOp(OperatorDefinition def, long maxByteLength, boolean createOverflowFlag, String pattern) {
+    TextOp(OperatorDefinition def, long maxByteLength, boolean dropIfOverflow, boolean createOverflowFlag, String pattern) {
         super(def);
         this.maxByteLength = maxByteLength;
+        this.dropIfOverflow = dropIfOverflow;
         this.createOverflowFlag = createOverflowFlag;
         this.pattern = (pattern == null) ? null : Pattern.compile(pattern);
     }
@@ -38,12 +43,16 @@ class TextOp extends SingleColumnOp {
     protected Object applyValue(Object value, Record record) throws FilterException {
         String str = castStringForce(value);
         if (str == null) return null;
-        boolean stringOverflow = (maxByteLength > 0 && str.getBytes(DATA_FILE_CHARSET).length > maxByteLength);
-        if (createOverflowFlag) {
-            record.put(overflowFlagName(), stringOverflow);
+        if (maxByteLength > 0) {
+            boolean overflow = (str.getBytes(DATA_FILE_CHARSET).length > maxByteLength);
+            if (createOverflowFlag) {
+                record.put(overflowFlagName(), overflow);
+            }
+            if (overflow && dropIfOverflow) return null;
         }
-        if (stringOverflow) return null;
-        if (pattern != null && !pattern.matcher(str).lookingAt()) return null;
+        if (pattern != null) {
+            if (!pattern.matcher(str).lookingAt()) return null;
+        }
         return str;
     }
 

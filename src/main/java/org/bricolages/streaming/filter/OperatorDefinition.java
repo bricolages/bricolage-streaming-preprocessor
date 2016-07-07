@@ -44,7 +44,7 @@ public class OperatorDefinition {
             return map.readValue(params, type);
         }
         catch (IOException err) {
-            throw new ConfigError("could not map filter parameters: " + targetTable + "." + targetColumn + ": " + params);
+            throw new ConfigError("could not map filter parameters: " + targetTable + "." + targetColumn + "[" + operatorId + "]: " + params + ": " + err.getMessage());
         }
     }
 }

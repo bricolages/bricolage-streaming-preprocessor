@@ -1,12 +1,19 @@
 package org.bricolages.streaming.filter;
 import java.util.Map;
+import java.util.HashMap;
 import lombok.*;
 
 public class Record {
+    static public Record empty() {
+        return new Record(new HashMap<String, Object>());
+    }
+
     final Map<String, Object> object;
+    final boolean wasEmpty;
 
     Record(Map<String, Object> object) {
         this.object = object;
+        this.wasEmpty = object.isEmpty();
     }
 
     Map<String, Object> getObject() {
@@ -26,6 +33,6 @@ public class Record {
     }
 
     boolean isEmpty() {
-        return object.isEmpty();
+        return object.isEmpty() && !wasEmpty;
     }
 }
