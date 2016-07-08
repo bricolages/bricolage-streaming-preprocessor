@@ -48,14 +48,14 @@ Converts Unix epoch time given by integers (`1467954650`) to the timestamp strin
 
 ### `removenull`: Removes All Null Columns
 
-Removes all null columns e.g. {a: null, b: 1}` -> `{b: 1}`.
+Removes all null columns e.g. `{a: null, b: 1}` -> `{b: 1}`.
 `target_column` must be `'*'`.
 
 - No Parameters.
 
 ### `aggregate`: Aggregates Multiple Columns to One JSON String
 
-Aggregates multiple target columns to one nested JSON column.
+Aggregates multiple target columns which have same prefix to one nested JSON column.
 e.g. `{x:1,p_a:2,p_b:3}` -> `{x:1,p:{a:2,b:3}}`
 
 - `targetColumns`: Target column names to aggreagate, given by the Java regex pattern (e.g. `"^p_"`).
