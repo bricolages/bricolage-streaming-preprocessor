@@ -54,4 +54,9 @@ public class S3Event extends Event {
     public void callHandler(EventHandlers h) {
         h.handleS3Event(this);
     }
+
+    @Override
+    public String toString() {
+        return "#<S3Event messageId=" + getMessageId() + ", object=" + location + ">";
+    }
 }

@@ -11,7 +11,7 @@ public class ObjectFilterFactory {
     OperatorDefinitionRepository repos;
 
     public ObjectFilter load(TableId table) {
-        List<OperatorDefinition> defs = repos.findByTargetTableOrderByApplicationOrderAndId(table.toString());
+        List<OperatorDefinition> defs = repos.findByTargetTableOrderByApplicationOrderAsc(table.toString());
         List<Op> ops = defs.stream().map((def) -> {
             Op op = Op.build(def);
             log.debug("operator stacked: {}", op);

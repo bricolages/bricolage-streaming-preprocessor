@@ -29,6 +29,7 @@ public class Preprocessor implements EventHandlers {
                     safeSleep(5);
                 }
             }
+            eventQueue.flushDelete();
         }
         catch (ApplicationAbort ex) {
             // ignore
@@ -43,6 +44,7 @@ public class Preprocessor implements EventHandlers {
                 val empty = handleEvents();
                 if (empty) break;
             }
+            eventQueue.flushDelete();
         }
         catch (ApplicationAbort ex) {
             // ignore
@@ -63,12 +65,13 @@ public class Preprocessor implements EventHandlers {
     public void handleUnknownEvent(UnknownEvent event) {
         // FIXME: notify?
         log.warn("unknown message: {}", event.getMessageBody());
-        // Keep message in the queue.
+        eventQueue.deleteAsync(event);
     }
 
     @Override
     public void handleShutdownEvent(ShutdownEvent event) {
-        eventQueue.delete(event);
+        eventQueue.deleteAsync(event);
+        eventQueue.flushDelete();
         initiateShutdown();
     }
 
@@ -142,7 +145,7 @@ public class Preprocessor implements EventHandlers {
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
-            eventQueue.delete(event);
+            eventQueue.deleteAsync(event);
         }
         catch (S3IOException | IOException ex) {
             log.error("src: {}, error: {}", src.urlString(), ex.getMessage());

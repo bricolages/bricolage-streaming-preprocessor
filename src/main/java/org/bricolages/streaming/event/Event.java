@@ -36,6 +36,10 @@ public abstract class Event {
 
     final Message message;
 
+    public String getMessageId() {
+        return message.getMessageId();
+    }
+
     public String getMessageBody() {
         return message.getBody();
     }
@@ -45,4 +49,9 @@ public abstract class Event {
     }
 
     public abstract void callHandler(EventHandlers h);
+
+    @Override
+    public String toString() {
+        return "#<Event messageId=" + getMessageId() + ">";
+    }
 }

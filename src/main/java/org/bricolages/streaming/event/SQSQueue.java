@@ -6,6 +6,8 @@ import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageResult;
+import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry;
+import com.amazonaws.services.sqs.model.DeleteMessageBatchResult;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AbortedException;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.ListIterator;
 import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import lombok.*;
@@ -24,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SQSQueue implements Iterable<Message> {
     final AmazonSQS sqs;
     final String queueUrl;
-    int visibilityTimeout = 30;     // sec
+    int visibilityTimeout = 600;    // sec
     int maxNumberOfMessages = 10;   // max value
     int waitTimeSeconds = 20;       // max value; enables long poll
 
@@ -45,7 +48,7 @@ public class SQSQueue implements Iterable<Message> {
             log.info("receiveMessage queue={}, visibilityTimeout={}, maxNumberOfMessages={}, waitTimeSeconds={}",
                 queueUrl, visibilityTimeout, maxNumberOfMessages, waitTimeSeconds);
             ReceiveMessageResult res = sqs.receiveMessage(req);
-            log.debug("receiveMessage returned");
+            log.debug("receiveMessage returned: count={}", res.getMessages().size());
             return res.getMessages();
         }
         catch (AbortedException ex) {
@@ -71,6 +74,17 @@ public class SQSQueue implements Iterable<Message> {
         }
     }
 
-    // FIXME: batch delete
-    //public void deleteMessages(List<String> receiptHandle) {}
+    public DeleteMessageBatchResult deleteMessageBatch(List<DeleteMessageBatchRequestEntry> entries) {
+        try {
+            log.info("deleteMessageBatch queue={}, count={}", queueUrl, entries.size());
+            DeleteMessageBatchResult res = sqs.deleteMessageBatch(queueUrl, entries);
+            log.info("deleteMessageBatch success={}, failure={}", res.getSuccessful().size(), res.getFailed().size());
+            return res;
+        }
+        catch (AmazonClientException ex) {
+            String msg = "deleteMessageBatch failed: " + ex.getMessage();
+            log.error(msg);
+            throw new SQSException(msg);
+        }
+    }
 }

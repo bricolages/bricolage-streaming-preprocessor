@@ -21,4 +21,9 @@ public class ShutdownEvent extends Event {
     public void callHandler(EventHandlers h) {
         h.handleShutdownEvent(this);
     }
+
+    @Override
+    public String toString() {
+        return "#<ShutdownEvent messageId=" + getMessageId() + ">";
+    }
 }
