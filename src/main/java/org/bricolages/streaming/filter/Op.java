@@ -29,6 +29,8 @@ public abstract class Op {
         UnixTimeOp.register();
         RemoveNullOp.register();
         AggregateOp.register();
+        DeleteOp.register();
+        RenameOp.register();
     }
 
     static final public Op build(OperatorDefinition def) {
