@@ -31,6 +31,7 @@ public abstract class Op {
         AggregateOp.register();
         DeleteOp.register();
         RenameOp.register();
+        CollectRestOp.register();
     }
 
     static final public Op build(OperatorDefinition def) {
