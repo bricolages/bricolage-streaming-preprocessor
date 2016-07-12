@@ -3,11 +3,11 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import lombok.*;
 
-public class RemoveNullOpTest {
+public class DeleteNullsOpTest {
     @Test
     public void apply() throws Exception {
-        val def = new OperatorDefinition(0, "removenull", "schema.table", "*", "{}");
-        val op = (RemoveNullOp)Op.build(def);
+        val def = new OperatorDefinition(0, "deletenulls", "schema.table", "*", "{}");
+        val op = (DeleteNullsOp)Op.build(def);
         val rec = Record.parse("{\"a\":null,\"b\":1,\"c\":null}");
         val out = op.apply(rec);
         assertEquals("{\"b\":1}", out.serialize());

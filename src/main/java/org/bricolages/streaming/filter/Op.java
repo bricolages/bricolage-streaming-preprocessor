@@ -27,7 +27,7 @@ public abstract class Op {
         TextOp.register();
         TimeZoneOp.register();
         UnixTimeOp.register();
-        RemoveNullOp.register();
+        DeleteNullsOp.register();
         AggregateOp.register();
         DeleteOp.register();
         RenameOp.register();
