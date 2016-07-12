@@ -36,11 +36,27 @@ public class Preprocessor implements EventHandlers {
         log.info("application is gracefully shut down");
     }
 
-    void handleEvents() {
-        eventQueue.stream().forEach(event -> {
+    public void runOneshot() throws Exception {
+        trapSignals();
+        try {
+            while (!isTerminating()) {
+                val empty = handleEvents();
+                if (empty) break;
+            }
+        }
+        catch (ApplicationAbort ex) {
+            // ignore
+        }
+    }
+
+    boolean handleEvents() {
+        boolean empty = true;
+        for (val event : eventQueue.poll()) {
             log.debug("processing message: {}", event.getMessageBody());
             event.callHandler(this);
-        });
+            empty = false;
+        }
+        return empty;
     }
 
     @Override
