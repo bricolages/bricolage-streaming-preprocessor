@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.sqs.AmazonSQSClient;
+import java.util.Objects;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,10 +26,35 @@ public class Application {
     }
 
     public void run(String[] args) throws Exception {
-        this.configPath = args[0];
+        boolean oneshot = false;
+        for (int i = 0; i < args.length; i++) {
+            if (Objects.equals(args[i], "--oneshot")) {
+                oneshot = true;
+            }
+            else if (args[i].startsWith("-")) {
+                System.err.println("unknown option: " + args[i]);
+                System.exit(1);
+            }
+            else {
+                int argc = args.length - 1;
+                if (argc > 1) {
+                    System.err.println("too many arguments");
+                    System.exit(1);
+                }
+                if (argc == 1) {
+                    this.configPath = args[i];
+                }
+                break;
+            }
+        }
         log.info("configPath=" + configPath);
         this.preproc = preprocessor();
-        preproc.run();
+        if (oneshot) {
+            preproc.runOneshot();
+        }
+        else {
+            preproc.run();
+        }
     }
 
     String configPath = "config/streaming-preprocessor.yml";
