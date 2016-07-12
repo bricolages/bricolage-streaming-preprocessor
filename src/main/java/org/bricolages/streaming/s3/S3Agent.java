@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.CodingErrorAction;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +43,11 @@ public class S3Agent {
 
     public BufferedReader openBufferedReader(S3ObjectLocation loc) throws S3IOException {
         InputStream in = openInputStreamAuto(loc);
-        return new BufferedReader(new InputStreamReader(in, DATA_FILE_CHARSET));
+        // CharsetDecoder is not multi-threads safe, create new instance always.
+        val decoder = DATA_FILE_CHARSET.newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.REPLACE);
+        decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+        return new BufferedReader(new InputStreamReader(in, decoder));
     }
 
     InputStream openInputStreamAuto(S3ObjectLocation loc) throws S3IOException {
