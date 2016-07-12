@@ -48,7 +48,7 @@ public class SQSQueue implements Iterable<Message> {
             log.info("receiveMessage queue={}, visibilityTimeout={}, maxNumberOfMessages={}, waitTimeSeconds={}",
                 queueUrl, visibilityTimeout, maxNumberOfMessages, waitTimeSeconds);
             ReceiveMessageResult res = sqs.receiveMessage(req);
-            log.debug("receiveMessage returned: count={}", res.getMessages().size());
+            log.info("receiveMessage returned: count={}", res.getMessages().size());
             return res.getMessages();
         }
         catch (AbortedException ex) {
