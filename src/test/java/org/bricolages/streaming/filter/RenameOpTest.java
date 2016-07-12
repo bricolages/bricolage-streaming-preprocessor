@@ -6,7 +6,7 @@ import lombok.*;
 public class RenameOpTest {
     @Test
     public void apply() throws Exception {
-        val def = new OperatorDefinition(0, "rename", "schema.table", "b", "{\"to\":\"b_renamed\"}");
+        val def = new OperatorDefinition("rename", "schema.table", "b", "{\"to\":\"b_renamed\"}");
         val op = (RenameOp)Op.build(def);
         val rec = Record.parse("{\"a\":1,\"b\":2,\"c\":3}");
         val out = op.apply(rec);

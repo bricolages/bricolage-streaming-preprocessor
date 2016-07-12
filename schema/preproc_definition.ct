@@ -2,8 +2,11 @@ create table preproc_definition
 ( id bigserial primary key
 , target_table text not null
 , target_column text not null
+, application_order integer not null default 0
 , operator_id text not null
 , params text not null   -- JSON format
+, created_at timestamp not null default current_timestamp
+, updated_at timestamp not null default current_timestamp
 )
 ;
 

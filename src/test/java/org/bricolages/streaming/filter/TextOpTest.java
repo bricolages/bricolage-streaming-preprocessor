@@ -6,7 +6,7 @@ import lombok.*;
 public class TextOpTest {
     @Test
     public void build() throws Exception {
-        val def = new OperatorDefinition(0, "text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}");
+        val def = new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}");
         val op = (TextOp)Op.build(def);
         assertEquals("text_col", op.targetColumnName());
         assertEquals(10, op.maxByteLength);
@@ -33,7 +33,7 @@ public class TextOpTest {
 
     @Test
     public void apply_overflowFlag() throws Exception {
-        val def = new OperatorDefinition(0, "text", "schema.table", "text_col", null);
+        val def = new OperatorDefinition("text", "schema.table", "text_col", null);
         val rec = new Record();
         val f = new TextOp(def, 4, false, true, null);
 

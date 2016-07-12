@@ -6,7 +6,7 @@ import lombok.*;
 public class AggregateOpTest {
     @Test
     public void apply() throws Exception {
-        val def = new OperatorDefinition(0, "aggregate", "schema.table", "*", "{\"targetColumns\":\"^q:\",\"aggregatedColumn\":\"q\"}");
+        val def = new OperatorDefinition("aggregate", "schema.table", "*", "{\"targetColumns\":\"^q:\",\"aggregatedColumn\":\"q\"}");
         val op = (AggregateOp)Op.build(def);
         val rec = Record.parse("{\"a\":1,\"q:x\":2,\"q:y\":3,\"b\":4}");
         val out = op.apply(rec);

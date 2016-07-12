@@ -6,7 +6,7 @@ import lombok.*;
 public class DeleteNullsOpTest {
     @Test
     public void apply() throws Exception {
-        val def = new OperatorDefinition(0, "deletenulls", "schema.table", "*", "{}");
+        val def = new OperatorDefinition("deletenulls", "schema.table", "*", "{}");
         val op = (DeleteNullsOp)Op.build(def);
         val rec = Record.parse("{\"a\":null,\"b\":1,\"c\":null}");
         val out = op.apply(rec);

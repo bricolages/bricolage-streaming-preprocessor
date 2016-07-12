@@ -3,6 +3,7 @@ import org.bricolages.streaming.ConfigError;
 import javax.persistence.*;
 import java.util.List;
 import java.io.IOException;
+import java.sql.Timestamp;
 import lombok.*;
 
 @NoArgsConstructor
@@ -26,8 +27,22 @@ public class OperatorDefinition {
     @Column(name="target_column")
     String targetColumn;
 
+    @Column(name="application_order")
+    int applicationOrder;
+
     @Column(name="params")
     String params;  // JSON string
+
+    @Column(name="created_at")
+    Timestamp createdTime;
+
+    @Column(name="updated_at")
+    Timestamp updatedTime;
+
+    // For tests
+    OperatorDefinition(String operatorId, String targetTable, String targetColumn, String params) {
+        this(0, operatorId, targetTable, targetColumn, 0, params, null, null);
+    }
 
     public boolean isSingleColumn() {
         return ! this.targetColumn.equals("*");

@@ -8,9 +8,9 @@ import lombok.*;
 public class ObjectFilterTest {
     ObjectFilter newFilter() {
         val ops = new ArrayList<Op>();
-        ops.add(Op.build(new OperatorDefinition(0, "int", "schema.table", "int_col", "{}")));
-        ops.add(Op.build(new OperatorDefinition(0, "bigint", "schema.table", "bigint_col", "{}")));
-        ops.add(Op.build(new OperatorDefinition(0, "text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
+        ops.add(Op.build(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
+        ops.add(Op.build(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
+        ops.add(Op.build(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
         return new ObjectFilter(ops);
     }
 
