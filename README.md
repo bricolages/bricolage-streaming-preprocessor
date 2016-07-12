@@ -41,14 +41,26 @@ Converts Unix epoch time given by integers (`1467954650`) to the timestamp strin
 
 - `zoneOffset`: Target timezone, given by the string like `'+09:00'`.
 
+### `delete`: Unconditional column delete
+
+Deletes specified column.
+
+- No parameters.
+
+### `rename`: Column rename
+
+Renames specified column.
+
+- `to`: the column name which is renamed to.
+
 ### `timezone`: Timezone Conversion
 
 - `sourceOffset`: Expected source data timezone, given by the string like `'+00:00'`.
 - `targetOffset`: Target timezone, given by the string like `'+09:00'`.
 
-### `removenull`: Removes All Null Columns
+### `deletenulls`: Deletes All Null Columns
 
-Removes all null columns e.g. `{a: null, b: 1}` -> `{b: 1}`.
+Deletes all null columns e.g. `{a: null, b: 1}` -> `{b: 1}`.
 `target_column` must be `'*'`.
 
 - No Parameters.
@@ -61,6 +73,12 @@ e.g. `{x:1,p_a:2,p_b:3}` -> `{x:1,p:{a:2,b:3}}`
 - `targetColumns`: Target column names to aggreagate, given by the Java regex pattern (e.g. `"^p_"`).
   Note: matched string is removed from output column name.
 - `aggregatedColumn`: Aggregated, output column name.
+
+### `collectrest`: Aggregates Rest Columns to One JSON String
+
+Aggregates rest columns except specified columns.
+
+- `rejectColumns`: Kept columns
 
 ## Development
 
