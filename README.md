@@ -4,6 +4,39 @@ Bricolage Streaming Preprocessor service processes JSON data stream (S3 to S3).
 
 This software is written in working time in Cookpad, Inc.
 
+## Development (Local)
+
+Building Executable JAR file and running all tests:
+```
+% gradle build
+```
+
+Executing built program:
+```
+% ./run.sh
+```
+
+## Building Docker Image
+
+Copy following config files and edit it (DB host, port, user, password).
+All config files has the corresponding example file (*.example), just copy and edit it.
+
+- config.docker/application.yml (for Spring)
+- config.docker/streaming-preprocessor.yml
+- config.docker/gradle.properties (for Flyway)
+- env.docker
+
+Then build image:
+```
+% gradle build
+% docker-compose build
+```
+
+Run:
+```
+% docker-compose start
+```
+
 ## Operators
 
 bricolage-streaming-preprocessor task is defined by "operators".
@@ -79,18 +112,6 @@ e.g. `{x:1,p_a:2,p_b:3}` -> `{x:1,p:{a:2,b:3}}`
 Aggregates rest columns except specified columns.
 
 - `rejectColumns`: Kept columns
-
-## Development
-
-Building Executable JAR file and running all tests:
-```
-% gradle build
-```
-
-Executing built program:
-```
-% ./run.sh APP_CONFIG_FILE
-```
 
 ## License
 
