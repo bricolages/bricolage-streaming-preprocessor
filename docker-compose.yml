@@ -1,0 +1,16 @@
+db:
+  image: postgres:9.5
+  ports:
+    - 5432
+  environment:
+    POSTGRES_USER: bricolage
+    POSTGRES_PASSWORD: bricolage
+app:
+  build: .
+  links:
+    - db
+  volumes:
+    - /tmp:/log
+  env_file: env.docker
+  environment:
+    WORKER_NUM: 1

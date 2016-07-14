@@ -1,0 +1,3 @@
+flyway.url=jdbc:postgresql://DBHOST:5432/DBNAME
+flyway.user=USER_NAME
+flyway.password=PASSWORD
