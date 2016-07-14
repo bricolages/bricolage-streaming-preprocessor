@@ -11,3 +11,17 @@ create table preproc_definition
 ;
 
 create index preproc_definition_target_table_idx on preproc_definition (target_table);
+
+create table preproc_log
+( id bigserial primary key
+, src_data_file text
+, dest_data_file text
+, input_rows bigint
+, output_rows bigint
+, error_rows bigint
+, status varchar(16)
+, start_time timestamp with time zone default current_timestamp
+, end_time timestamp with time zone
+, message text
+)
+;
