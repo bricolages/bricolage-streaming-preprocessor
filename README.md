@@ -10,10 +10,11 @@ Building Executable JAR file and running all tests:
 ```
 % gradle build
 ```
-
-Executing built program:
+To run the application, you must copy config/*.example files to config/* and edit them.
+Execute:
 ```
-% ./run.sh
+% (cd db && bundle && bundle exec ridgepole -c database.yml -f Schemafile --merge)   # Migrates database schema
+% java -jar build/libs/bricolage-streaming-preprocessor.jar
 ```
 
 ## Building Docker Image
@@ -21,9 +22,9 @@ Executing built program:
 Copy following config files and edit it (DB host, port, user, password).
 All config files has the corresponding example file (*.example), just copy and edit it.
 
-- config.docker/application.yml (for Spring)
 - config.docker/streaming-preprocessor.yml
-- config.docker/gradle.properties (for Flyway)
+- config.docker/application.yml (for Spring)
+- config.docker/logback.xml (for LogBack)
 - env.docker
 
 Then build image:
@@ -34,7 +35,9 @@ Then build image:
 
 Run:
 ```
-% docker-compose start
+% docker-compose -d up db    # Starts database in the background
+% docker-compose up mig      # Migrates database schema and exits
+% docker-compose up app      # Runs main application
 ```
 
 ## Operators
