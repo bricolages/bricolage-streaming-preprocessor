@@ -131,12 +131,30 @@ public class Preprocessor implements EventHandlers {
     @Autowired
     FilterResultRepository repos;
 
+    @Autowired
+    TableParamsRepository paramsRepos;
+
     @Override
     public void handleS3Event(S3Event event) {
         S3ObjectLocation src = event.getLocation();
         val mapResult = mapper.map(src);
-        if (mapResult == null) return;
+        if (mapResult == null) {
+            log.warn("S3 object could not mapped: {}", src);
+            return;
+        }
+        TableId table = mapResult.getTableId();
         S3ObjectLocation dest = mapResult.getDestLocation();
+
+        TableParams params = paramsRepos.findParams(table);
+        if (params == null) {
+            log.warn("table is not configured: {}", table);
+            return;
+        }
+        if (params.isDisabled()) {
+            // Explicitly disabled; just ignore
+            return;
+        }
+
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
             repos.save(result);

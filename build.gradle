@@ -52,19 +52,17 @@ dependencies {
 
 ///// xjar //////////////////////////////////////////////////////////////////////////////
 
+jar.baseName = 'bricolage-streaming-preprocessor'
 mainClassName = 'org.bricolages.streaming.Application'
 
-task xjar(type: Jar, dependsOn: jar)  {
-    archiveName = 'bricolage-streaming-preprocessor.jar'
-    manifest {
-        attributes 'Main-Class' : mainClassName
-    }
-    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    from "$buildDir/classes/main"
-    from "$buildDir/resources/main"
-}
+///// DB migration //////////////////////////////////////////////////////////////////////
 
-jar.baseName = 'bricolage-streaming-preprocessor'
+task migrate << {
+    exec {
+        executable "sh"
+        args "-x", "-c", "cd db; ./ridgepole.sh --merge" + (project.hasProperty("dry-run") ? " --dry-run" : "")
+    }
+}
 
 ///// test ///////////////////////////////////////////////////////////////////////////////
 
