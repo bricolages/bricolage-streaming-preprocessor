@@ -94,7 +94,11 @@ public class Application {
 
     @Bean
     public EventQueue eventQueue() {
-        val sqs = new SQSQueue(new AmazonSQSClient(), getConfig().queue.url);
+        val config = getConfig().queue;
+        val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
+        if (config.visibilityTimeout > 0) sqs.setVisibilityTimeout(config.visibilityTimeout);
+        if (config.maxNumberOfMessages > 0) sqs.setMaxNumberOfMessages(config.maxNumberOfMessages);
+        if (config.waitTimeSeconds > 0) sqs.setWaitTimeSeconds(config.waitTimeSeconds);
         return new EventQueue(sqs);
     }
 
