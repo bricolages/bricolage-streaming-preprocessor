@@ -3,6 +3,11 @@ import lombok.*;
 
 @EqualsAndHashCode
 public class TableId {
+    static public TableId parse(String spec) {
+        // FIXME
+        return new TableId(spec);
+    }
+
     final String spec;
 
     public TableId(String spec) {
