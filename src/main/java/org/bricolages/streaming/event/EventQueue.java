@@ -55,9 +55,8 @@ public class EventQueue {
     }
 
     public void flushDelete() {
-System.err.println("*** flushDelete");
+        log.info("flushing async delete requests");
         if (deleteBuffer.isEmpty()) return;
-System.err.println("*** is not empty.");
         val now = LocalDateTime.now();
         val handles = deleteBuffer.values().stream()
             .filter(ent -> ent.isIssueable(now))
@@ -65,13 +64,10 @@ System.err.println("*** is not empty.");
             .limit(BUFFER_SIZE_MAX)
             .collect(Collectors.toList());
         if (handles.isEmpty()) return;
-System.err.println("*** handle is not empty.");
-System.err.println("*** DeleteMessageBatch");
         val result = queue.deleteMessageBatch(handles);
         for (val success : result.getSuccessful()) {
             deleteBuffer.remove(success.getId());
         }
-System.err.println("*** handle failed");
         for (val failure : result.getFailed()) {
             val ent = deleteBuffer.get(failure.getId());
             if (ent == null) {
@@ -88,6 +84,34 @@ System.err.println("*** handle failed");
         if (deleteBuffer.size() > BUFFER_SIZE_MAX * 10) {
             log.warn("SQS DeleteMessageBatch buffer size is too large: count={}", deleteBuffer.size());
         }
+    }
+
+    // Called on shutdown; issues and removes all pending delete requests, with ignoring all errors.
+    public void flushDeleteForce() {
+        log.info("*** Flushing async delete requests (forced)");
+        int nFailure = 0;
+        while (!deleteBuffer.isEmpty()) {
+            val handles = deleteBuffer.values().stream()
+                .map(ent -> new DeleteMessageBatchRequestEntry(ent.event.getMessageId(), ent.event.getReceiptHandle()))
+                .limit(BUFFER_SIZE_MAX)
+                .collect(Collectors.toList());
+            val result = queue.deleteMessageBatch(handles);
+            for (val success : result.getSuccessful()) {
+                deleteBuffer.remove(success.getId());
+            }
+            for (val failure : result.getFailed()) {
+                val ent = deleteBuffer.get(failure.getId());
+                if (ent == null) {
+                    log.warn("MUST NOT HAPPEN: could not lookup DeleteBufferEntry: {}", failure.getId());
+                }
+                else {
+                    log.warn("SQS DeleteMessageBatch failed (message remains in the queue): {}", ent.event);
+                }
+                nFailure++;
+                deleteBuffer.remove(failure.getId());
+            }
+        }
+        log.info("*** Async delete requests cleared (could not remove {} events)", nFailure);
     }
 
     static class DeleteBufferEntry {

@@ -24,16 +24,17 @@ public class Preprocessor implements EventHandlers {
                 // FIXME: insert sleep on empty result
                 try {
                     handleEvents();
+                    eventQueue.flushDelete();
                 }
                 catch (SQSException ex) {
                     safeSleep(5);
                 }
             }
-            eventQueue.flushDelete();
         }
         catch (ApplicationAbort ex) {
             // ignore
         }
+        eventQueue.flushDeleteForce();
         log.info("application is gracefully shut down");
     }
 
@@ -44,11 +45,11 @@ public class Preprocessor implements EventHandlers {
                 val empty = handleEvents();
                 if (empty) break;
             }
-            eventQueue.flushDelete();
         }
         catch (ApplicationAbort ex) {
             // ignore
         }
+        eventQueue.flushDeleteForce();
     }
 
     boolean handleEvents() {
@@ -70,8 +71,8 @@ public class Preprocessor implements EventHandlers {
 
     @Override
     public void handleShutdownEvent(ShutdownEvent event) {
-        eventQueue.deleteAsync(event);
-        eventQueue.flushDelete();
+        // Use sync delete to avoid duplicated shutdown
+        eventQueue.delete(event);
         initiateShutdown();
     }
 
