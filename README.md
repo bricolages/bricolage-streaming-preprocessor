@@ -10,10 +10,11 @@ Building Executable JAR file and running all tests:
 ```
 % gradle build
 ```
+
 To run the application, you must copy config/*.example files to config/* and edit them.
 Execute:
 ```
-% (cd db && bundle && bundle exec ridgepole -c database.yml -f Schemafile --merge)   # Migrates database schema
+% (cd db && bundle && ./ridgepole.sh --merge)   # Migrates database schema
 % java -jar build/libs/bricolage-streaming-preprocessor.jar
 ```
 
