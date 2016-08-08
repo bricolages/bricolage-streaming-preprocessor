@@ -27,8 +27,17 @@ import lombok.extern.slf4j.Slf4j;
 public class SQSQueue implements Iterable<Message> {
     final AmazonSQS sqs;
     final String queueUrl;
+
+    @Getter
+    @Setter
     int visibilityTimeout = 600;    // sec
+
+    @Getter
+    @Setter
     int maxNumberOfMessages = 10;   // max value
+
+    @Getter
+    @Setter
     int waitTimeSeconds = 20;       // max value; enables long poll
 
     public Stream<Message> stream() {

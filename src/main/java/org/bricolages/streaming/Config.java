@@ -39,5 +39,8 @@ class Config {
 
     static final class QueueEntry {
         public String url;
+        public int visibilityTimeout;
+        public int maxNumberOfMessages;
+        public int waitTimeSeconds;
     }
 }
