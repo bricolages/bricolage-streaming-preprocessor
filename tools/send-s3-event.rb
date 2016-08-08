@@ -3,7 +3,7 @@
 
 require 'yaml'
 
-config = YAML.load("config.yml")
+config = YAML.load(File.read('config.yml'))
 region = config['region']
 ENV['AWS_REGION'] = region
 
