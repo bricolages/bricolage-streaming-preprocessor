@@ -1,5 +1,6 @@
 <configuration>
   <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
     <encoder>
       <pattern>%d [%t] %5level: %logger: %msg%n</pattern>
     </encoder>
