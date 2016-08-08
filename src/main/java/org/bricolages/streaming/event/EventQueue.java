@@ -55,7 +55,9 @@ public class EventQueue {
     }
 
     public void flushDelete() {
+System.err.println("*** flushDelete");
         if (deleteBuffer.isEmpty()) return;
+System.err.println("*** is not empty.");
         val now = LocalDateTime.now();
         val handles = deleteBuffer.values().stream()
             .filter(ent -> ent.isIssueable(now))
@@ -63,10 +65,13 @@ public class EventQueue {
             .limit(BUFFER_SIZE_MAX)
             .collect(Collectors.toList());
         if (handles.isEmpty()) return;
+System.err.println("*** handle is not empty.");
+System.err.println("*** DeleteMessageBatch");
         val result = queue.deleteMessageBatch(handles);
         for (val success : result.getSuccessful()) {
             deleteBuffer.remove(success.getId());
         }
+System.err.println("*** handle failed");
         for (val failure : result.getFailed()) {
             val ent = deleteBuffer.get(failure.getId());
             if (ent == null) {
