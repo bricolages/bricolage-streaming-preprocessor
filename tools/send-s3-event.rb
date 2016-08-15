@@ -3,7 +3,8 @@
 
 require 'yaml'
 
-config = YAML.load(File.read('config.yml'))
+config_path = ARGV[0] || 'config.yml'
+config = YAML.load(File.read(config_path))
 region = config['region']
 ENV['AWS_REGION'] = region
 
@@ -21,7 +22,7 @@ send_message = -> (body) {
   sqs.send_message(**args)
 }
 
-ARGF.each do |line|
+$stdin.each do |line|
   url = line.strip
   bucket, key = url.sub(%r<s3://>, '').split('/', 2)
   $stderr.puts "PUT bucket=#{bucket} key=#{key}"
