@@ -4,6 +4,7 @@ import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.s3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,30 @@ public class Preprocessor implements EventHandlers {
             // ignore
         }
         eventQueue.flushDeleteForce();
+    }
+
+    public boolean processUrl(S3ObjectLocation src, BufferedWriter out) {
+        val mapResult = mapper.map(src);
+        if (mapResult == null) {
+            log.warn("S3 object could not mapped: {}", src);
+            return false;
+        }
+        TableId table = mapResult.getTableId();
+        S3ObjectLocation dest = mapResult.getDestLocation();
+
+        FilterResult result = new FilterResult(src.urlString(), dest.urlString());
+        try {
+            ObjectFilter filter = filterFactory.load(mapResult.getTableId());
+            try (BufferedReader r = s3.openBufferedReader(src)) {
+                filter.apply(r, out, src.toString(), result);
+            }
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
+            return true;
+        }
+        catch (S3IOException | IOException ex) {
+            log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
+            return false;
+        }
     }
 
     boolean handleEvents() {

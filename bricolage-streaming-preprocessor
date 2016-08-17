@@ -1,0 +1,8 @@
+#!/bin/sh
+
+JAVAOPTS=${JAVAOPTS:-""}
+if [[ -n $LOGBACK_CONFIG ]]
+then
+    JAVAOPTS="$JAVAOPTS -Dlogging.config=$LOGBACK_CONFIG"
+fi
+java $JAVAOPTS -jar build/libs/bricolage-streaming-preprocessor.jar "$@"
