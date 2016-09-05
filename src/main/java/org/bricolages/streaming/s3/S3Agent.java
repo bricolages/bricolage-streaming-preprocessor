@@ -3,7 +3,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.CodingErrorAction;
+import java.time.Instant;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,9 +78,9 @@ public class S3Agent {
         }
     }
 
-    public void upload(Path src, S3ObjectLocation dest) throws S3IOException {
+    public PutObjectResult upload(Path src, S3ObjectLocation dest) throws S3IOException {
         try {
-            s3client.putObject(dest.newPutRequest(src));
+            return s3client.putObject(dest.newPutRequest(src));
         }
         catch (AmazonClientException ex) {
             throw new S3IOException("S3 error in PutObject: " + ex.getMessage());
@@ -102,8 +103,7 @@ public class S3Agent {
             this.dest = dest;
 
             try {
-                Path tmp = Paths.get(TMPDIR, dest.basename());
-                OutputStream s = Files.newOutputStream(tmp);
+                OutputStream s = Files.newOutputStream(path);
                 OutputStream out = dest.isGzip() ? new GZIPOutputStream(s) : s;
                 this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
             }
@@ -112,10 +112,11 @@ public class S3Agent {
             }
         }
 
-        public void commit() throws S3IOException {
+        public S3ObjectMetadata commit() throws S3IOException {
             try {
                 bufferedWriter.close();   // flush() does not work
-                upload(path, dest);
+                val result = upload(path, dest);
+                return new S3ObjectMetadata(dest, Instant.now(), Files.size(path), result.getETag());
             }
             catch (IOException ex) {
                 throw new S3IOException("I/O error: " + ex.getMessage());

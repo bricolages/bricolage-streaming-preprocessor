@@ -1,6 +1,7 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.event.EventQueue;
+import org.bricolages.streaming.event.LogQueue;
 import org.bricolages.streaming.event.SQSQueue;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.ObjectMapper;
@@ -135,17 +136,24 @@ public class Application {
 
     @Bean
     public Preprocessor preprocessor() {
-        return new Preprocessor(eventQueue(), s3(), mapper(), filterFactory());
+        return new Preprocessor(eventQueue(), logQueue(), s3(), mapper(), filterFactory());
     }
 
     @Bean
     public EventQueue eventQueue() {
-        val config = getConfig().queue;
+        val config = getConfig().eventQueue;
         val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
         if (config.visibilityTimeout > 0) sqs.setVisibilityTimeout(config.visibilityTimeout);
         if (config.maxNumberOfMessages > 0) sqs.setMaxNumberOfMessages(config.maxNumberOfMessages);
         if (config.waitTimeSeconds > 0) sqs.setWaitTimeSeconds(config.waitTimeSeconds);
         return new EventQueue(sqs);
+    }
+
+    @Bean
+    public LogQueue logQueue() {
+        val config = getConfig().logQueue;
+        val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
+        return new LogQueue(sqs);
     }
 
     @Bean
