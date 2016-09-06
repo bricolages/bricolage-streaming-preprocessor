@@ -185,8 +185,8 @@ public class Preprocessor implements EventHandlers {
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
             repos.save(result);
-            ObjectFilter filter = filterFactory.load(mapResult.getTableId());
-            S3ObjectMetadata obj = applyFilter(filter, src, dest, result);
+            ObjectFilter filter = filterFactory.load(table);
+            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, table);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
@@ -202,8 +202,8 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result) throws S3IOException, IOException {
-        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest)) {
+    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, TableId table) throws S3IOException, IOException {
+        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, table.toString())) {
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
             }

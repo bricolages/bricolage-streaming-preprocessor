@@ -87,8 +87,8 @@ public class S3Agent {
         }
     }
 
-    public Buffer openWriteBuffer(S3ObjectLocation dest) throws S3IOException {
-        Path tmp = Paths.get(TMPDIR, dest.basename());
+    public Buffer openWriteBuffer(S3ObjectLocation dest, String uniqPrefix) throws S3IOException {
+        Path tmp = Paths.get(TMPDIR, uniqPrefix + "-" + dest.basename());
         return new Buffer(tmp, dest);
     }
 
