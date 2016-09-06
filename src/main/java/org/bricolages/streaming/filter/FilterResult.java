@@ -45,6 +45,9 @@ public class FilterResult {
     @Column(name="message")
     String message;
 
+    @Column(name="dispatched")
+    boolean dispatched;
+
     public FilterResult(String src, String dest) {
         this.srcDataFile = src;
         this.destDataFile = dest;
@@ -64,5 +67,9 @@ public class FilterResult {
 
     Timestamp currentTimestamp() {
         return new Timestamp(System.currentTimeMillis());
+    }
+
+    public void dispatched() {
+        this.dispatched = true;
     }
 }
