@@ -8,6 +8,7 @@ import com.amazonaws.services.sqs.model.DeleteMessageRequest;
 import com.amazonaws.services.sqs.model.DeleteMessageResult;
 import com.amazonaws.services.sqs.model.DeleteMessageBatchRequestEntry;
 import com.amazonaws.services.sqs.model.DeleteMessageBatchResult;
+import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AbortedException;
 import java.util.List;
@@ -92,6 +93,18 @@ public class SQSQueue implements Iterable<Message> {
         }
         catch (AmazonClientException ex) {
             String msg = "deleteMessageBatch failed: " + ex.getMessage();
+            log.error(msg);
+            throw new SQSException(msg);
+        }
+    }
+
+    public SendMessageResult sendMessage(String body) {
+        try {
+            log.info("sendMessage queue={}", queueUrl);
+            return sqs.sendMessage(queueUrl, body);
+        }
+        catch (AmazonClientException ex) {
+            String msg = "sendMessage failed: " + ex.getMessage();
             log.error(msg);
             throw new SQSException(msg);
         }

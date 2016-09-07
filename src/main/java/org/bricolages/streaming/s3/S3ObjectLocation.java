@@ -37,6 +37,14 @@ public class S3ObjectLocation {
         return this.urlString;
     }
 
+    public String bucket() {
+        return this.bucket;
+    }
+
+    public String key() {
+        return this.key;
+    }
+
     public String basename() {
         return Paths.get(key).getFileName().toString();
     }

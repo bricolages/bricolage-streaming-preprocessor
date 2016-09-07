@@ -34,13 +34,18 @@ class Config {
         return new Yaml().loadAs(in, Config.class);
     }
 
-    public QueueEntry queue;
+    public ReceiveQueueEntry eventQueue;
+    public SendQueueEntry logQueue;
     public List<ObjectMapper.Entry> mapping;
 
-    static final class QueueEntry {
+    static final class ReceiveQueueEntry {
         public String url;
         public int visibilityTimeout;
         public int maxNumberOfMessages;
         public int waitTimeSeconds;
+    }
+
+    static final class SendQueueEntry {
+        public String url;
     }
 }

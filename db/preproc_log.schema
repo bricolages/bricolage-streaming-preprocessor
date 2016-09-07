@@ -8,4 +8,5 @@ create_table "preproc_log", id: :bigserial, force: :cascade do |t|
   t.datetime "start_time"
   t.datetime "end_time"
   t.text     "message"
+  t.boolean  "dispatched", default: false
 end

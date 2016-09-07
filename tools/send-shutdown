@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [[ -z $1 ]]
+then
+    echo "Usage: $0 QUEUE_NAME" 2>&1
+    exit 1
+fi
+queue=$1
+
+exec aws sqs send-message --queue-url="https://sqs.ap-northeast-1.amazonaws.com/789035092620/$queue" --message-body='{"Records":[{"eventName":"shutdown"}]}'

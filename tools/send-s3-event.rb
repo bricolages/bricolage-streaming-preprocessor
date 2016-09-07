@@ -3,7 +3,8 @@
 
 require 'yaml'
 
-config_path = ARGV[0] || 'config.yml'
+no_dispatch = ARGV.delete('--no-dispatch')
+config_path = ARGV.shift || 'config.yml'
 config = YAML.load(File.read(config_path))
 region = config['region']
 ENV['AWS_REGION'] = region
@@ -45,5 +46,6 @@ $stdin.each do |line|
       }
     }
   }
+  body["noDispatch"] = true if no_dispatch
   send_message.(body)
 end
