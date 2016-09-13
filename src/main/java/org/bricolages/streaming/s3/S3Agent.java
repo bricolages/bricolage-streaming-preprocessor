@@ -1,5 +1,7 @@
 package org.bricolages.streaming.s3;
+import org.bricolages.streaming.ApplicationAbort;
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -70,11 +72,43 @@ public class S3Agent {
 
     public InputStream openInputStream(S3ObjectLocation loc) throws S3IOException {
         try {
-            S3Object obj = s3client.getObject(loc.newGetRequest());
+            S3Object obj = getObjectWithRetry(loc.newGetRequest());
             return obj.getObjectContent();
         }
         catch (AmazonClientException ex) {
+            log.error(ex.getMessage());
             throw new S3IOException("S3 error in GetObject: " + ex.getMessage());
+        }
+    }
+
+    static final int RETRY_MAX = 2;
+
+    S3Object getObjectWithRetry(GetObjectRequest req) throws AmazonClientException {
+        int nRetry = 0;
+        while (true) {
+            try {
+                return s3client.getObject(req);
+            }
+            catch (AmazonServiceException ex) {
+                // S3 is an eventual consistency system, GetObject may fail just after ObjectCreated event occured.
+                if (ex.getErrorCode().equals("NoSuchKey") && nRetry < RETRY_MAX) {
+                    log.info("GetObject failed, retrying...");
+                    safeSleep(3);
+                    nRetry++;
+                    continue;
+                }
+                throw ex;
+            }
+        }
+    }
+
+    void safeSleep(int sec) {
+        try {
+            log.info("sleeping " + sec + " seconds");
+            Thread.sleep(sec * 1000);
+        }
+        catch (InterruptedException ex) {
+            throw new ApplicationAbort("sleep interrupted");
         }
     }
 
