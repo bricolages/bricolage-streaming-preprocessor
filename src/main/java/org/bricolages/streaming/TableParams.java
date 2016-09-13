@@ -21,11 +21,18 @@ class TableParams {
     @Getter
     boolean disabled;
 
+    @Column(name="discard")
+    boolean discard;
+
     public TableParams(TableId id) {
         this.tableId = id.toString();
     }
 
     public TableId getTableId() {
         return TableId.parse(tableId);
+    }
+
+    public boolean doesDiscard() {
+        return this.discard;
     }
 }

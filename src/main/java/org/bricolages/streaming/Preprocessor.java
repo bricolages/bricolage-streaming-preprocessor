@@ -163,6 +163,7 @@ public class Preprocessor implements EventHandlers {
 
     @Override
     public void handleS3Event(S3Event event) {
+        log.debug("handling URL: {}", event.getLocation().toString());
         S3ObjectLocation src = event.getLocation();
         val mapResult = mapper.map(src);
         if (mapResult == null) {
@@ -178,7 +179,13 @@ public class Preprocessor implements EventHandlers {
             return;
         }
         if (params.isDisabled()) {
-            // Explicitly disabled; just ignore
+            // Processing is temporary disabled; process objects later
+            return;
+        }
+        if (params.doesDiscard()) {
+            // Just ignore without processing, do not keep SQS messages.
+            log.info("discard event: {}", event.getLocation().toString());
+            eventQueue.deleteAsync(event);
             return;
         }
 
