@@ -16,21 +16,27 @@ public class TimeZoneOpTest {
 
     @Test
     public void apply() throws Exception {
-        val f = new TimeZoneOp(null, "+0000", "+0900");
+        val f = new TimeZoneOp(null, "+0000", "+0900", false);
         assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01T10:41:06Z", null));
         assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01T10:41:06+00:00", null));
         assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01 10:41:06 +0000", null));
     }
 
+    @Test
+    public void apply_trailing_tz() throws Exception {
+        val f = new TimeZoneOp(null, "+0000", "+0900", true);
+        assertEquals("2012-09-11T04:34:11+09:00", f.applyValue("2012-09-10T12:34:11-07:00[America/Los_Angeles]", null));
+    }
+
     @Test(expected = FilterException.class)
     public void apply_invalid() throws Exception {
-        val f = new TimeZoneOp(null, "+0000", "+0900");
+        val f = new TimeZoneOp(null, "+0000", "+0900", false);
         f.applyValue("junk value", null);
     }
 
     @Test(expected = FilterException.class)
     public void apply_unsupported() throws Exception {
-        val f = new TimeZoneOp(null, "+0000", "+0900");
+        val f = new TimeZoneOp(null, "+0000", "+0900", false);
         f.applyValue(new Object(), null);
     }
 }

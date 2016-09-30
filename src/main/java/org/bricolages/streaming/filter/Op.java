@@ -3,6 +3,7 @@ import org.bricolages.streaming.ConfigError;
 import java.util.function.Function;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -103,39 +104,43 @@ public abstract class Op {
     }
 
     static protected final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
+    static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|[+-]\\d{2}:?\\d{2})");
 
-    protected OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset) throws FilterException {
-        if (value instanceof String) {
-            val str = ((String)value).trim();
-            // Order DOES matter
-            try {
-                // "2016-07-01T12:34:56Z": This representation appears most
-                return OffsetDateTime.parse(str, DateTimeFormatter.ISO_INSTANT);
-            }
-            catch (DateTimeException e1) {
-                try {
-                    // "2016-07-01T12:34:56+00:00": Some log file have this.  Old Fluentd format?
-                    return OffsetDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                }
-                catch (DateTimeException e2) {
-                    try {
-                        // "2016-07-01 12:34:56 +0000": Ruby Time#to_s
-                        return OffsetDateTime.parse(str, RUBY_DATE_TIME);
-                    }
-                    catch (DateTimeException e3) {
-                        try {
-                            // "2016-07-01T12:34:56": No offset.
-                            return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
-                        }
-                        catch (DateTimeException e4) {
-                            throw new FilterException("could not parse a timestamp: " + str);
-                        }
-                    }
-                }
-            }
+    protected OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset, boolean truncate) throws FilterException {
+        if (! (value instanceof String)) {
+            throw new FilterException("is not a string: " + value);
         }
-        else {
-            throw new FilterException("is not a timestamp: " + value);
+        String strValue = ((String)value).trim();
+        val m = TIMESTAMP_PATTERN.matcher(strValue);
+        if (!m.find()) {
+            throw new FilterException("is not a timestamp: " + strValue);
+        }
+        String str = m.group();
+        // Order DOES matter
+        try {
+            // "2016-07-01T12:34:56Z": This representation appears most
+            return OffsetDateTime.parse(str, DateTimeFormatter.ISO_INSTANT);
+        }
+        catch (DateTimeException e1) {
+            try {
+                // "2016-07-01T12:34:56+00:00": Some log file have this.  Old Fluentd format?
+                return OffsetDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            }
+            catch (DateTimeException e2) {
+                try {
+                    // "2016-07-01 12:34:56 +0000": Ruby Time#to_s
+                    return OffsetDateTime.parse(str, RUBY_DATE_TIME);
+                }
+                catch (DateTimeException e3) {
+                    try {
+                        // "2016-07-01T12:34:56": No offset.
+                        return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
+                    }
+                    catch (DateTimeException e4) {
+                        throw new FilterException("could not parse a timestamp: " + str);
+                    }
+                }
+            }
         }
     }
 }
