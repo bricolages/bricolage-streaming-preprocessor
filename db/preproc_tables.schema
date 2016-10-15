@@ -1,7 +1,0 @@
-create_table "preproc_tables", id: :bigserial, force: :cascade do |t|
-  t.text     "table_id", null: false
-  t.boolean  "disabled", null: false
-  t.boolean  "discard", null: false, default: false
-end
-
-add_index "preproc_tables", ["table_id"], name: "preproc_tables_table_id_idx", using: :btree, unique: true

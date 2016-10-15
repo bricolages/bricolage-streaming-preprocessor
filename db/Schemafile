@@ -1,3 +1,0 @@
-Dir.glob("*.schema").each do |path|
-  require path
-end
