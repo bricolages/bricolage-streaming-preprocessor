@@ -3,6 +3,7 @@ import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.s3.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -161,6 +162,9 @@ public class Preprocessor implements EventHandlers {
     @Autowired
     TableParamsRepository paramsRepos;
 
+    @Autowired
+    IncomingStreamRepository strRepos;
+
     @Override
     public void handleS3Event(S3Event event) {
         log.debug("handling URL: {}", event.getLocation().toString());
@@ -175,7 +179,18 @@ public class Preprocessor implements EventHandlers {
 
         TableParams params = paramsRepos.findParams(table);
         if (params == null) {
-            log.warn("table is not configured: {}", table);
+            IncomingStream stream = strRepos.findStream(table);
+            if (stream == null) {
+                try {
+                    stream = new IncomingStream(table.toString());
+                    stream = strRepos.save(stream);
+                    log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), table);
+                }
+                catch (DataIntegrityViolationException ex) {
+                    stream = strRepos.findStream(table);
+                }
+            }
+            log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), table, src);
             return;
         }
         if (params.isDisabled()) {
