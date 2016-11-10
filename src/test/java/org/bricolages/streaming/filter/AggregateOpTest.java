@@ -14,8 +14,8 @@ public class AggregateOpTest {
     }
 
     @Test
-    public void apply_no_remove() throws Exception {
-        val def = new OperatorDefinition("aggregate", "schema.table", "*", "{\"targetColumns\":\"^q:\",\"aggregatedColumn\":\"q\",\"dropTargetColumns\":false}");
+    public void apply_keepTargetColumns() throws Exception {
+        val def = new OperatorDefinition("aggregate", "schema.table", "*", "{\"targetColumns\":\"^q:\",\"aggregatedColumn\":\"q\",\"keepTargetColumns\":true}");
         val op = (AggregateOp)Op.build(def);
         val rec = Record.parse("{\"a\":1,\"q:x\":2,\"q:y\":3,\"b\":4}");
         val out = op.apply(rec);
