@@ -6,9 +6,10 @@ import org.bricolages.streaming.event.SQSQueue;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.ObjectMapper;
 import org.bricolages.streaming.s3.S3ObjectLocation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootApplication
 @EnableJpaRepositories
 @Slf4j
+@EnableConfigurationProperties(Config.class)
 public class Application {
     static public void main(String[] args) throws Exception {
         try (val ctx = SpringApplication.run(Application.class, args)) {
@@ -36,15 +38,7 @@ public class Application {
         S3ObjectLocation procUrl = null;
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("--config=")) {
-                val kv = args[i].split("=", 2);
-                if (kv.length != 2) {
-                    System.err.println("missing argument for --config");
-                    System.exit(1);
-                }
-                this.configPath = kv[1];
-            }
-            else if (Objects.equals(args[i], "--oneshot")) {
+            if (Objects.equals(args[i], "--oneshot")) {
                 oneshot = true;
             }
             else if (args[i].startsWith("--map-url=")) {
@@ -77,9 +71,6 @@ public class Application {
                     System.err.println("too many arguments");
                     System.exit(1);
                 }
-                if (argc == 1) {
-                    this.configPath = args[i];
-                }
                 break;
             }
         }
@@ -90,7 +81,6 @@ public class Application {
             System.exit(0);
         }
 
-        log.info("configPath=" + configPath);
         val preproc = preprocessor();
         if (procUrl != null) {
             val out = new BufferedWriter(new OutputStreamWriter(System.out));
@@ -116,23 +106,14 @@ public class Application {
     void printUsage(PrintStream s) {
         s.println("Usage: bricolage-streaming-preprocessor [options]");
         s.println("Options:");
-        s.println("\t--config=PATH         Use PATH as a streaming preprocess config file.");
         s.println("\t--oneshot             Process one ReceiveMessage and quit.");
         s.println("\t--map-url=S3URL       Prints destination S3 URL for S3URL and quit.");
         s.println("\t--process-url=S3URL   Process the data file S3URL as configured and print to stdout.");
         s.println("\t--help                Prints this message and quit.");
     }
 
-    String configPath = "config/streaming-preprocessor.yml";
+    @Autowired
     Config config;
-
-    // FIXME: replace by Spring DI
-    Config getConfig() {
-        if (this.config == null) {
-            this.config = Config.load(configPath);
-        }
-        return this.config;
-    }
 
     @Bean
     public Preprocessor preprocessor() {
@@ -141,7 +122,7 @@ public class Application {
 
     @Bean
     public EventQueue eventQueue() {
-        val config = getConfig().eventQueue;
+        val config = this.config.getEventQueueEntry();
         val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
         if (config.visibilityTimeout > 0) sqs.setVisibilityTimeout(config.visibilityTimeout);
         if (config.maxNumberOfMessages > 0) sqs.setMaxNumberOfMessages(config.maxNumberOfMessages);
@@ -151,7 +132,7 @@ public class Application {
 
     @Bean
     public LogQueue logQueue() {
-        val config = getConfig().logQueue;
+        val config = this.config.getLogQueueEntry();
         val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
         return new LogQueue(sqs);
     }
@@ -163,7 +144,7 @@ public class Application {
 
     @Bean
     public ObjectMapper mapper() {
-        return new ObjectMapper(getConfig().mapping);
+        return new ObjectMapper(this.config.getMappingEntries());
     }
 
     @Bean

@@ -1,7 +1,0 @@
-queue:
-    url: https://sqs.ap-northeast-1.amazonaws.com/111111111111/QUEUE_NAME
-
-mapping:
-    -
-      src: "s3://SOURCE_BUFFER_NAME/PREFIX/(.*\\.gz)"
-      dest: "s3://DEST_BUFFER_NAME/PREFIX/$1"

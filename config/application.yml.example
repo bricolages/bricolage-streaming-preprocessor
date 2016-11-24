@@ -13,3 +13,14 @@ spring:
 
 flyway:
     enabled: false
+
+bricolage:
+    event-queue:
+        url: ${bricolage.event.queue.url}
+    log-queue:
+        url: ${bricolage.log.queue.url}
+    mappings:
+        -
+          src: "s3://src-bucket/((.*)\\.gz)"
+          dest: "s3://dst-buckert/$1"
+          table: "$2"
