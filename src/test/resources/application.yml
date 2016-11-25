@@ -1,0 +1,5 @@
+bricolage:
+    event-queue:
+        visibility-timeout: 120
+        max-number-of-messages: 10
+        wait-time-seconds: 0

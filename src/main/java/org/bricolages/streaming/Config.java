@@ -1,51 +1,104 @@
 package org.bricolages.streaming;
+
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.bricolages.streaming.s3.ObjectMapper;
-import org.yaml.snakeyaml.Yaml;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
 
-class Config {
-    static public Config load(String path) throws ConfigError {
-        try {
-            try (InputStream in = new FileInputStream(path)) {
-                return loadFromStream(in);
-            }
+@Component
+@ConfigurationProperties(prefix = "bricolage")
+public class Config {
+
+    private final EventQueue eventQueue = new EventQueue();
+    private final LogQueue logQueue = new LogQueue();
+    private List<Mapping> mappings = new ArrayList<>();
+
+    // Must be public for Spring
+    public EventQueue getEventQueue() {
+        return eventQueue;
+    }
+
+    public LogQueue getLogQueue() {
+        return logQueue;
+    }
+
+    public List<Mapping> getMappings() {
+        return mappings;
+    }
+
+    public void setMappings(List<Mapping> mappings) {
+        this.mappings = mappings;
+    }
+
+    //TODO Remove *Entry() methods
+    EventQueueEntry getEventQueueEntry() {
+        return new EventQueueEntry(getEventQueue());
+    }
+
+    LogQueueEntry getLogQueueEntry() {
+        return new LogQueueEntry(getLogQueue());
+    }
+
+    List<ObjectMapper.Entry> getMappingEntries() {
+        List<ObjectMapper.Entry> entries = new ArrayList<>();
+        for (Mapping m : getMappings()) {
+            ObjectMapper.Entry e = new ObjectMapper.Entry();
+            e.setSrc(m.src);
+            e.setDest(m.dest);
+            e.setTable(m.table);
+            entries.add(e);
         }
-        catch (IOException ex) {
-            throw new ConfigError(ex);
+        return entries;
+    }
+
+    @Getter
+    @Setter
+    static class EventQueue {
+        private String url;
+        private int visibilityTimeout;
+        private int maxNumberOfMessages;
+        private int waitTimeSeconds;
+    }
+
+    class EventQueueEntry {
+        public final String url;
+        public final int visibilityTimeout;
+        public final int maxNumberOfMessages;
+        public final int waitTimeSeconds;
+
+        public EventQueueEntry(EventQueue eq) {
+            this.url = eq.getUrl();
+            this.visibilityTimeout = eq.getVisibilityTimeout();
+            this.maxNumberOfMessages = eq.getMaxNumberOfMessages();
+            this.waitTimeSeconds = eq.getWaitTimeSeconds();
         }
     }
 
-    static public Config loadResource(String name) throws ConfigError {
-        try {
-            try (InputStream in = ClassLoader.getSystemResourceAsStream(name)) {
-                return loadFromStream(in);
-            }
+    @Getter
+    @Setter
+    static class LogQueue {
+        private String url;
+    }
+
+    class LogQueueEntry {
+        public final String url;
+
+        public LogQueueEntry(LogQueue sq) {
+            this.url = sq.getUrl();
         }
-        catch (IOException ex) {
-            throw new ConfigError(ex);
-        }
     }
 
-    static public Config loadFromStream(InputStream in) throws IOException {
-        return new Yaml().loadAs(in, Config.class);
-    }
-
-    public ReceiveQueueEntry eventQueue;
-    public SendQueueEntry logQueue;
-    public List<ObjectMapper.Entry> mapping;
-
-    static final class ReceiveQueueEntry {
-        public String url;
-        public int visibilityTimeout;
-        public int maxNumberOfMessages;
-        public int waitTimeSeconds;
-    }
-
-    static final class SendQueueEntry {
-        public String url;
+    @Getter
+    @Setter
+    // Must be pubic (Don't know why...)
+    public static class Mapping {
+        private String src;
+        private String dest;
+        private String table;
     }
 }
