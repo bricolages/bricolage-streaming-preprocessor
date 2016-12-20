@@ -41,7 +41,7 @@ class TextOp extends SingleColumnOp {
 
     @Override
     protected Object applyValue(Object value, Record record) throws FilterException {
-        String str = removeHeadNullChars(castStringForce(value));
+        String str = dropIfHeadingNullChars(castStringForce(value));
         if (str == null) return null;
         if (maxByteLength > 0) {
             boolean overflow = (str.getBytes(DATA_FILE_CHARSET).length > maxByteLength);
@@ -66,14 +66,9 @@ class TextOp extends SingleColumnOp {
         return (String)value;
     }
 
-    final Pattern nullCharsPattern = Pattern.compile("^\\x00+$");
-    String removeHeadNullChars(String str) {
+    String dropIfHeadingNullChars(String str) {
         if (str == null) return null;
-        // return if first char is not \0
-        if (0 != str.indexOf("\0")) return str;
-        // return null if all chars are \0
-        if (nullCharsPattern.matcher(str).matches()) return null;
-        // remove heading \0(s) if some chars follows
-        return str.replaceFirst("^\\x00+", "");
+        if (str.startsWith("\0")) return null;
+        return str;
     }
 }
