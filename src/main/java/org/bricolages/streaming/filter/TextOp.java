@@ -66,7 +66,7 @@ class TextOp extends SingleColumnOp {
         return (String)value;
     }
 
-    final private Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("\\x00.*");
+    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("\\x00.*");
 
     String removeAfterNullChar(String str) {
         if (str == null) return null;
