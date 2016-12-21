@@ -66,11 +66,11 @@ class TextOp extends SingleColumnOp {
         return (String)value;
     }
 
-    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("\\x00.*");
+    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("\\\\u0000.*");
 
     String removeAfterNullChar(String str) {
         if (str == null) return null;
-        if (str.indexOf('\0') == -1) return str; // avoid regex when no null chars
+        if (str.indexOf("\\u0000") == -1) return str; // avoid regex when no null chars
         return AFTER_NULL_CHAR_PATTERN.matcher(str).replaceFirst("");
     }
 }
