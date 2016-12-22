@@ -1,6 +1,7 @@
 package org.bricolages.streaming.filter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.*;
 
@@ -66,11 +67,14 @@ class TextOp extends SingleColumnOp {
         return (String)value;
     }
 
-    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("\\\\u0000.*");
+    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("([^\\\\]|^)(\\\\\\\\)*(?=\\\\u0000)(\\\\u0000)");
 
     String removeAfterNullChar(String str) {
         if (str == null) return null;
-        if (str.indexOf("\\u0000") == -1) return str; // avoid regex when no null chars
-        return AFTER_NULL_CHAR_PATTERN.matcher(str).replaceFirst("");
+        Matcher matcher = AFTER_NULL_CHAR_PATTERN.matcher(str);
+        if (matcher.find()) {
+            return str.substring(0, matcher.start(3));
+        }
+        return str;
     }
 }
