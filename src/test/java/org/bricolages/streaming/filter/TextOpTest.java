@@ -62,7 +62,9 @@ public class TextOpTest {
         assertEquals("xyz", f.applyValue("xyz\\u0000abc", null));
         assertEquals("\\\\u0000", f.applyValue("\\\\u0000", null));
         assertEquals("\\\\\\\\u0000\\\\", f.applyValue("\\\\\\\\u0000\\\\\\u0000", null));
-        assertEquals("abc\\\\u0000", f.applyValue("abc\\\\u0000", null));
+        assertEquals("\\\\\\\\\\\\\\\\u0000\\\\", f.applyValue("\\\\\\\\\\\\\\\\u0000\\\\\\u0000", null));
+        assertEquals("abc\\\\\\\\u0000", f.applyValue("abc\\\\\\\\u0000", null));
+        assertEquals("abc\\\\\\\\", f.applyValue("abc\\\\\\\\\\u0000", null));
         assertEquals("abc\\\\u0000xyz", f.applyValue("abc\\\\u0000xyz\\u0000ijk", null));
         assertEquals("", f.applyValue("\\u0000abcd", null));
     }

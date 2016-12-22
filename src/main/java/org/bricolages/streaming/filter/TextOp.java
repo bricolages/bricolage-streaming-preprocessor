@@ -67,7 +67,7 @@ class TextOp extends SingleColumnOp {
         return (String)value;
     }
 
-    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("([^\\\\]|^)(\\\\\\\\)*(?=\\\\u0000)(\\\\u0000)");
+    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("([^\\\\]|^)(\\\\\\\\)*(\\\\u0000)");
 
     String removeAfterNullChar(String str) {
         if (str == null) return null;
