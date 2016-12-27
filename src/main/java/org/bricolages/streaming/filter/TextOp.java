@@ -1,7 +1,6 @@
 package org.bricolages.streaming.filter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.*;
 
@@ -42,7 +41,7 @@ class TextOp extends SingleColumnOp {
 
     @Override
     protected Object applyValue(Object value, Record record) throws FilterException {
-        String str = removeAfterNullChar(castStringForce(value));
+        String str = removeAfterNull(castStringForce(value));
         if (str == null) return null;
         if (maxByteLength > 0) {
             boolean overflow = (str.getBytes(DATA_FILE_CHARSET).length > maxByteLength);
@@ -66,14 +65,17 @@ class TextOp extends SingleColumnOp {
         if (!(value instanceof String)) return null;
         return (String)value;
     }
-
-    static final Pattern AFTER_NULL_CHAR_PATTERN = Pattern.compile("([^\\\\]|^)(\\\\\\\\)*(\\\\u0000)");
-
-    String removeAfterNullChar(String str) {
+    String removeAfterNull(String str) {
         if (str == null) return null;
-        Matcher matcher = AFTER_NULL_CHAR_PATTERN.matcher(str);
-        if (matcher.find()) {
-            return str.substring(0, matcher.start(3));
+        int idx = 0;
+        while (idx < str.length()) {
+            idx = str.indexOf('\\', idx);
+            if (idx < 0) break;
+            if (str.substring(idx, idx + 6).equals("\\u0000")) {
+                // Drop rest characters
+                return str.substring(0, idx);
+            }
+            idx += 2;  // skip any character after '\'
         }
         return str;
     }
