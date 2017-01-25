@@ -21,3 +21,5 @@ hs_err_pid*
 /config.docker/*.properties
 /env.docker
 /gradle.properties
+
+!/gradle/wrapper/gradle-wrapper.jar
