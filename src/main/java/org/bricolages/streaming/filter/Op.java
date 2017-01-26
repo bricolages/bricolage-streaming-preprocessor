@@ -33,6 +33,7 @@ public abstract class Op {
         DeleteOp.register();
         RenameOp.register();
         CollectRestOp.register();
+        RejectOp.register();
     }
 
     static final public Op build(OperatorDefinition def) {
