@@ -117,6 +117,22 @@ Aggregates rest columns except specified columns.
 
 - `rejectColumns`: Kept columns
 
+### `reject`: Reject Records Matched with Condition
+
+Reject records matched with condition described in params.
+
+#### `type`: `string`
+
+- `value`: If this value(string) and `target_columns` value are equal, the record will be rejected.
+
+#### `type`: `integer`
+
+- `value`: If this value(integer) and `target_columns` value are equal, the record will be rejected.
+
+#### `type`: `null`
+
+If `target_columns` value is null, it will reject the record.
+
 ## License
 
 MIT license. See LICENSE file for details.
