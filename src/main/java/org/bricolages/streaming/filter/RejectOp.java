@@ -35,13 +35,12 @@ class RejectOp extends Op {
         }
     }
     static class NullParameters extends Parameters {
-        @Getter @Setter Boolean isNull;
         Function<Object, Boolean> getMatcher() {
-            return (target) -> (target == null) == isNull;
+            return (target) -> target == null;
         }
     }
 
-    private Function<Object, Boolean> matcher;
+    Function<Object, Boolean> matcher;
 
     RejectOp(OperatorDefinition def, Parameters params) {
         this(def, params.getMatcher());

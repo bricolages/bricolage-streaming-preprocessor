@@ -42,34 +42,16 @@ public class RejectOpTest {
 
     @Test
     public void apply_matched_null() throws Exception {
-        val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\", \"isNull\": true}");
+        val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\"}");
         val op = (RejectOp)Op.build(def);
         val rec = Record.parse("{\"a\":1,\"b\":2,\"c\":3,\"hoge\":null}");
-        val out = op.apply(rec);
-        assertEquals(null, out);
-    }
-
-    @Test
-    public void apply_not_matched_null() throws Exception {
-        val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\", \"isNull\": false}");
-        val op = (RejectOp)Op.build(def);
-        val rec = Record.parse("{\"a\":1,\"b\":2,\"c\":3,\"hoge\":null}");
-        val out = op.apply(rec);
-        assertEquals("{\"a\":1,\"b\":2,\"c\":3,\"hoge\":null}", out.serialize());
-    }
-
-    @Test
-    public void apply_matched_non_null() throws Exception {
-        val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\", \"isNull\": false}");
-        val op = (RejectOp)Op.build(def);
-        val rec = Record.parse("{\"a\":1,\"b\":2,\"c\":3,\"hoge\":\"non_null\"}");
         val out = op.apply(rec);
         assertEquals(null, out);
     }
 
     @Test
     public void apply_not_matched_non_null() throws Exception {
-        val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\", \"isNull\": true}");
+        val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\"}");
         val op = (RejectOp)Op.build(def);
         val rec = Record.parse("{\"a\":1,\"b\":2,\"c\":3,\"hoge\":\"non_null\"}");
         val out = op.apply(rec);
