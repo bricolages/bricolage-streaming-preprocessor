@@ -41,7 +41,7 @@ class TextOp extends SingleColumnOp {
 
     @Override
     protected Object applyValue(Object value, Record record) throws FilterException {
-        String str = removeAfterNull(castStringForce(value));
+        String str = removeAfterNullChar(castStringForce(value));
         if (str == null) return null;
         if (maxByteLength > 0) {
             boolean overflow = (str.getBytes(DATA_FILE_CHARSET).length > maxByteLength);
@@ -65,18 +65,14 @@ class TextOp extends SingleColumnOp {
         if (!(value instanceof String)) return null;
         return (String)value;
     }
-    String removeAfterNull(String str) {
+
+    String removeAfterNullChar(String str) {
         if (str == null) return null;
-        int idx = 0;
-        while (idx < str.length()) {
-            idx = str.indexOf('\\', idx);
-            if (idx < 0) break;
-            if (str.substring(idx, idx + 6).equals("\\u0000")) {
-                // Drop rest characters
-                return str.substring(0, idx);
-            }
-            idx += 2;  // skip any character after '\'
+        int idx = str.indexOf('\0');
+        if (idx == -1) {
+            return str;
+        } else {
+            return str.substring(0,idx);
         }
-        return str;
     }
 }
