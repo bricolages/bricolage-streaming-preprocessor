@@ -1,32 +1,36 @@
 package org.bricolages.streaming.filter;
 
-import org.bricolages.streaming.AllocatedRange;
+import org.bricolages.streaming.ApplicationError;
 import org.bricolages.streaming.SequencialNumberRepository;
 import lombok.*;
 
 class SequenceOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("sequence", (def) ->
-            new SequenceOp(def, builder)
+            new SequenceOp(def, builder.sequencialNumberRepository)
         );
     }
 
-    SequencialNumberRepository sequencialNumberRepository;
+    long currentValue;
+    long upperValue;
 
-    SequenceOp(OperatorDefinition def, OpBuilder builder) {
+    SequenceOp(OperatorDefinition def) {
         super(def);
-        this.sequencialNumberRepository = builder.sequencialNumberRepository;
     }
 
-    static final long SEQUENCE_ID = 1; // FIXME: fixed magic number
-    static final long ALLOCATION_SIZE = 10000;
+    SequenceOp(OperatorDefinition def, SequencialNumberRepository repo) {
+        this(def);
+        val seq = repo.allocate();
+        this.currentValue = seq.getLastValue();
+        this.upperValue = seq.getNextValue();
+    }
 
-    AllocatedRange range = AllocatedRange.none();
     private long getNextValue() {
-        return range.getNextValue().orElseGet(() -> {
-            range = sequencialNumberRepository.allocate(SEQUENCE_ID, ALLOCATION_SIZE);
-            return getNextValue();
-        }).longValue();
+        currentValue ++;
+        if (currentValue > upperValue) {
+            throw new ApplicationError("sequence number is starved");
+        }
+        return currentValue;
     }
 
     @Override

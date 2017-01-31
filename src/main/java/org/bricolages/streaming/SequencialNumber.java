@@ -6,15 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Slf4j
 @Entity
-@Table(name="preproc_sequence")
+@Table(name="global_sequence")
 public class SequencialNumber {
+    // HACK: JPA Repository needs PK
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Getter
-    long id;
+    @GeneratedValue
+    @Column(name="sequence_name")
+    String name;
 
-    @Column(name="value")
+    @Column(name="last_value")
     @Getter
-    @Setter
-    long value;
+    long lastValue;
+
+    @Column(name="nextval")
+    @Getter
+    long nextValue;
 }

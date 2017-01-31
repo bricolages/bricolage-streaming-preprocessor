@@ -1,30 +1,10 @@
 package org.bricolages.streaming;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+import org.springframework.data.jpa.repository.Query;
 import lombok.*;
 
 public interface SequencialNumberRepository extends JpaRepository<SequencialNumber, Long> {
-    List<SequencialNumber> findById(long id);
-
-    default SequencialNumber findSequence(long id) {
-        val list = findById(id);
-        if (list.isEmpty())
-            return null;
-        if (list.size() > 1) {
-            throw new ApplicationError("FATAL: multiple table parameters matched: " + id);
-        }
-        return list.get(0);
-    }
-
-    @Transactional
-    default AllocatedRange allocate(long id, long size) {
-        SequencialNumber num = findSequence(id);
-        long nextValue = num.value;
-        num.value += size;
-        save(num);
-
-        return new AllocatedRange(nextValue, num.value);
-    }
+    @Query(value = "select sequence_name, last_value, nextval('preproc_sequence') from preproc_sequence", nativeQuery = true)
+    SequencialNumber allocate();
 }
