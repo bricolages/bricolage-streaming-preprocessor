@@ -60,7 +60,7 @@ public class TextOpTest {
         val f = new TextOp(null, -1, false, false, null);
         assertEquals("abcd", f.applyValue("abcd", null));
         assertEquals("efgh", f.applyValue("efgh\0xxxx", null));
-        assertEquals("", f.applyValue("\0\0abcd", null));
+        assertEquals("", f.applyValue("\0abcd", null));
         assertEquals("", f.applyValue("\0\0\0", null));
     }
 }
