@@ -2,8 +2,8 @@ package org.bricolages.streaming.filter;
 import lombok.*;
 
 class DeleteNullsOp extends Op {
-    static final void register() {
-        Op.registerOperator("deletenulls", (def) ->
+    static final void register(OpBuilder builder) {
+        builder.registerOperator("deletenulls", (def) ->
             new DeleteNullsOp(def)
         );
     }

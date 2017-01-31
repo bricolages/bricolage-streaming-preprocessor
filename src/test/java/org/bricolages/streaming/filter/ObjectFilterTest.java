@@ -6,11 +6,13 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class ObjectFilterTest {
+    OpBuilder builder = new OpBuilder();
+
     ObjectFilter newFilter() {
         val ops = new ArrayList<Op>();
-        ops.add(Op.build(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
-        ops.add(Op.build(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
-        ops.add(Op.build(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
+        ops.add(builder.build(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
+        ops.add(builder.build(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
+        ops.add(builder.build(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
         return new ObjectFilter(ops);
     }
 

@@ -1,5 +1,6 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
+import org.bricolages.streaming.filter.OpBuilder;
 import org.bricolages.streaming.event.EventQueue;
 import org.bricolages.streaming.event.LogQueue;
 import org.bricolages.streaming.event.SQSQueue;
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import java.io.BufferedWriter;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableJpaRepositories
+@EnableTransactionManagement
 @Slf4j
 @EnableConfigurationProperties(Config.class)
 public class Application {
@@ -150,5 +153,13 @@ public class Application {
     @Bean
     public ObjectFilterFactory filterFactory() {
         return new ObjectFilterFactory();
+    }
+
+    @Autowired
+    SequencialNumberRepository sequentialNumberRepository;
+
+    @Bean
+    public OpBuilder opBuilder() {
+        return new OpBuilder(sequentialNumberRepository);
     }
 }

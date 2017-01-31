@@ -2,8 +2,8 @@ package org.bricolages.streaming.filter;
 import lombok.*;
 
 class RenameOp extends Op {
-    static final void register() {
-        Op.registerOperator("rename", (def) ->
+    static final void register(OpBuilder builder) {
+        builder.registerOperator("rename", (def) ->
             new RenameOp(def, def.mapParameters(Parameters.class))
         );
     }

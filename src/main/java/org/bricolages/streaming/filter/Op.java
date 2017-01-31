@@ -1,8 +1,4 @@
 package org.bricolages.streaming.filter;
-import org.bricolages.streaming.ConfigError;
-import java.util.function.Function;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -15,35 +11,6 @@ import lombok.*;
 
 @Slf4j
 public abstract class Op {
-    static final Map<String, Function<OperatorDefinition, Op>> BUILDERS = new HashMap<String, Function<OperatorDefinition, Op>>();
-
-    static final public void registerOperator(String id, Function<OperatorDefinition, Op> builder) {
-        log.debug("new operator builder registered: '{}' -> {}", id, builder);
-        BUILDERS.put(id, builder);
-    }
-
-    static {
-        IntOp.register();
-        BigIntOp.register();
-        TextOp.register();
-        TimeZoneOp.register();
-        UnixTimeOp.register();
-        DeleteNullsOp.register();
-        AggregateOp.register();
-        DeleteOp.register();
-        RenameOp.register();
-        CollectRestOp.register();
-        RejectOp.register();
-    }
-
-    static final public Op build(OperatorDefinition def) {
-        val builder = BUILDERS.get(def.getOperatorId());
-        if (builder == null) {
-            throw new ConfigError("unknown operator ID: " + def.getOperatorId());
-        }
-        return builder.apply(def);
-    }
-
     final OperatorDefinition def;
 
     Op(OperatorDefinition def) {

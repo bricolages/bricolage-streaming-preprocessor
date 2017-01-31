@@ -4,8 +4,8 @@ import lombok.*;
 import java.util.regex.Pattern;
 
 class AggregateOp extends Op {
-    static final void register() {
-        Op.registerOperator("aggregate", (def) ->
+    static final void register(OpBuilder builder) {
+        builder.registerOperator("aggregate", (def) ->
             new AggregateOp(def, def.mapParameters(Parameters.class))
         );
     }
