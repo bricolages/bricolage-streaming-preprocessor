@@ -40,7 +40,7 @@ public class TextOpTest {
         assertEquals("aaaa", f.applyValue("aaaa", rec));
         assertEquals(false, rec.get("text_col_overflow"));
 
-        assertEquals("", f.applyValue("\\u0000\\u0000", rec));
+        assertEquals("", f.applyValue("\0\0\0\0\0", rec));
         assertEquals(false, rec.get("text_col_overflow"));
 
         assertEquals("aaaaXX", f.applyValue("aaaaXX", rec));
@@ -58,14 +58,9 @@ public class TextOpTest {
     @Test
     public void apply_nothing() throws Exception {
         val f = new TextOp(null, -1, false, false, null);
-        assertEquals("abc", f.applyValue("abc", null));
-        assertEquals("xyz", f.applyValue("xyz\\u0000abc", null));
-        assertEquals("\\\\u0000", f.applyValue("\\\\u0000", null));
-        assertEquals("\\\\\\\\u0000\\\\", f.applyValue("\\\\\\\\u0000\\\\\\u0000", null));
-        assertEquals("\\\\\\\\\\\\\\\\u0000\\\\", f.applyValue("\\\\\\\\\\\\\\\\u0000\\\\\\u0000", null));
-        assertEquals("abc\\\\\\\\u0000", f.applyValue("abc\\\\\\\\u0000", null));
-        assertEquals("abc\\\\\\\\", f.applyValue("abc\\\\\\\\\\u0000", null));
-        assertEquals("abc\\\\u0000xyz", f.applyValue("abc\\\\u0000xyz\\u0000ijk", null));
-        assertEquals("", f.applyValue("\\u0000abcd", null));
+        assertEquals("abcd", f.applyValue("abcd", null));
+        assertEquals("efgh", f.applyValue("efgh\0xxxx", null));
+        assertEquals("", f.applyValue("\0\0abcd", null));
+        assertEquals("", f.applyValue("\0\0\0", null));
     }
 }
