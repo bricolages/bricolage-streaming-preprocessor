@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Slf4j
 @Entity
-@Table(name="global_sequence")
+@Table(name="strload_sequence")
 public class SequencialNumber {
     // HACK: JPA Repository needs PK
     @Id
