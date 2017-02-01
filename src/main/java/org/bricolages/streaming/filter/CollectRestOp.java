@@ -5,8 +5,8 @@ import java.util.HashMap;
 import lombok.*;
 
 class CollectRestOp extends Op {
-    static final void register() {
-        Op.registerOperator("collectrest", (def) ->
+    static final void register(OpBuilder builder) {
+        builder.registerOperator("collectrest", (def) ->
             new CollectRestOp(def, def.mapParameters(Parameters.class))
         );
     }

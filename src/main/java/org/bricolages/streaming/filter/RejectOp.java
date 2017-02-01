@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.*;
 
 class RejectOp extends Op {
-    static final void register() {
-        Op.registerOperator("reject", (def) ->
+    static final void register(OpBuilder builder) {
+        builder.registerOperator("reject", (def) ->
             new RejectOp(def, def.mapParameters(Parameters.class))
         );
     }
