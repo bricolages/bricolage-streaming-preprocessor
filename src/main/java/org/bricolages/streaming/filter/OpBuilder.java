@@ -33,6 +33,7 @@ public class OpBuilder {
         CollectRestOp.register(this);
         RejectOp.register(this);
         SequenceOp.register(this);
+        DupOp.register(this);
     }
 
     private Map<String, Function<OperatorDefinition, Op>> builders = new HashMap<String, Function<OperatorDefinition, Op>>();
