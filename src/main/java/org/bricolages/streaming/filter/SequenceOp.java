@@ -1,4 +1,6 @@
 package org.bricolages.streaming.filter;
+
+import org.bricolages.streaming.ApplicationError;
 import org.bricolages.streaming.SequencialNumberRepository;
 import lombok.*;
 
