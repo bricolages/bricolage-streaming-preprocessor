@@ -25,10 +25,10 @@ class SequenceOp extends SingleColumnOp {
         this.upperValue = seq.getNextValue();
     }
 
-    private long getNextValue() {
+    private long getNextValue() throws FilterException {
         currentValue ++;
         if (currentValue > upperValue) {
-            throw new ApplicationError("sequence number is starved");
+            throw new FilterException("sequence number is starved");
         }
         return currentValue;
     }
