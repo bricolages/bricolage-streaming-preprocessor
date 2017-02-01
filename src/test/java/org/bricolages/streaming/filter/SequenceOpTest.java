@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.junit.Test;
+import org.bricolages.streaming.ApplicationError;
 import static org.junit.Assert.*;
 import lombok.*;
 
@@ -29,7 +30,7 @@ public class SequenceOpTest {
         assertEquals("{\"a\":1,\"b\":2,\"c\":3,\"seq\":11}", out2.serialize());
     }
 
-    @Test(expected=FilterException.class)
+    @Test(expected=ApplicationError.class)
     public void apply_over_capacity() throws Exception {
         val def = new OperatorDefinition("sequence", "schema.table", "seq", "{}");
         val op = new SequenceOp(def);
