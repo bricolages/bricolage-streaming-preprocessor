@@ -49,6 +49,32 @@ public abstract class Op {
         }
     }
 
+    protected float getFloat(Object value) throws FilterException {
+        if (value instanceof Integer) {
+            return ((Integer)value).floatValue();
+        }
+        else if (value instanceof Long) {
+            return ((Long)value).floatValue();
+        }
+        else if (value instanceof String) {
+            try {
+                return Float.valueOf((String)value);
+            }
+            catch (NumberFormatException ex) {
+                throw new FilterException(ex);
+            }
+        }
+        else if (value instanceof Float) {
+            return ((Float)value).floatValue();
+        }
+        else if (value instanceof Double) {
+            return ((Double)value).floatValue();
+        }
+        else {
+            throw new FilterException("unexpected value for integer");
+        }
+    }
+
     protected OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset) throws FilterException {
         try {
             return Instant.ofEpochSecond(t).atOffset(offset);

@@ -34,6 +34,7 @@ public class OpBuilder {
         RejectOp.register(this);
         SequenceOp.register(this);
         DupOp.register(this);
+        FloatOp.register(this);
     }
 
     private Map<String, Function<OperatorDefinition, Op>> builders = new HashMap<String, Function<OperatorDefinition, Op>>();
