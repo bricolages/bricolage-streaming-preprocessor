@@ -133,6 +133,16 @@ Reject records matched with condition described in params.
 
 If `target_columns` value is null, it will reject the record.
 
+### `sequence`: Add Sequence Number to Target Column
+
+### `dup`: Duplicate column
+
+Duplicate the column specified in `from` param to `target_column`.
+
+### `float`: Floating-Point Number Cleansing
+
+Similar to `int` or `bigint`, but this operator accepts floating-point numbers.
+
 ## License
 
 MIT license. See LICENSE file for details.
