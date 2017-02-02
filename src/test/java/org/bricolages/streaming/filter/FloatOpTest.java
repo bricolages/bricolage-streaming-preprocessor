@@ -9,22 +9,27 @@ public class FloatOpTest {
 
     @Test
     public void apply() throws Exception {
-        val def = new OperatorDefinition("float", "schema.table", "b", "{}");
+        val def = new OperatorDefinition("float", "schema.table", "n", "{}");
         val op = (FloatOp) builder.build(def);
         {
-            val rec = Record.parse("{\"a\":1,\"b\":1.5,\"c\":3}");
+            val rec = Record.parse("{\"n\":1.5}");
             val out = op.apply(rec);
-            assertEquals("{\"a\":1,\"b\":1.5,\"c\":3}", out.serialize());
+            assertEquals("{\"n\":1.5}", out.serialize());
         }
         {
-            val rec = Record.parse("{\"a\":1,\"b\":\"1.5\",\"c\":3}");
+            val rec = Record.parse("{\"n\":\"1.5\"}");
             val out = op.apply(rec);
-            assertEquals("{\"a\":1,\"b\":1.5,\"c\":3}", out.serialize());
+            assertEquals("{\"n\":1.5}", out.serialize());
         }
         {
-            val rec = Record.parse("{\"a\":1,\"b\":\"1.234e2\",\"c\":3}");
+            val rec = Record.parse("{\"n\":\"1.234e2\"}");
             val out = op.apply(rec);
-            assertEquals("{\"a\":1,\"b\":123.4,\"c\":3}", out.serialize());
+            assertEquals("{\"n\":123.4}", out.serialize());
+        }
+        {
+            val rec = Record.parse("{\"n\":1.234e2}");
+            val out = op.apply(rec);
+            assertEquals("{\"n\":123.4}", out.serialize());
         }
     }
 
