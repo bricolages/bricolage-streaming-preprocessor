@@ -212,7 +212,7 @@ public class Preprocessor implements EventHandlers {
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
-            if (!event.doesNotDispatch()) {
+            if (!event.doesNotDispatch() && !params.doesNotDispatch()) {
                 logQueue.send(new FakeS3Event(obj));
                 result.dispatched();
                 repos.save(result);

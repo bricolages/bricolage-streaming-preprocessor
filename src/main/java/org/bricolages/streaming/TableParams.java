@@ -24,6 +24,9 @@ class TableParams {
     @Column(name="discard")
     boolean discard;
 
+    @Column(name="no_dispatch")
+    boolean no_dispatch;
+
     public TableParams(TableId id) {
         this.tableId = id.toString();
     }
@@ -34,5 +37,9 @@ class TableParams {
 
     public boolean doesDiscard() {
         return this.discard;
+    }
+
+    public boolean doesNotDispatch() {
+        return this.no_dispatch;
     }
 }
