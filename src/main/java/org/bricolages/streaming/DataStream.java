@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Entity
 @Table(name="strload_streams")
-public class StreamParams {
+public class DataStream {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="stream_id")

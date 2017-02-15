@@ -3,10 +3,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import lombok.*;
 
-public interface StreamParamsRepository extends JpaRepository<StreamParams, Long> {
-    List<StreamParams> findByStreamName(String streamName);
+public interface DataStreamRepository extends JpaRepository<DataStream, Long> {
+    List<DataStream> findByStreamName(String streamName);
 
-    default StreamParams findParams(String streamName) {
+    default DataStream findParams(String streamName) {
         val list = findByStreamName(streamName);
         if (list.isEmpty()) return null;
         if (list.size() > 1) {
