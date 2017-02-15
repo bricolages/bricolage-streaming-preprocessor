@@ -1,6 +1,7 @@
 package org.bricolages.streaming.s3;
 import org.bricolages.streaming.ConfigError;
 import java.util.Objects;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -19,7 +20,7 @@ public class ObjectMapper {
                 ent.sourcePattern();
             }
             catch (PatternSyntaxException ex) {
-                throw new ConfigError("source pattern syntax error: " + ent.src);
+                throw new ConfigError("source pattern syntax error: " + ent.srcUrlPattern);
             }
         }
     }
@@ -28,14 +29,13 @@ public class ObjectMapper {
         for (Entry ent : entries) {
             Matcher m = ent.sourcePattern().matcher(src.urlString());
             if (m.matches()) {
-                try {
-                    val dest = S3ObjectLocation.forUrl(safeSubst(ent.dest, m, src));
-                    val streamName = safeSubst(ent.table, m, src);
-                    return new Result(dest, streamName);
-                }
-                catch (S3UrlParseException ex) {
-                    throw new ConfigError("S3 URL parse error: " + ex.getMessage());
-                }
+                return new Result(
+                    safeSubst(ent.streamName, m),
+                    ent.destBucket,
+                    safeSubst(ent.streamPrefix, m),
+                    safeSubst(ent.objectPrefix, m),
+                    safeSubst(ent.objectName, m)
+                );
             }
         }
         // FIXME: error??
@@ -43,44 +43,53 @@ public class ObjectMapper {
         return null;
     }
 
-    String safeSubst(String template, Matcher m, S3ObjectLocation src) {
-        String result;
+    String safeSubst(String template, Matcher m) throws ConfigError {
         try {
-            result = m.replaceFirst(template);
+            return m.replaceFirst(template);
         }
         catch (IndexOutOfBoundsException ex) {
-            throw new ConfigError("bad replacement: " + template + ", src=" + src);
+            throw new ConfigError("bad replacement: " + template);
         }
-        if (Objects.equals(src.toString(), result)) {
-            throw new ConfigError("could not map object url: src=" + src + ", template=" + template);
-        }
-        return result;
     }
 
     @NoArgsConstructor
     public static final class Entry {
-        @Getter @Setter String src;
-        @Getter @Setter String dest;
-        @Getter @Setter String table;
+        @Setter public String srcUrlPattern;
+        @Setter public String streamName;
+        @Setter public String destBucket;
+        @Setter public String streamPrefix;
+        @Setter public String objectPrefix;
+        @Setter public String objectName;
 
-        Entry(String src, String dest, String table) {
-            this.src = src;
-            this.dest = dest;
-            this.table = table;
+        public Entry(String srcUrlPattern, String streamName, String destBucket, String streamPrefix, String objectPrefix, String objectName) {
+            this.srcUrlPattern = srcUrlPattern;
+            this.streamName = streamName;
+            this.destBucket = destBucket;
+            this.streamPrefix = streamPrefix;
+            this.objectPrefix = objectPrefix;
+            this.objectName = objectName;
         }
 
         Pattern pat = null;
 
         Pattern sourcePattern() {
             if (pat != null) return pat;
-            pat = Pattern.compile("^" + src + "$");
+            pat = Pattern.compile("^" + srcUrlPattern + "$");
             return pat;
         }
     }
 
     @RequiredArgsConstructor
     public static final class Result {
-        @Getter final S3ObjectLocation destLocation;
-        @Getter final String streamName;
+        @Getter private final String streamName;
+
+        @Getter private final String destBucket;
+        @Getter private final String streamPrefix;
+        @Getter private final String objectPrefix;
+        @Getter private final String objectName;
+
+        public S3ObjectLocation getDestLocation() {
+            return new S3ObjectLocation(destBucket, Paths.get(streamPrefix, objectPrefix, objectName).toString());
+        }
     }
 }

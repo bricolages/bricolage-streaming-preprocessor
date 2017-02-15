@@ -20,7 +20,9 @@ bricolage:
     log-queue:
         url: ${bricolage.log.queue.url}
     mappings:
-        -
-          src: "s3://src-bucket/((.*)\\.gz)"
-          dest: "s3://dst-buckert/$1"
-          table: "$2"
+        - src-url-pattern: "s3://src-bucket/(\\w{4}\\.(\\w+\\.\\w+))/(\\d{4}/\\d{2}/\\d{2})/(.*\\.gz)"
+          dest-bucket: dst-bucket
+          stream-prefix: "$1"
+          stream-name: "$2"
+          object-prefix: "$3"
+          object-name: "$4"
