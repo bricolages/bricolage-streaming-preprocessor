@@ -125,7 +125,7 @@ public class Application {
 
     @Bean
     public EventQueue eventQueue() {
-        val config = this.config.getEventQueueEntry();
+        val config = this.config.getEventQueue();
         val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
         if (config.visibilityTimeout > 0) sqs.setVisibilityTimeout(config.visibilityTimeout);
         if (config.maxNumberOfMessages > 0) sqs.setMaxNumberOfMessages(config.maxNumberOfMessages);
@@ -135,7 +135,7 @@ public class Application {
 
     @Bean
     public LogQueue logQueue() {
-        val config = this.config.getLogQueueEntry();
+        val config = this.config.getLogQueue();
         val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
         return new LogQueue(sqs);
     }
@@ -147,7 +147,7 @@ public class Application {
 
     @Bean
     public ObjectMapper mapper() {
-        return new ObjectMapper(this.config.getMappingEntries());
+        return new ObjectMapper(this.config.getMappings());
     }
 
     @Bean
