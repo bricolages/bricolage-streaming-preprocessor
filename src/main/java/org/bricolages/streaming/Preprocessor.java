@@ -160,7 +160,7 @@ public class Preprocessor implements EventHandlers {
     FilterResultRepository repos;
 
     @Autowired
-    TableParamsRepository paramsRepos;
+    StreamParamsRepository paramsRepos;
 
     @Autowired
     IncomingStreamRepository strRepos;
@@ -177,7 +177,7 @@ public class Preprocessor implements EventHandlers {
         TableId table = mapResult.getTableId();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
-        TableParams params = paramsRepos.findParams(table);
+        StreamParams params = paramsRepos.findParams(table);
         if (params == null) {
             IncomingStream stream = strRepos.findStream(table);
             if (stream == null) {

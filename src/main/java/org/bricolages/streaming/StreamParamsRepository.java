@@ -4,11 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import lombok.*;
 
-interface TableParamsRepository extends JpaRepository<TableParams, Long> {
-    List<TableParams> findByTableId(String tableId);
+public interface StreamParamsRepository extends JpaRepository<StreamParams, Long> {
+    List<StreamParams> findByStreamName(String streamName);
 
-    default TableParams findParams(TableId id) {
-        val list = findByTableId(id.toString());
+    default StreamParams findParams(TableId id) {
+        val list = findByStreamName(id.toString());
         if (list.isEmpty()) return null;
         if (list.size() > 1) {
             throw new ApplicationError("FATAL: multiple table parameters matched: " + id);
