@@ -1,21 +1,30 @@
 package org.bricolages.streaming;
-import org.bricolages.streaming.filter.TableId;
+
+import java.util.List;
 import javax.persistence.*;
+import org.bricolages.streaming.filter.OperatorDefinition;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor
 @Slf4j
 @Entity
-@Table(name="preproc_tables")
-class TableParams {
+@Table(name="strload_streams")
+public class DataStream {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="stream_id")
     @Getter
     long id;
 
-    @Column(name="table_id")
-    String tableId;
+    @Column(name="stream_name")
+    @Getter
+    String streamName;
+
+    @OneToMany(mappedBy="stream", fetch=FetchType.EAGER)
+    @OrderBy("application_order asc")
+    @Getter
+    List<OperatorDefinition> operatorDefinitions;
 
     @Column(name="disabled")
     @Getter
@@ -26,14 +35,6 @@ class TableParams {
 
     @Column(name="no_dispatch")
     boolean no_dispatch;
-
-    public TableParams(TableId id) {
-        this.tableId = id.toString();
-    }
-
-    public TableId getTableId() {
-        return TableId.parse(tableId);
-    }
 
     public boolean doesDiscard() {
         return this.discard;
