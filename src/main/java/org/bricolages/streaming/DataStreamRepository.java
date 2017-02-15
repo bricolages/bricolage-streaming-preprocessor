@@ -6,7 +6,7 @@ import lombok.*;
 public interface DataStreamRepository extends JpaRepository<DataStream, Long> {
     List<DataStream> findByStreamName(String streamName);
 
-    default DataStream findParams(String streamName) {
+    default DataStream findStream(String streamName) {
         val list = findByStreamName(streamName);
         if (list.isEmpty()) return null;
         if (list.size() > 1) {

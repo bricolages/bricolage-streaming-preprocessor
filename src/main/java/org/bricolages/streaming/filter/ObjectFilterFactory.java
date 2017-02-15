@@ -15,7 +15,7 @@ public class ObjectFilterFactory {
     OpBuilder builder;
 
     public ObjectFilter load(String streamName) {
-        List<OperatorDefinition> defs = repos.findParams(streamName).getOperatorDefinitions();
+        List<OperatorDefinition> defs = repos.findStream(streamName).getOperatorDefinitions();
         List<Op> ops = defs.stream().map((def) -> {
             Op op = builder.build(def);
             log.debug("operator stacked: {}", op);

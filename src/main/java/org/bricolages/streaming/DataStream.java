@@ -43,4 +43,9 @@ public class DataStream {
     public boolean doesNotDispatch() {
         return this.no_dispatch;
     }
+
+    public DataStream(String streamName, boolean isDisabled) {
+        this.streamName = streamName;
+        this.disabled = isDisabled;
+    }
 }

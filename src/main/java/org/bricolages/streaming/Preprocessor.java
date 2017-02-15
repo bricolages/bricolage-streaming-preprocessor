@@ -162,9 +162,6 @@ public class Preprocessor implements EventHandlers {
     @Autowired
     DataStreamRepository streamRepos;
 
-    @Autowired
-    IncomingStreamRepository strRepos;
-
     @Override
     public void handleS3Event(S3Event event) {
         log.debug("handling URL: {}", event.getLocation().toString());
@@ -177,27 +174,24 @@ public class Preprocessor implements EventHandlers {
         String streamName = mapResult.getStreamName();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
-        DataStream params = streamRepos.findParams(streamName);
-        if (params == null) {
-            IncomingStream stream = strRepos.findStream(streamName);
-            if (stream == null) {
-                try {
-                    stream = new IncomingStream(streamName);
-                    stream = strRepos.save(stream);
-                    log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), streamName);
-                }
-                catch (DataIntegrityViolationException ex) {
-                    stream = strRepos.findStream(streamName);
-                }
+        DataStream stream = streamRepos.findStream(streamName);
+        if (stream == null) {
+            try {
+                // create new stream with disabled (to avoid to produce non preprocessed output)
+                stream = new DataStream(streamName, true);
+                streamRepos.save(stream);
+                log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), streamName);
+            }
+            catch (DataIntegrityViolationException ex) {
+                stream = streamRepos.findStream(streamName);
             }
             log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), streamName, src);
-            return;
         }
-        if (params.isDisabled()) {
+        if (stream.isDisabled()) {
             // Processing is temporary disabled; process objects later
             return;
         }
-        if (params.doesDiscard()) {
+        if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
             log.info("discard event: {}", event.getLocation().toString());
             eventQueue.deleteAsync(event);
@@ -212,7 +206,7 @@ public class Preprocessor implements EventHandlers {
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
-            if (!event.doesNotDispatch() && !params.doesNotDispatch()) {
+            if (!event.doesNotDispatch() && !stream.doesNotDispatch()) {
                 logQueue.send(new FakeS3Event(obj));
                 result.dispatched();
                 repos.save(result);
