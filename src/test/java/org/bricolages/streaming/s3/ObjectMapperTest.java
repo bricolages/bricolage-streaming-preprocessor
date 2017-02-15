@@ -1,6 +1,5 @@
 package org.bricolages.streaming.s3;
 import org.bricolages.streaming.ConfigError;
-import org.bricolages.streaming.filter.TableId;
 import java.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -25,7 +24,7 @@ public class ObjectMapperTest {
         map.check();
         val result = map.map(loc("s3://src-bucket/src-prefix/schema.table/datafile.json.gz"));
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
-        assertEquals(new TableId("schema.table"), result.getTableId());
+        assertEquals("schema.table", result.getStreamName());
         assertNull(map.map(loc("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz")));
     }
 

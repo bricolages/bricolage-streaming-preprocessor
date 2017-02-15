@@ -61,12 +61,12 @@ public class Preprocessor implements EventHandlers {
             log.warn("S3 object could not mapped: {}", src);
             return false;
         }
-        TableId table = mapResult.getTableId();
+        String streamName = mapResult.getStreamName();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
-            ObjectFilter filter = filterFactory.load(mapResult.getTableId());
+            ObjectFilter filter = filterFactory.load(streamName);
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, out, src.toString(), result);
             }
@@ -174,23 +174,23 @@ public class Preprocessor implements EventHandlers {
             log.warn("S3 object could not mapped: {}", src);
             return;
         }
-        TableId table = mapResult.getTableId();
+        String streamName = mapResult.getStreamName();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
-        StreamParams params = paramsRepos.findParams(table);
+        StreamParams params = paramsRepos.findParams(streamName);
         if (params == null) {
-            IncomingStream stream = strRepos.findStream(table);
+            IncomingStream stream = strRepos.findStream(streamName);
             if (stream == null) {
                 try {
-                    stream = new IncomingStream(table.toString());
+                    stream = new IncomingStream(streamName);
                     stream = strRepos.save(stream);
-                    log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), table);
+                    log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), streamName);
                 }
                 catch (DataIntegrityViolationException ex) {
-                    stream = strRepos.findStream(table);
+                    stream = strRepos.findStream(streamName);
                 }
             }
-            log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), table, src);
+            log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), streamName, src);
             return;
         }
         if (params.isDisabled()) {
@@ -207,8 +207,8 @@ public class Preprocessor implements EventHandlers {
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
             repos.save(result);
-            ObjectFilter filter = filterFactory.load(table);
-            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, table);
+            ObjectFilter filter = filterFactory.load(streamName);
+            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, streamName);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
@@ -226,8 +226,8 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, TableId table) throws S3IOException, IOException {
-        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, table.toString())) {
+    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
+        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, streamName)) {
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
             }
