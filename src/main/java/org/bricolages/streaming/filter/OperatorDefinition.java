@@ -15,6 +15,7 @@ import lombok.*;
 public class OperatorDefinition {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="filter_id")
     long id;
 
     @Column(name="operator_id")
