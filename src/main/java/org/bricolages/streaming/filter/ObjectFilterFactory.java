@@ -1,5 +1,5 @@
 package org.bricolages.streaming.filter;
-import org.bricolages.streaming.StreamParamsRepository;
+import org.bricolages.streaming.DataStreamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,7 +9,7 @@ import lombok.*;
 @Slf4j
 public class ObjectFilterFactory {
     @Autowired
-    StreamParamsRepository repos;
+    DataStreamRepository repos;
 
     @Autowired
     OpBuilder builder;
