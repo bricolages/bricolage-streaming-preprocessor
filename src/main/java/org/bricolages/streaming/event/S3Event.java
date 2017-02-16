@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.AmazonClientException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import lombok.*;
 
 @Getter
@@ -32,14 +34,14 @@ public class S3Event extends Event {
                 msg,
                 new S3ObjectLocation(
                     rec.getS3().getBucket().getName(),
-                    rec.getS3().getObject().getKey()
+                    URLDecoder.decode(rec.getS3().getObject().getKey(), "UTF-8")
                 ),
                 rec.getS3().getObject().getSizeAsLong(),
                 rec,
                 msg.getBody().contains("\"noDispatch\":true")   // CLUDGE, but there is no other handy way
             );
         }
-        catch (AmazonClientException ex) {
+        catch (AmazonClientException | UnsupportedEncodingException ex) {
             throw new MessageParseException("S3 event message parse error: " + ex.getMessage());
         }
     }
