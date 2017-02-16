@@ -1,6 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.ConfigError;
-import org.bricolages.streaming.DataStream;
+import org.bricolages.streaming.StreamParams;
 import javax.persistence.*;
 import java.util.List;
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class OperatorDefinition {
     @ManyToOne
     @JoinColumn(name="stream_id")
     @Getter
-    DataStream stream;
+    StreamParams stream;
 
     @Column(name="target_column")
     String targetColumn;
