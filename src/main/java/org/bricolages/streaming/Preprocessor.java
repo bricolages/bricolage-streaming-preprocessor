@@ -61,12 +61,12 @@ public class Preprocessor implements EventHandlers {
             log.warn("S3 object could not mapped: {}", src);
             return false;
         }
-        String streamName = mapResult.getStreamName();
+        TableId table = mapResult.getTableId();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
-            ObjectFilter filter = filterFactory.load(streamName);
+            ObjectFilter filter = filterFactory.load(mapResult.getTableId());
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, out, src.toString(), result);
             }
@@ -160,7 +160,7 @@ public class Preprocessor implements EventHandlers {
     FilterResultRepository repos;
 
     @Autowired
-    StreamParamsRepository paramsRepos;
+    TableParamsRepository paramsRepos;
 
     @Autowired
     IncomingStreamRepository strRepos;
@@ -174,23 +174,23 @@ public class Preprocessor implements EventHandlers {
             log.warn("S3 object could not mapped: {}", src);
             return;
         }
-        String streamName = mapResult.getStreamName();
+        TableId table = mapResult.getTableId();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
-        StreamParams params = paramsRepos.findParams(streamName);
+        TableParams params = paramsRepos.findParams(table);
         if (params == null) {
-            IncomingStream stream = strRepos.findStream(streamName);
+            IncomingStream stream = strRepos.findStream(table);
             if (stream == null) {
                 try {
-                    stream = new IncomingStream(streamName);
+                    stream = new IncomingStream(table.toString());
                     stream = strRepos.save(stream);
-                    log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), streamName);
+                    log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), table);
                 }
                 catch (DataIntegrityViolationException ex) {
-                    stream = strRepos.findStream(streamName);
+                    stream = strRepos.findStream(table);
                 }
             }
-            log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), streamName, src);
+            log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), table, src);
             return;
         }
         if (params.isDisabled()) {
@@ -207,8 +207,8 @@ public class Preprocessor implements EventHandlers {
         FilterResult result = new FilterResult(src.urlString(), dest.urlString());
         try {
             repos.save(result);
-            ObjectFilter filter = filterFactory.load(streamName);
-            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, streamName);
+            ObjectFilter filter = filterFactory.load(table);
+            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, table);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
@@ -226,8 +226,8 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
-        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, streamName)) {
+    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, TableId table) throws S3IOException, IOException {
+        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, table.toString())) {
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
             }
