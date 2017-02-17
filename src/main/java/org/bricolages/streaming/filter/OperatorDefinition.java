@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.ConfigError;
+import org.bricolages.streaming.DataStream;
 import javax.persistence.*;
 import java.util.List;
 import java.io.IOException;
@@ -10,19 +11,21 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Entity
-@Table(name="preproc_definition")
+@Table(name="strload_filters")
 public class OperatorDefinition {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="filter_id")
     long id;
 
     @Column(name="operator_id")
     @Getter
     String operatorId;
 
-    @Column(name="target_table")
+    @ManyToOne
+    @JoinColumn(name="stream_id")
     @Getter
-    String targetTable;
+    DataStream stream;
 
     @Column(name="target_column")
     String targetColumn;
@@ -41,7 +44,7 @@ public class OperatorDefinition {
 
     // For tests
     OperatorDefinition(String operatorId, String targetTable, String targetColumn, String params) {
-        this(0, operatorId, targetTable, targetColumn, 0, params, null, null);
+        this(0, operatorId, null, targetColumn, 0, params, null, null);
     }
 
     public boolean isSingleColumn() {
@@ -49,7 +52,7 @@ public class OperatorDefinition {
     }
 
     public String getTargetColumn() {
-        if (!isSingleColumn()) throw new ConfigError("is not a single column op: " + targetTable + ", " + operatorId);
+        if (!isSingleColumn()) throw new ConfigError("is not a single column op: " + stream.getStreamName() + ", " + operatorId);
         return targetColumn;
     }
 
@@ -59,7 +62,7 @@ public class OperatorDefinition {
             return map.readValue(params, type);
         }
         catch (IOException err) {
-            throw new ConfigError("could not map filter parameters: " + targetTable + "." + targetColumn + "[" + operatorId + "]: " + params + ": " + err.getMessage());
+            throw new ConfigError("could not map filter parameters: " + stream.getStreamName() + "." + targetColumn + "[" + operatorId + "]: " + params + ": " + err.getMessage());
         }
     }
 }

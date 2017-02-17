@@ -3,11 +3,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import lombok.*;
 
-interface IncomingStreamRepository extends JpaRepository<IncomingStream, Long> {
-    List<IncomingStream> findByName(String name);
+public interface DataStreamRepository extends JpaRepository<DataStream, Long> {
+    List<DataStream> findByStreamName(String streamName);
 
-    default IncomingStream findStream(String streamName) {
-        val list = findByName(streamName);
+    default DataStream findParams(String streamName) {
+        val list = findByStreamName(streamName);
         if (list.isEmpty()) return null;
         if (list.size() > 1) {
             throw new ApplicationError("FATAL: multiple table parameters matched: " + streamName);
