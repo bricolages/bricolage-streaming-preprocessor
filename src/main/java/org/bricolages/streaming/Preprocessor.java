@@ -178,7 +178,7 @@ public class Preprocessor implements EventHandlers {
         if (stream == null) {
             try {
                 // create new stream with disabled (to avoid to produce non preprocessed output)
-                stream = new DataStream(streamName, true);
+                stream = new DataStream(streamName);
                 streamRepos.save(stream);
                 log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), streamName);
             }
@@ -187,7 +187,7 @@ public class Preprocessor implements EventHandlers {
             }
             log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), streamName, src);
         }
-        if (stream.isDisabled()) {
+        if (stream.isSkip()) {
             // Processing is temporary disabled; process objects later
             return;
         }

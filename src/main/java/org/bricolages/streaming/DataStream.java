@@ -1,5 +1,6 @@
 package org.bricolages.streaming;
 
+import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.*;
 import org.bricolages.streaming.filter.OperatorDefinition;
@@ -27,7 +28,6 @@ public class DataStream {
     List<OperatorDefinition> operatorDefinitions;
 
     @Column(name="disabled")
-    @Getter
     boolean disabled;
 
     @Column(name="discard")
@@ -35,6 +35,12 @@ public class DataStream {
 
     @Column(name="no_dispatch")
     boolean no_dispatch;
+
+    @Column(name="initialized")
+    boolean initialized;
+
+    @Column(name="create_time")
+    Timestamp createTime;
 
     public boolean doesDiscard() {
         return this.discard;
@@ -44,8 +50,12 @@ public class DataStream {
         return this.no_dispatch;
     }
 
-    public DataStream(String streamName, boolean isDisabled) {
+    public boolean isSkip() {
+        return this.disabled || !this.initialized;
+    }
+
+    public DataStream(String streamName) {
         this.streamName = streamName;
-        this.disabled = isDisabled;
+        this.createTime = new Timestamp(System.currentTimeMillis());
     }
 }
