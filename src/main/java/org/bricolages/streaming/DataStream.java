@@ -27,6 +27,10 @@ public class DataStream {
     @Getter
     List<OperatorDefinition> operatorDefinitions;
 
+    @OneToMany(mappedBy="stream", fetch=FetchType.LAZY)
+    @Getter
+    List<StreamBundle> bundles;
+
     @Column(name="disabled")
     boolean disabled;
 

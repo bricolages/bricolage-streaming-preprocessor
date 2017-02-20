@@ -162,10 +162,14 @@ public class Preprocessor implements EventHandlers {
     @Autowired
     DataStreamRepository streamRepos;
 
+    @Autowired
+    StreamBundleRepository streamBundleRepos;
+
     @Override
     public void handleS3Event(S3Event event) {
         log.debug("handling URL: {}", event.getLocation().toString());
         S3ObjectLocation src = event.getLocation();
+        String srcBucket = src.bucket();
         val mapResult = mapper.map(src);
         if (mapResult == null) {
             log.warn("S3 object could not mapped: {}", src);
@@ -190,6 +194,17 @@ public class Preprocessor implements EventHandlers {
         if (stream.doesDefer()) {
             // Processing is temporary disabled; process objects later
             return;
+        }
+        String streamPrefix = mapResult.getStreamPrefix();
+        StreamBundle streamBundle = streamBundleRepos.findStreamBundle(stream, srcBucket, streamPrefix);
+        if (streamBundle == null) {
+            try {
+                streamBundle = new StreamBundle(stream, srcBucket, streamPrefix);
+                streamBundleRepos.save(streamBundle);
+                log.warn("new stream bundle: stream_id={}, stream_prefix={}", stream.getId(), streamPrefix);
+            } catch (DataIntegrityViolationException ex) {
+                streamBundle = streamBundleRepos.findStreamBundle(stream, srcBucket, mapResult.getStreamPrefix());
+            }
         }
         if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
