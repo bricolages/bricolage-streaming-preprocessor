@@ -1,9 +1,7 @@
 package org.bricolages.streaming;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import lombok.*;
 
 public interface StreamBundleRepository extends JpaRepository<StreamBundle, Long> {
