@@ -228,7 +228,7 @@ public class Preprocessor implements EventHandlers {
             }
             eventQueue.deleteAsync(event);
         }
-        catch (S3IOException | IOException ex) {
+        catch (S3IOException | IOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
             result.failed(ex.getMessage());
             repos.save(result);
