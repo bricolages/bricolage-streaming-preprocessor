@@ -187,7 +187,7 @@ public class Preprocessor implements EventHandlers {
             }
             log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}, url={}", stream.getId(), streamName, src);
         }
-        if (stream.isSkip()) {
+        if (stream.doesDefer()) {
             // Processing is temporary disabled; process objects later
             return;
         }

@@ -50,7 +50,7 @@ public class DataStream {
         return this.no_dispatch;
     }
 
-    public boolean isSkip() {
+    public boolean doesDefer() {
         return this.disabled || !this.initialized;
     }
 
