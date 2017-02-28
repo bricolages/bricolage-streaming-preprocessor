@@ -31,9 +31,11 @@ public class OperatorDefinition {
     String targetColumn;
 
     @Column(name="application_order")
+    @Getter
     int applicationOrder;
 
     @Column(name="params")
+    @Getter
     String params;  // JSON string
 
     @Column(name="created_at")
@@ -45,6 +47,11 @@ public class OperatorDefinition {
     // For tests
     OperatorDefinition(String operatorId, String targetTable, String targetColumn, String params) {
         this(0, operatorId, null, targetColumn, 0, params, null, null);
+    }
+
+    // FIXME: untidy
+    public OperatorDefinition(String operatorId, String targetColumn, String params, int applicationOrder) {
+        this(0, operatorId, null, targetColumn, applicationOrder, params, null, null);
     }
 
     public boolean isSingleColumn() {

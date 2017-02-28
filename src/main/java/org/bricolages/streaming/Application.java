@@ -1,6 +1,7 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.filter.OpBuilder;
+import org.bricolages.streaming.preflight.Runner;
 import org.bricolages.streaming.event.EventQueue;
 import org.bricolages.streaming.event.LogQueue;
 import org.bricolages.streaming.event.SQSQueue;
@@ -39,10 +40,19 @@ public class Application {
         boolean oneshot = false;
         S3ObjectLocation mapUrl = null;
         S3ObjectLocation procUrl = null;
+        String streamDefFilename = null;
 
         for (int i = 0; i < args.length; i++) {
             if (Objects.equals(args[i], "--oneshot")) {
                 oneshot = true;
+            }
+            else if (args[i].startsWith("--preflight=")) {
+                val kv = args[i].split("=", 2);
+                if (kv.length != 2) {
+                    System.err.println("missing stream definition file for --preflight");
+                    System.exit(1);
+                }
+                streamDefFilename = kv[1];
             }
             else if (args[i].startsWith("--map-url=")) {
                 val kv = args[i].split("=", 2);
@@ -85,7 +95,14 @@ public class Application {
         }
 
         val preproc = preprocessor();
-        if (procUrl != null) {
+        if (streamDefFilename != null) {
+            if (procUrl == null) {
+                System.err.println("missing argument: --process-url");
+                System.exit(1);
+            }
+            preflightRunner().run(streamDefFilename, procUrl);
+        }
+        else if (procUrl != null) {
             val out = new BufferedWriter(new OutputStreamWriter(System.out));
             val success = preproc.processUrl(procUrl, out);
             out.flush();
@@ -117,6 +134,11 @@ public class Application {
 
     @Autowired
     Config config;
+
+    @Bean
+    public Runner preflightRunner() {
+        return new Runner(preprocessor(), filterFactory(), s3(), mapper());
+    }
 
     @Bean
     public Preprocessor preprocessor() {
