@@ -1,7 +1,7 @@
 package org.bricolages.streaming.filter;
 import lombok.*;
 
-class FloatOp extends SingleColumnOp {
+public class FloatOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("float", (def) ->
             new FloatOp(def)

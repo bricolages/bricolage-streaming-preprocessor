@@ -37,6 +37,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.6'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.6.6'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.6.6'
+    compile group: 'org.apache.derby', name: 'derby', version: '10.13.1.1'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.27'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.27'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.27'

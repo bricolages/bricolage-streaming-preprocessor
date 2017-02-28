@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import lombok.*;
 
-class TextOp extends SingleColumnOp {
+public class TextOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("text", (def) ->
             new TextOp(def, def.mapParameters(Parameters.class))
@@ -13,7 +13,7 @@ class TextOp extends SingleColumnOp {
 
     @Getter
     @Setter
-    static final class Parameters {
+    public static final class Parameters {
         long maxByteLength;
         boolean dropIfOverflow;
         boolean createOverflowFlag;

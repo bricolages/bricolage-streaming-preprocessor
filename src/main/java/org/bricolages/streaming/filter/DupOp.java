@@ -1,7 +1,7 @@
 package org.bricolages.streaming.filter;
 import lombok.*;
 
-class DupOp extends SingleColumnOp {
+public class DupOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("dup", (def) ->
             new DupOp(def, def.mapParameters(Parameters.class))
@@ -12,7 +12,7 @@ class DupOp extends SingleColumnOp {
 
     @Getter
     @Setter
-    static class Parameters {
+    public static class Parameters {
         String from;
     }
 

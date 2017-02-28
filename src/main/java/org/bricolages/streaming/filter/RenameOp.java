@@ -1,7 +1,7 @@
 package org.bricolages.streaming.filter;
 import lombok.*;
 
-class RenameOp extends Op {
+public class RenameOp extends Op {
     static final void register(OpBuilder builder) {
         builder.registerOperator("rename", (def) ->
             new RenameOp(def, def.mapParameters(Parameters.class))
@@ -10,7 +10,7 @@ class RenameOp extends Op {
 
     @Getter
     @Setter
-    static class Parameters {
+    public static class Parameters {
         String to;
     }
 

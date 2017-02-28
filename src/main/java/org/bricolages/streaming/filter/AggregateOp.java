@@ -3,7 +3,7 @@ package org.bricolages.streaming.filter;
 import lombok.*;
 import java.util.regex.Pattern;
 
-class AggregateOp extends Op {
+public class AggregateOp extends Op {
     static final void register(OpBuilder builder) {
         builder.registerOperator("aggregate", (def) ->
             new AggregateOp(def, def.mapParameters(Parameters.class))
@@ -12,7 +12,7 @@ class AggregateOp extends Op {
 
     @Getter
     @Setter
-    static class Parameters {
+    public static class Parameters {
         String targetColumns;
         String aggregatedColumn;
         boolean keepTargetColumns = false;
