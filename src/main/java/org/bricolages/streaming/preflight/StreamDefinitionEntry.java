@@ -13,7 +13,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.*;
 
 class StreamDefinitionEntry {
-    @Getter private String fluentdTag;
     @Getter private String schemaName;
     @Getter private String tableName;
     @Getter private List<ColumnDefinitionEntry> columns;
