@@ -12,7 +12,7 @@ class CreateTableGenerator {
     String generate() {
         val sb = new StringBuilder();
         sb.append("--dest-table: ");
-        sb.append(streamDef.getTableName());
+        sb.append(streamDef.getFullTableName());
         sb.append("\n\n");
         sb.append("create table $dest_table \n(");
         generateColumnDefinitionList(sb);

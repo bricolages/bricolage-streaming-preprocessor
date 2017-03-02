@@ -1,16 +1,11 @@
 package org.bricolages.streaming.preflight;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BinaryOperator;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.bricolages.streaming.Preprocessor;
 import org.bricolages.streaming.filter.FilterResult;
@@ -19,7 +14,6 @@ import org.bricolages.streaming.filter.OperatorDefinition;
 import org.bricolages.streaming.s3.ObjectMapper;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.S3IOException;
-import org.bricolages.streaming.s3.ObjectMapper.Entry;
 import org.bricolages.streaming.s3.S3ObjectLocation;
 import lombok.*;
 
@@ -51,6 +45,13 @@ public class Runner {
         }
     }
 
+    private void saveLoadJob(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, S3ObjectLocation dest) throws IOException {
+        val filepath = streamDefFile.getLoadJobFilepath();
+        try (val loadJobFile = new FileOutputStream(filepath)) {
+            new LoadJobSerializer(loadJobFile).serialize(dest, streamDefFile.getCreateTableFilepath(), streamDef.getFullTableName());
+        }
+    }
+
     static class StreamDefinitionFile {
         @Getter
         private final String filepath;
@@ -70,6 +71,10 @@ public class Runner {
 
         String getOperatorDefinitionsFilepath() {
             return this.filepathWithoutExt + ".preproc.csv";
+        }
+
+        String getLoadJobFilepath() {
+            return this.filepathWithoutExt + ".job";
         }
     }
 
@@ -92,5 +97,6 @@ public class Runner {
 
         saveOperatorDefinitions(streamDefFile, operators);
         saveCreateTableStmt(streamDefFile, streamDef);
+        saveLoadJob(streamDefFile, streamDef, dest);
     }
 }

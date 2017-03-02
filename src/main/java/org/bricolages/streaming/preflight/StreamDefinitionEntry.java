@@ -41,4 +41,8 @@ class StreamDefinitionEntry {
         }
         this.tableName = tableName;
     }
+
+    public String getFullTableName() {
+        return getSchemaName() + "." + getTableName();
+    }
 }
