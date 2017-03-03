@@ -15,11 +15,12 @@ class ObjectFilterSerializer {
         this.out = out;
     }
 
-    void serialize(List<OperatorDefinition> operators) throws IOException {
+    void serialize(String streamName, List<OperatorDefinition> operators) throws IOException {
         CsvMapper mapper = new CsvMapper();
         
         val rows = operators.stream().map(op -> {
-            ArrayList<String> row = new ArrayList<String>(4);
+            ArrayList<String> row = new ArrayList<String>(5);
+            row.add(streamName);
             row.add(op.getTargetColumn());
             row.add(String.valueOf(op.getApplicationOrder()));
             row.add(op.getOperatorId());

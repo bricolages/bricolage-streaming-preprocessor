@@ -37,11 +37,11 @@ public class Runner {
         }
     }
 
-    private void saveOperatorDefinitions(StreamDefinitionFile streamDefFile, List<OperatorDefinition> operators) throws IOException {
+    private void saveOperatorDefinitions(StreamDefinitionFile streamDefFile, String streamName, List<OperatorDefinition> operators) throws IOException {
         val filepath = streamDefFile.getOperatorDefinitionsFilepath();
         try (val preprocCsvFile = new FileOutputStream(filepath)) {
             val serializer = new ObjectFilterSerializer(preprocCsvFile);
-            serializer.serialize(operators);
+            serializer.serialize(streamName, operators);
         }
     }
 
@@ -95,7 +95,7 @@ public class Runner {
         preprocessor.applyFilter(filter, src, dest, result, streamName);
         System.out.printf("     result: input rows=%d, output rows=%d, error rows=%d\n", result.inputRows, result.outputRows, result.errorRows);
 
-        saveOperatorDefinitions(streamDefFile, operators);
+        saveOperatorDefinitions(streamDefFile, streamName, operators);
         saveCreateTableStmt(streamDefFile, streamDef);
         saveLoadJob(streamDefFile, streamDef, dest);
     }
