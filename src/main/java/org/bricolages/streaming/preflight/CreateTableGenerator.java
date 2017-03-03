@@ -16,7 +16,9 @@ class CreateTableGenerator {
         sb.append("\n\n");
         sb.append("create table $dest_table \n(");
         generateColumnDefinitionList(sb);
-        sb.append("\n)\n;\n");
+        sb.append("\n)\n");
+        sb.append("sortkey(jst_time)\n");
+        sb.append(";\n");
 
         return sb.toString();
     }
