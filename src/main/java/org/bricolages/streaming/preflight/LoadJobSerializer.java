@@ -38,12 +38,15 @@ class LoadJobSerializer {
         private final String destTable;
         private String format = "json";
         private boolean drop = true;
-        private LoadJobOption option = new LoadJobOption();
+        private LoadJobOption options = new LoadJobOption();
 
         @Getter
         @JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)
         static class LoadJobOption {
             private boolean gzip = true;
+            private String timeformat = "auto";
+            private String dateformat = "auto";
+            private boolean truncatecolumns = true;
         }
     }
 }
