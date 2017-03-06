@@ -93,7 +93,7 @@ public class Runner {
         val result = new FilterResult(src.urlString(), dest.urlString());
         val streamName = mapping.getStreamName();
         preprocessor.applyFilter(filter, src, dest, result, streamName);
-        System.out.printf("     result: input rows=%d, output rows=%d, error rows=%d\n", result.inputRows, result.outputRows, result.errorRows);
+        System.err.printf("     result: input rows=%d, output rows=%d, error rows=%d\n", result.inputRows, result.outputRows, result.errorRows);
 
         saveOperatorDefinitions(streamDefFile, streamName, operators);
         saveCreateTableStmt(streamDefFile, streamDef);
