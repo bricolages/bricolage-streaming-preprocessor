@@ -2,7 +2,7 @@ package org.bricolages.streaming.filter;
 import java.time.ZoneOffset;
 import lombok.*;
 
-class TimeZoneOp extends SingleColumnOp {
+public class TimeZoneOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("timezone", (def) ->
             new TimeZoneOp(def, def.mapParameters(Parameters.class))
@@ -11,7 +11,7 @@ class TimeZoneOp extends SingleColumnOp {
 
     @Getter
     @Setter
-    static class Parameters {
+    public static class Parameters {
         String sourceOffset;
         String targetOffset;
         boolean truncate;

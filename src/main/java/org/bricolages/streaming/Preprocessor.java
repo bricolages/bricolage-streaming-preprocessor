@@ -235,7 +235,7 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
+    public S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
         try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, streamName)) {
             try (BufferedReader r = s3.openBufferedReader(src)) {
                 filter.apply(r, buf.getBufferedWriter(), src.toString(), result);

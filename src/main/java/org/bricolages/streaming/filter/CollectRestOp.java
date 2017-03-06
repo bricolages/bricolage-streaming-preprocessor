@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import lombok.*;
 
-class CollectRestOp extends Op {
+public class CollectRestOp extends Op {
     static final void register(OpBuilder builder) {
         builder.registerOperator("collectrest", (def) ->
             new CollectRestOp(def, def.mapParameters(Parameters.class))
@@ -13,7 +13,7 @@ class CollectRestOp extends Op {
 
     @Getter
     @Setter
-    static class Parameters {
+    public static class Parameters {
         String aggregatedColumn;
         List<String> rejectColumns;
     }

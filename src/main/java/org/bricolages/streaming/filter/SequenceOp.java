@@ -4,7 +4,7 @@ import org.bricolages.streaming.ApplicationError;
 import org.bricolages.streaming.SequencialNumberRepository;
 import lombok.*;
 
-class SequenceOp extends SingleColumnOp {
+public class SequenceOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("sequence", (def) ->
             new SequenceOp(def, builder.sequencialNumberRepository)

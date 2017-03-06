@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import lombok.*;
 
-class RejectOp extends Op {
+public class RejectOp extends Op {
     static final void register(OpBuilder builder) {
         builder.registerOperator("reject", (def) ->
             new RejectOp(def, def.mapParameters(Parameters.class))
@@ -22,19 +22,19 @@ class RejectOp extends Op {
     abstract static class Parameters {
         abstract Function<Object, Boolean> getMatcher();
     }
-    static class StringPatameters extends Parameters {
+    public static class StringPatameters extends Parameters {
         @Getter @Setter String value;
         Function<Object, Boolean> getMatcher() {
             return (target) -> value.equals(target);
         }
     }
-    static class IntegerParameters extends Parameters {
+    public static class IntegerParameters extends Parameters {
         @Getter @Setter Integer value;
         Function<Object, Boolean> getMatcher() {
             return (target) -> value.equals(target);
         }
     }
-    static class NullParameters extends Parameters {
+    public static class NullParameters extends Parameters {
         Function<Object, Boolean> getMatcher() {
             return (target) -> target == null;
         }

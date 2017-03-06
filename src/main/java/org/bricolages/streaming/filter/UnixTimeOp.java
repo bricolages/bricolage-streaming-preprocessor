@@ -2,7 +2,7 @@ package org.bricolages.streaming.filter;
 import java.time.*;
 import lombok.*;
 
-class UnixTimeOp extends SingleColumnOp {
+public class UnixTimeOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
         builder.registerOperator("unixtime", (def) ->
             new UnixTimeOp(def, def.mapParameters(Parameters.class))
@@ -11,7 +11,7 @@ class UnixTimeOp extends SingleColumnOp {
 
     @Getter
     @Setter
-    static class Parameters {
+    public static class Parameters {
         String zoneOffset;
     }
 
