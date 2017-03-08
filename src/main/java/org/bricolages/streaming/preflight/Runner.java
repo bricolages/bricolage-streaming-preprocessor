@@ -29,8 +29,8 @@ public class Runner {
         return StreamDefinitionEntry.load(fileReader);
     }
 
-    private void saveCreateTableStmt(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef) throws IOException {
-        val createTableStmt = new CreateTableGenerator(streamDef).generate();
+    private void saveCreateTableStmt(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, String fullTableName) throws IOException {
+        val createTableStmt = new CreateTableGenerator(streamDef, fullTableName).generate();
         val filepath = streamDefFile.getCreateTableFilepath();
         try(val writer = new BufferedWriter(new FileWriter(filepath))) {
             writer.write(createTableStmt);
@@ -45,10 +45,10 @@ public class Runner {
         }
     }
 
-    private void saveLoadJob(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, S3ObjectLocation dest) throws IOException {
+    private void saveLoadJob(StreamDefinitionFile streamDefFile, S3ObjectLocation dest, String fullTableName) throws IOException {
         val filepath = streamDefFile.getLoadJobFilepath();
         try (val loadJobFile = new FileOutputStream(filepath)) {
-            new LoadJobSerializer(loadJobFile).serialize(dest, streamDefFile.getCreateTableFilepath(), streamDef.getFullTableName());
+            new LoadJobSerializer(loadJobFile).serialize(dest, streamDefFile.getCreateTableFilepath(), fullTableName);
         }
     }
 
@@ -78,7 +78,8 @@ public class Runner {
         }
     }
 
-    public void run(String streamDefFilename, S3ObjectLocation src) throws IOException, S3IOException {
+    public void run(String streamDefFilename, S3ObjectLocation src, String schemaName, String tableName) throws IOException, S3IOException {
+        val fullTableName = schemaName + "." + tableName;
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
         val streamDef = loadStreamDef(streamDefFile);
         System.err.printf("     source: %s\n", src.toString());
@@ -96,7 +97,7 @@ public class Runner {
         System.err.printf("     result: input rows=%d, output rows=%d, error rows=%d\n", result.inputRows, result.outputRows, result.errorRows);
 
         saveOperatorDefinitions(streamDefFile, streamName, operators);
-        saveCreateTableStmt(streamDefFile, streamDef);
-        saveLoadJob(streamDefFile, streamDef, dest);
+        saveCreateTableStmt(streamDefFile, streamDef, fullTableName);
+        saveLoadJob(streamDefFile, dest, fullTableName);
     }
 }

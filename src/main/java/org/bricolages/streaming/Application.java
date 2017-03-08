@@ -41,6 +41,8 @@ public class Application {
         S3ObjectLocation mapUrl = null;
         S3ObjectLocation procUrl = null;
         String streamDefFilename = null;
+        String schemaName = null;
+        String tableName = null;
 
         for (int i = 0; i < args.length; i++) {
             if (Objects.equals(args[i], "--oneshot")) {
@@ -53,6 +55,22 @@ public class Application {
                     System.exit(1);
                 }
                 streamDefFilename = kv[1];
+            }
+            else if (args[i].startsWith("--schema-name=")) {
+                val kv = args[i].split("=", 2);
+                if (kv.length != 2) {
+                    System.err.println("missing stream definition file for --schema-name");
+                    System.exit(1);
+                }
+                schemaName = kv[1];
+            }
+            else if (args[i].startsWith("--table-name=")) {
+                val kv = args[i].split("=", 2);
+                if (kv.length != 2) {
+                    System.err.println("missing stream definition file for --table-name");
+                    System.exit(1);
+                }
+                tableName = kv[1];
             }
             else if (args[i].startsWith("--map-url=")) {
                 val kv = args[i].split("=", 2);
@@ -100,7 +118,15 @@ public class Application {
                 System.err.println("missing argument: --process-url");
                 System.exit(1);
             }
-            preflightRunner().run(streamDefFilename, procUrl);
+            if (schemaName == null) {
+                System.err.println("missing argument: --schema-name");
+                System.exit(1);
+            }
+            if (tableName == null) {
+                System.err.println("missing argument: --table-name");
+                System.exit(1);
+            }
+            preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName);
         }
         else if (procUrl != null) {
             val out = new BufferedWriter(new OutputStreamWriter(System.out));

@@ -4,15 +4,17 @@ import java.util.StringJoiner;
 import lombok.*;
 
 class CreateTableGenerator {
-    private StreamDefinitionEntry streamDef;
-    CreateTableGenerator(StreamDefinitionEntry streamDef) {
+    private final StreamDefinitionEntry streamDef;
+    private final String fullTableName;
+    CreateTableGenerator(StreamDefinitionEntry streamDef, String fullTableName) {
         this.streamDef = streamDef;
+        this.fullTableName = fullTableName;
     }
 
     String generate() {
         val sb = new StringBuilder();
         sb.append("--dest-table: ");
-        sb.append(streamDef.getFullTableName());
+        sb.append(fullTableName);
         sb.append("\n\n");
         sb.append("create table $dest_table \n(");
         generateColumnDefinitionList(sb);
