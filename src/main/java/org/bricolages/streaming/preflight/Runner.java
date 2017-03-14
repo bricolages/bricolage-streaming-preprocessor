@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
+import org.bricolages.streaming.Config;
 import org.bricolages.streaming.Preprocessor;
 import org.bricolages.streaming.filter.FilterResult;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
@@ -23,6 +24,7 @@ public class Runner {
     final ObjectFilterFactory factory;
     final S3Agent s3;
     final ObjectMapper mapper;
+    final Config config;
 
     private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile) throws IOException {
         val fileReader = new FileReader(streamDefFile.getFilepath());
@@ -48,7 +50,7 @@ public class Runner {
     private void saveLoadJob(StreamDefinitionFile streamDefFile, S3ObjectLocation dest, String fullTableName) throws IOException {
         val filepath = streamDefFile.getLoadJobFilepath();
         try (val loadJobFile = new FileOutputStream(filepath)) {
-            new LoadJobSerializer(loadJobFile).serialize(dest, streamDefFile.getCreateTableFilepath(), fullTableName);
+            new LoadJobSerializer(loadJobFile).serialize(dest, streamDefFile.getCreateTableFilepath(), fullTableName, config.getSrcDs(), config.getDestDs());
         }
     }
 

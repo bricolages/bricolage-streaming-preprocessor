@@ -32,4 +32,12 @@ public class Config {
     static class LogQueue {
         String url;
     }
+
+    // preflight
+    @Getter
+    @Setter
+    private String srcDs;
+    @Getter
+    @Setter
+    private String destDs;
 }

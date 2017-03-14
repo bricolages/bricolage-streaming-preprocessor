@@ -19,8 +19,8 @@ class LoadJobSerializer {
         this.out = out;
     }
     
-    void serialize(S3ObjectLocation dest, String ctFileName, String destTable) throws IOException {
-        val jobDefinition = new LoadJobDefinition(dest.getKey(), ctFileName, destTable);
+    void serialize(S3ObjectLocation dest, String ctFileName, String destTable, String srcDs, String destDs) throws IOException {
+        val jobDefinition = new LoadJobDefinition(srcDs, dest.getKey(), destDs, ctFileName, destTable);
         val mapper = new ObjectMapper(new YAMLFactory());
         mapper.writeValue(out, jobDefinition);
     }
@@ -31,9 +31,9 @@ class LoadJobSerializer {
     static class LoadJobDefinition {
         @JsonProperty("class")
         private String klass = "load";
-        private String srcDs = "redshift-copy-buffer-preflight";
+        private final String srcDs;
         private final String srcFile;
-        private String destDs = "db_data";
+        private final String destDs;
         private final String tableDef;
         private final String destTable;
         private String format = "json";

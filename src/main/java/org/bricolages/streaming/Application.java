@@ -163,7 +163,7 @@ public class Application {
 
     @Bean
     public Runner preflightRunner() {
-        return new Runner(preprocessor(), filterFactory(), s3(), mapper());
+        return new Runner(preprocessor(), filterFactory(), s3(), mapper(), config);
     }
 
     @Bean
