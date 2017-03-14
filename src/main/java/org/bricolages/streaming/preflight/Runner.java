@@ -76,7 +76,7 @@ public class Runner {
         }
 
         String getLoadJobFilepath() {
-            return this.filepathWithoutExt + ".job";
+            return this.filepathWithoutExt + "_preflight_load_.job";
         }
     }
 
