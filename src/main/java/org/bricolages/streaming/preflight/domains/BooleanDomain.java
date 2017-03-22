@@ -5,13 +5,13 @@ import java.util.List;
 import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
-import com.fasterxml.jackson.annotation.JsonClassDescription;
+import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("boolean")
-@JsonClassDescription("Boolean")
+@MultilineDescription("Boolean")
 public class BooleanDomain implements ColumnParametersEntry {
     @Getter private final String type = "boolean";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.RAW;
