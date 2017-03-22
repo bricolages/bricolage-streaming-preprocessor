@@ -6,13 +6,13 @@ import java.util.List;
 import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
-import com.fasterxml.jackson.annotation.JsonClassDescription;
+import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("integer")
-@JsonClassDescription("32bit signed integral number")
+@MultilineDescription("32bit signed integral number")
 public class IntegerDomain implements ColumnParametersEntry {
     @Getter private final String type = "integer";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;

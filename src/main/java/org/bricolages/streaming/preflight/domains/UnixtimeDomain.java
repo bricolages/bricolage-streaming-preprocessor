@@ -6,18 +6,17 @@ import org.bricolages.streaming.filter.UnixTimeOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
-import com.fasterxml.jackson.annotation.JsonClassDescription;
+import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("unixtime")
-@JsonClassDescription("Timestamp converted from unix time")
+@MultilineDescription("Timestamp converted from unix time")
 public class UnixtimeDomain implements ColumnParametersEntry {
     @Getter
     @JsonProperty(required = true)
-    @JsonPropertyDescription("Target timezone, given by the string like '+09:00'")
+    @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String zoneOffset;
 
     @Getter private final String type = "timestamp";

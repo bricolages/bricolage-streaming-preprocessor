@@ -7,26 +7,28 @@ import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
-import com.fasterxml.jackson.annotation.JsonClassDescription;
+import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("log_time")
-@JsonClassDescription("Timestamp indicating when log was recorded\n\nUsually this column becomes sortkey.")
+@MultilineDescription({
+    "Timestamp indicating when log was recorded",
+    "Usually this column becomes sortkey.",
+})
 public class LogTimeDomain implements ColumnParametersEntry {
     @Getter
     @JsonProperty(required = true)
-    @JsonPropertyDescription("Expected source data timezone, given by the string like '+00:00'")
+    @MultilineDescription("Expected source data timezone, given by the string like '+00:00'")
     private String sourceOffset;
     @Getter
     @JsonProperty(required = true)
-    @JsonPropertyDescription("Target timezone, given by the string like '+09:00'")
+    @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String targetOffset;
     @Getter
     @JsonProperty(required = true)
-    @JsonPropertyDescription("Column name which is renamed from")
+    @MultilineDescription("Column name which is renamed from")
     private String sourceColumn;
 
     @Getter private final String type = "timestamp";

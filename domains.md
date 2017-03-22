@@ -4,7 +4,7 @@
 - `filter`: `List`
 
 ## `integer` domain
-Integral number
+32bit signed integral number
 
 No parameters.
 
@@ -16,6 +16,8 @@ Timestamp converted from unix time
 
 ## `log_time` domain
 Timestamp indicating when log was recorded
+
+Usually this column becomes sortkey.
 
 - `sourceOffset`: `String`
   - Expected source data timezone, given by the string like '+00:00'
@@ -38,12 +40,12 @@ Boolean
 No parameters.
 
 ## `bigint` domain
-Big integral number
+64bit signed integral number
 
 No parameters.
 
 ## `float` domain
-Floating point number
+64bit floating point number
 
 No parameters.
 
