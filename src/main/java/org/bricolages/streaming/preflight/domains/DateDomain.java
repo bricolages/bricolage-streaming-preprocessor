@@ -6,17 +6,22 @@ import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
+import com.fasterxml.jackson.annotation.JsonClassDescription;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("date")
+@JsonClassDescription("Date time")
 public class DateDomain implements ColumnParametersEntry {
     @Getter
     @JsonProperty(required = true)
+    @JsonPropertyDescription("Expected source data timezone, given by the string like '+00:00'")
     private String sourceOffset;
     @Getter
     @JsonProperty(required = true)
+    @JsonPropertyDescription("Target timezone, given by the string like '+09:00'")
     private String targetOffset;
 
     @Getter private final String type = "timestamp";

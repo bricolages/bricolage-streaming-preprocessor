@@ -1,6 +1,7 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.filter.OpBuilder;
+import org.bricolages.streaming.preflight.ReferenceGenerator;
 import org.bricolages.streaming.preflight.Runner;
 import org.bricolages.streaming.event.EventQueue;
 import org.bricolages.streaming.event.LogQueue;
@@ -43,6 +44,7 @@ public class Application {
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
+        boolean domainsReference = false;
 
         for (int i = 0; i < args.length; i++) {
             if (Objects.equals(args[i], "--oneshot")) {
@@ -87,6 +89,9 @@ public class Application {
                     System.exit(1);
                 }
                 procUrl = S3ObjectLocation.forUrl(kv[1]);
+            }
+            else if (Objects.equals(args[i], "--domains-reference")) {
+                domainsReference = true;
             }
             else if (Objects.equals(args[i], "--help")) {
                 printUsage(System.out);
@@ -143,6 +148,9 @@ public class Application {
         }
         else if (oneshot) {
             preproc.runOneshot();
+        }
+        else if (domainsReference) {
+            new ReferenceGenerator().generate();
         }
         else {
             preproc.run();
