@@ -1,0 +1,4 @@
+test:
+  override:
+    - ./gradlew build
+    - cp ./build/libs/bricolage-streaming-preprocessor.jar $CIRCLE_ARTIFACTS
