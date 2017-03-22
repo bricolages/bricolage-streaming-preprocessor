@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("float")
-@JsonClassDescription("Floating point number")
+@JsonClassDescription("64bit floating point number")
 public class FloatDomain implements ColumnParametersEntry {
     @Getter private final String type = "float";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;

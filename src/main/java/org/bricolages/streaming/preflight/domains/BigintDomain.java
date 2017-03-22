@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("bigint")
-@JsonClassDescription("Big integral number")
+@JsonClassDescription("64bit signed integral number")
 public class BigintDomain implements ColumnParametersEntry {
     @Getter private final String type = "bigint";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;

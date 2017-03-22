@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("integer")
-@JsonClassDescription("Integral number")
+@JsonClassDescription("32bit signed integral number")
 public class IntegerDomain implements ColumnParametersEntry {
     @Getter private final String type = "integer";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
