@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("log_time")
-@JsonClassDescription("Timestamp indicating when log was recorded")
+@JsonClassDescription("Timestamp indicating when log was recorded\n\nUsually this column becomes sortkey.")
 public class LogTimeDomain implements ColumnParametersEntry {
     @Getter
     @JsonProperty(required = true)
