@@ -16,6 +16,7 @@ public class LocatorFactory {
         val uri = new URI(urlString);
         val scheme = uri.getScheme();
         if (scheme == null) {
+            // eg. "./relatice/path/to/file.gz"
             return new LocalFileSourceLocator(urlString);
         } else if (scheme.equals("file")) {
             return new LocalFileSourceLocator(uri.getPath());
