@@ -1,0 +1,3 @@
+default_values:
+  log_time: !log_time
+    target_offset: '+09:00'

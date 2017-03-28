@@ -23,4 +23,8 @@ public interface ColumnParametersEntry {
     ColumnEncoding getEncoding();
 
     List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName);
+
+    default void applyDefault(DomainDefaultValues defaultValues) {
+        return; // NOOP
+    };
 }

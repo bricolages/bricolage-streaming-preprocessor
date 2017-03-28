@@ -3,6 +3,7 @@ package org.bricolages.streaming;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bricolages.streaming.preflight.domains.DomainDefaultValues;
 import org.bricolages.streaming.s3.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -40,4 +41,7 @@ public class Config {
     @Getter
     @Setter
     private String destDs;
+    @Getter
+    @Setter
+    private DomainDefaultValues defaults;
 }

@@ -8,7 +8,6 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
@@ -19,15 +18,12 @@ import lombok.*;
 })
 public class LogTimeDomain implements ColumnParametersEntry {
     @Getter
-    @JsonProperty(required = true)
     @MultilineDescription("Expected source data timezone, given by the string like '+00:00'")
     private String sourceOffset;
     @Getter
-    @JsonProperty(required = true)
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String targetOffset;
     @Getter
-    @JsonProperty(required = true)
     @MultilineDescription("Column name which is renamed from")
     private String sourceColumn;
 
@@ -45,5 +41,13 @@ public class LogTimeDomain implements ColumnParametersEntry {
         list.add(new OperatorDefinitionEntry("timezone", sourceColumn, tzParams));
         list.add(new OperatorDefinitionEntry("rename", sourceColumn, renameParams));
         return list;
+    }
+
+    public void applyDefault(DomainDefaultValues defaultValues) {
+        val defaultValue = defaultValues.getLogTime();
+        if (defaultValue == null) { return; }
+        this.sourceOffset = this.sourceOffset == null ? defaultValue.sourceOffset : this.sourceOffset;
+        this.targetOffset = this.targetOffset == null ? defaultValue.targetOffset : this.targetOffset;
+        this.sourceColumn = this.sourceColumn == null ? defaultValue.sourceColumn : this.sourceColumn;
     }
 }
