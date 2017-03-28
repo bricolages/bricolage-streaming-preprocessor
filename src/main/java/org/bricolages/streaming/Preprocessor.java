@@ -55,8 +55,8 @@ public class Preprocessor implements EventHandlers {
         eventQueue.flushDeleteForce();
     }
 
-    public boolean processUrl(S3ObjectLocation src, BufferedWriter out) {
-        val mapResult = mapper.map(src);
+    public boolean processUrl(SourceLocator src, BufferedWriter out) {
+        val mapResult = mapper.map(src.toString());
         if (mapResult == null) {
             log.warn("S3 object could not mapped: {}", src);
             return false;
@@ -64,17 +64,17 @@ public class Preprocessor implements EventHandlers {
         String streamName = mapResult.getStreamName();
         S3ObjectLocation dest = mapResult.getDestLocation();
 
-        FilterResult result = new FilterResult(src.urlString(), dest.urlString());
+        FilterResult result = new FilterResult(src.toString(), dest.urlString());
         try {
             ObjectFilter filter = filterFactory.load(streamName);
-            try (BufferedReader r = s3.openBufferedReader(src)) {
+            try (BufferedReader r = src.open()) {
                 filter.apply(r, out, src.toString(), result);
             }
-            log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.urlString(), result.inputRows, result.outputRows);
             return true;
         }
-        catch (S3IOException | IOException ex) {
-            log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
+        catch (IOException ex) {
+            log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             return false;
         }
     }
@@ -170,7 +170,7 @@ public class Preprocessor implements EventHandlers {
         log.debug("handling URL: {}", event.getLocation().toString());
         S3ObjectLocation src = event.getLocation();
         String srcBucket = src.bucket();
-        val mapResult = mapper.map(src);
+        val mapResult = mapper.map(src.urlString());
         if (mapResult == null) {
             log.warn("S3 object could not mapped: {}", src);
             return;
@@ -217,7 +217,8 @@ public class Preprocessor implements EventHandlers {
         try {
             repos.save(result);
             ObjectFilter filter = filterFactory.load(streamName);
-            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, streamName);
+            val srcLocator = new S3ObjectSourceLocator(s3, src);
+            S3ObjectMetadata obj = applyFilter(filter, srcLocator, dest, result, streamName);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
@@ -235,9 +236,9 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    public S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
+    public S3ObjectMetadata applyFilter(ObjectFilter filter, SourceLocator src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
         try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, streamName)) {
-            try (BufferedReader r = s3.openBufferedReader(src)) {
+            try (BufferedReader r = src.open()) {
                 filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
             }
             return buf.commit();

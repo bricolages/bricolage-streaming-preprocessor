@@ -1,5 +1,7 @@
 package org.bricolages.streaming.s3;
 import org.bricolages.streaming.ConfigError;
+import org.bricolages.streaming.SourceLocator;
+
 import java.util.Objects;
 import java.nio.file.Paths;
 import java.util.List;
@@ -25,9 +27,9 @@ public class ObjectMapper {
         }
     }
 
-    public Result map(S3ObjectLocation src) throws ConfigError {
+    public Result map(String src) throws ConfigError {
         for (Entry ent : entries) {
-            Matcher m = ent.sourcePattern().matcher(src.urlString());
+            Matcher m = ent.sourcePattern().matcher(src);
             if (m.matches()) {
                 return new Result(
                     safeSubst(ent.streamName, m),
