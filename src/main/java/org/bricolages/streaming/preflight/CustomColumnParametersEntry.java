@@ -2,7 +2,6 @@ package org.bricolages.streaming.preflight;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;

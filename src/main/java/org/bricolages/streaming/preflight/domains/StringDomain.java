@@ -7,7 +7,6 @@ import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
@@ -19,9 +18,8 @@ import lombok.*;
 @NoArgsConstructor
 public class StringDomain implements ColumnParametersEntry {
     @Getter
-    @JsonProperty(required = true)
     @MultilineDescription("Declares max byte length")
-    private int bytes;
+    private Integer bytes;
 
     public String getType() {
         return String.format("varchar(%d)", bytes);
@@ -36,5 +34,11 @@ public class StringDomain implements ColumnParametersEntry {
     @JsonCreator
     public StringDomain(String bytes) {
         this.bytes = Integer.valueOf(bytes);
+    }
+
+    public void applyDefault(DomainDefaultValues defaultValues) {
+        val defaultValue = defaultValues.getString();
+        if (defaultValue == null) { return; }
+        this.bytes = this.bytes == null ? defaultValue.bytes : this.bytes;
     }
 }

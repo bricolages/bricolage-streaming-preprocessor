@@ -7,7 +7,6 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
@@ -15,11 +14,9 @@ import lombok.*;
 @MultilineDescription("Date time")
 public class DateDomain implements ColumnParametersEntry {
     @Getter
-    @JsonProperty(required = true)
     @MultilineDescription("Expected source data timezone, given by the string like '+00:00'")
     private String sourceOffset;
     @Getter
-    @JsonProperty(required = true)
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String targetOffset;
 
@@ -33,5 +30,12 @@ public class DateDomain implements ColumnParametersEntry {
         val list = new ArrayList<OperatorDefinitionEntry>();
         list.add(new OperatorDefinitionEntry("timezone", columnName, tzParams));
         return list;
+    }
+
+    public void applyDefault(DomainDefaultValues defaultValues) {
+        val defaultValue = defaultValues.getDate();
+        if (defaultValue == null) { return; }
+        this.sourceOffset = this.sourceOffset == null ? defaultValue.sourceOffset : this.sourceOffset;
+        this.targetOffset = this.targetOffset == null ? defaultValue.targetOffset : this.targetOffset;
     }
 }
