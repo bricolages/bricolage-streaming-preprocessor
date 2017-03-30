@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.bricolages.streaming.Config;
 import org.bricolages.streaming.Preprocessor;
+import org.bricolages.streaming.SourceLocator;
 import org.bricolages.streaming.filter.FilterResult;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.filter.OperatorDefinition;
@@ -87,7 +88,7 @@ public class Runner {
         }
     }
 
-    public void run(String streamDefFilename, S3ObjectLocation src, String schemaName, String tableName) throws IOException, S3IOException {
+    public void run(String streamDefFilename, SourceLocator src, String schemaName, String tableName) throws IOException, S3IOException {
         val preflightConfig = loadPreflightConfig("config/preflight.yml");
         val fullTableName = schemaName + "." + tableName;
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
@@ -95,14 +96,14 @@ public class Runner {
         streamDef.applyDefaultValues(preflightConfig.getDefaultValues());
         System.err.printf("     source: %s\n", src.toString());
 
-        val mapping = mapper.map(src);
+        val mapping = mapper.map(src.toString());
         val dest = mapping.getDestLocation();
         System.err.printf("destination: %s\n", dest.toString());
 
         val generator = new ObjectFilterGenerator(streamDef);
         val operators = generator.generate();
         val filter = factory.compose(operators);
-        val result = new FilterResult(src.urlString(), dest.urlString());
+        val result = new FilterResult(src.toString(), dest.urlString());
         val streamName = mapping.getStreamName();
         preprocessor.applyFilter(filter, src, dest, result, streamName);
         System.err.printf("     result: input rows=%d, output rows=%d, error rows=%d\n", result.inputRows, result.outputRows, result.errorRows);

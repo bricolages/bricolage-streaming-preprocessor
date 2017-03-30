@@ -39,8 +39,8 @@ public class Application {
 
     public void run(String[] args) throws Exception {
         boolean oneshot = false;
-        S3ObjectLocation mapUrl = null;
-        S3ObjectLocation procUrl = null;
+        SourceLocator mapUrl = null;
+        SourceLocator procUrl = null;
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
@@ -80,7 +80,7 @@ public class Application {
                     System.err.println("missing argument for --map-url");
                     System.exit(1);
                 }
-                mapUrl = S3ObjectLocation.forUrl(kv[1]);
+                mapUrl = locatorFactory().parse(kv[1]);
             }
             else if (args[i].startsWith("--process-url=")) {
                 val kv = args[i].split("=", 2);
@@ -88,7 +88,7 @@ public class Application {
                     System.err.println("missing argument for --process-url");
                     System.exit(1);
                 }
-                procUrl = S3ObjectLocation.forUrl(kv[1]);
+                procUrl = locatorFactory().parse(kv[1]);
             }
             else if (Objects.equals(args[i], "--domains-reference")) {
                 domainsReference = true;
@@ -112,7 +112,7 @@ public class Application {
         }
 
         if (mapUrl != null) {
-            val result = mapper().map(mapUrl);
+            val result = mapper().map(mapUrl.toString());
             System.out.println(result.getDestLocation());
             System.exit(0);
         }
@@ -217,5 +217,10 @@ public class Application {
     @Bean
     public OpBuilder opBuilder() {
         return new OpBuilder(sequentialNumberRepository);
+    }
+
+    @Bean
+    public LocatorFactory locatorFactory() {
+        return new LocatorFactory(s3());
     }
 }
