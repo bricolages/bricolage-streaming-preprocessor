@@ -18,10 +18,12 @@ public class LocatorFactory {
         if (scheme == null) {
             // eg. "./relatice/path/to/file.gz"
             return new LocalFileSourceLocator(urlString);
-        } else if (scheme.equals("file")) {
+        }
+        else if (scheme.equals("file")) {
             return new LocalFileSourceLocator(uri.getPath());
-        } else if (scheme.equals("s3")) {
-            return new S3ObjectSourceLocator(s3agent, new S3ObjectLocation(uri.getHost(), uri.getPath()));
+        }
+        else if (scheme.equals("s3")) {
+            return new S3ObjectSourceLocator(s3agent, new S3ObjectLocation(uri.getHost(), uri.getPath().replaceFirst("^/", "")));
         }
         throw new UnsupportedSchemeException("Unsupported scheme: " + scheme);
     }
