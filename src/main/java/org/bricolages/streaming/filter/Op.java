@@ -1,10 +1,6 @@
 package org.bricolages.streaming.filter;
+import java.time.*;
 import java.util.regex.Pattern;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.Instant;
-import java.time.DateTimeException;
 import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.*;
@@ -98,7 +94,8 @@ public abstract class Op {
     }
 
     static protected final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
-    static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|[+-]\\d{2}:?\\d{2})");
+    static protected final DateTimeFormatter RAILS_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|\\w{0,5}([+-]\\d{2}:?\\d{2})?)");
 
     protected OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset, boolean truncate) throws FilterException {
         if (! (value instanceof String)) {
@@ -127,11 +124,16 @@ public abstract class Op {
                 }
                 catch (DateTimeException e3) {
                     try {
-                        // "2016-07-01T12:34:56": No offset.
-                        return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
+                        // "2016-07-01 12:34:56 UTC": Rails TimeWithZone#to_s
+                        return ZonedDateTime.parse(str, RAILS_DATE_TIME).toOffsetDateTime();
                     }
                     catch (DateTimeException e4) {
-                        throw new FilterException("could not parse a timestamp: " + str);
+                        try {
+                            // "2016-07-01T12:34:56": No offset.
+                            return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
+                        } catch (DateTimeException e5) {
+                            throw new FilterException("could not parse a timestamp: " + str);
+                        }
                     }
                 }
             }
