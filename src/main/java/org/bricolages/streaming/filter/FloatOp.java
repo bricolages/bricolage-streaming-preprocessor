@@ -16,11 +16,8 @@ public class FloatOp extends SingleColumnOp {
     public Object applyValue(Object rawValue, Record record) throws FilterException {
         if (rawValue == null) return null;
         float value = getFloat(rawValue);
-        if (Float.MIN_VALUE <= value && value <= Float.MAX_VALUE) {
-            return Float.valueOf(value);
-        }
-        else {
-            return null;
-        }
+        // getFloat returns Inf/-Inf for too big/small value
+        if (Float.isInfinite(value) || Float.isNaN(value)) return null;
+        return Float.valueOf(value);
     }
 }

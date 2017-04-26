@@ -31,18 +31,23 @@ public class FloatOpTest {
             val out = op.apply(rec);
             assertEquals("{\"n\":123.4}", out.serialize());
         }
+        {
+            val rec = Record.parse("{\"n\":-1.234}");
+            val out = op.apply(rec);
+            assertEquals("{\"n\":-1.234}", out.serialize());
+        }
     }
 
     @Test
     public void apply_too_large_value() throws Exception {
         val f = new FloatOp(null);
-        assertEquals(null, f.applyValue(Double.MAX_VALUE, null));
+        assertEquals(null, f.applyValue(440282346638528860000000000000000000000.0, null));
     }
 
     @Test
     public void apply_too_small_value() throws Exception {
         val f = new FloatOp(null);
-        assertEquals(null, f.applyValue(Double.MIN_VALUE, null));
+        assertEquals(null, f.applyValue(-440282346638528860000000000000000000000.0, null));
     }
 
     @Test(expected = FilterException.class)
