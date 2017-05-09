@@ -8,6 +8,7 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
@@ -16,6 +17,7 @@ import lombok.*;
     "Timestamp indicating when log was recorded",
     "Usually this column becomes sortkey.",
 })
+@NoArgsConstructor
 public class LogTimeDomain implements ColumnParametersEntry {
     @Getter
     @MultilineDescription("Expected source data timezone, given by the string like '+00:00'")
@@ -50,4 +52,7 @@ public class LogTimeDomain implements ColumnParametersEntry {
         this.targetOffset = this.targetOffset == null ? defaultValue.targetOffset : this.targetOffset;
         this.sourceColumn = this.sourceColumn == null ? defaultValue.sourceColumn : this.sourceColumn;
     }
+
+    // This is necessary to accept empty value
+    @JsonCreator public LogTimeDomain(String nil) { /* noop */ }
 }
