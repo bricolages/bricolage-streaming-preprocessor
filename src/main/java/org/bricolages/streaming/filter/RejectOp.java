@@ -17,6 +17,7 @@ public class RejectOp extends Op {
     @JsonSubTypes({
         @JsonSubTypes.Type(value = StringPatameters.class, name = "string"),
         @JsonSubTypes.Type(value = IntegerParameters.class, name = "integer"),
+        @JsonSubTypes.Type(value = BooleanParameters.class, name = "boolean"),
         @JsonSubTypes.Type(value = NullParameters.class, name = "null") 
     })
     abstract static class Parameters {
@@ -30,6 +31,12 @@ public class RejectOp extends Op {
     }
     public static class IntegerParameters extends Parameters {
         @Getter @Setter Integer value;
+        Function<Object, Boolean> getMatcher() {
+            return (target) -> value.equals(target);
+        }
+    }
+    public static class BooleanParameters extends Parameters {
+        @Getter @Setter Boolean value;
         Function<Object, Boolean> getMatcher() {
             return (target) -> value.equals(target);
         }

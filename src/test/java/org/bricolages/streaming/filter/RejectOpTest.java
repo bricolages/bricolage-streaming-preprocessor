@@ -43,6 +43,24 @@ public class RejectOpTest {
     }
 
     @Test
+    public void apply_matched_boolean() throws Exception {
+        val def = new OperatorDefinition("reject", "schema.table", "flag", "{\"type\": \"boolean\", \"value\": true}");
+        val op = (RejectOp)builder.build(def);
+        val rec = Record.parse("{\"flag\":true}");
+        val out = op.apply(rec);
+        assertEquals(null, out);
+    }
+
+    @Test
+    public void apply_not_matched_boolean() throws Exception {
+        val def = new OperatorDefinition("reject", "schema.table", "flag", "{\"type\": \"boolean\", \"value\": true}");
+        val op = (RejectOp)builder.build(def);
+        val rec = Record.parse("{\"flag\":false,\"a\":1}");
+        val out = op.apply(rec);
+        assertEquals("{\"flag\":false,\"a\":1}", out.serialize());
+    }
+
+    @Test
     public void apply_matched_null() throws Exception {
         val def = new OperatorDefinition("reject", "schema.table", "hoge", "{\"type\": \"null\"}");
         val op = (RejectOp)builder.build(def);
