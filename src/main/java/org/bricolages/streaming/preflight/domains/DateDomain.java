@@ -7,11 +7,13 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("date")
 @MultilineDescription("Date time")
+@NoArgsConstructor
 public class DateDomain implements ColumnParametersEntry {
     @Getter
     @MultilineDescription("Expected source data timezone, given by the string like '+00:00'")
@@ -38,4 +40,7 @@ public class DateDomain implements ColumnParametersEntry {
         this.sourceOffset = this.sourceOffset == null ? defaultValue.sourceOffset : this.sourceOffset;
         this.targetOffset = this.targetOffset == null ? defaultValue.targetOffset : this.targetOffset;
     }
+
+    // This is necessary to accept empty value
+    @JsonCreator public DateDomain(String nil) { /* noop */ }
 }

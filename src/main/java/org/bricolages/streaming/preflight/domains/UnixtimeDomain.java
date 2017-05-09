@@ -7,11 +7,13 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("unixtime")
 @MultilineDescription("Timestamp converted from unix time")
+@NoArgsConstructor
 public class UnixtimeDomain implements ColumnParametersEntry {
     @Getter
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
@@ -33,4 +35,7 @@ public class UnixtimeDomain implements ColumnParametersEntry {
         if (defaultValue == null) { return; }
         this.zoneOffset = this.zoneOffset == null ? defaultValue.zoneOffset : this.zoneOffset;
     }
+
+    // This is necessary to accept empty value
+    @JsonCreator public UnixtimeDomain(String nil) { /* noop */ }
 }
