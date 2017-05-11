@@ -12,6 +12,10 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'spring-boot'
+apply plugin: 'maven'
+
+group 'org.bricolages.streaming'
+version 'SNAPSHOT'
 
 dependencyManagement {
     imports {
@@ -77,4 +81,8 @@ test {
         events "passed", "skipped", "failed", "standardOut", "standardError"
         exceptionFormat "full"
     }
+}
+
+uploadArchives.repositories.mavenDeployer {
+    repository url: "$System.env.MAVEN_REPO"
 }
