@@ -165,6 +165,18 @@ public class Preprocessor implements EventHandlers {
     @Autowired
     StreamBundleRepository streamBundleRepos;
 
+    public void logNewStream(long streamId, String streamName) {
+        log.warn("new stream: stream_id={}, stream_name={}", streamId, streamName);
+    }
+
+    public void logNewStreamBundle(long streamId, String streamPrefix) {
+        log.warn("new stream bundle: stream_id={}, stream_prefix={}", streamId, streamPrefix);
+    }
+
+    public void logNotMappedObject(String src) {
+        log.warn("S3 object could not mapped: {}", src);
+    }
+
     @Override
     public void handleS3Event(S3Event event) {
         log.debug("handling URL: {}", event.getLocation().toString());
@@ -172,7 +184,7 @@ public class Preprocessor implements EventHandlers {
         String srcBucket = src.bucket();
         val mapResult = mapper.map(src.urlString());
         if (mapResult == null) {
-            log.warn("S3 object could not mapped: {}", src);
+            logNotMappedObject(src.toString());
             return;
         }
         String streamName = mapResult.getStreamName();
@@ -184,7 +196,7 @@ public class Preprocessor implements EventHandlers {
                 // create new stream with disabled (to avoid to produce non preprocessed output)
                 stream = new DataStream(streamName);
                 streamRepos.save(stream);
-                log.warn("new stream: stream_id={}, stream_name={}", stream.getId(), streamName);
+                logNewStream(stream.getId(), streamName);
             }
             catch (DataIntegrityViolationException ex) {
                 stream = streamRepos.findStream(streamName);
@@ -201,7 +213,7 @@ public class Preprocessor implements EventHandlers {
             try {
                 streamBundle = new StreamBundle(stream, srcBucket, streamPrefix);
                 streamBundleRepos.save(streamBundle);
-                log.warn("new stream bundle: stream_id={}, stream_prefix={}", stream.getId(), streamPrefix);
+                logNewStreamBundle(stream.getId(), streamPrefix);
             } catch (DataIntegrityViolationException ex) {
                 streamBundle = streamBundleRepos.findStreamBundle(stream, srcBucket, mapResult.getStreamPrefix());
             }
