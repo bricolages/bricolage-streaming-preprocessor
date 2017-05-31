@@ -14,7 +14,7 @@ import lombok.*;
 @MultilineDescription("Boolean")
 public class BooleanDomain implements ColumnParametersEntry {
     @Getter private final String type = "boolean";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.RAW;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val list = new ArrayList<OperatorDefinitionEntry>();

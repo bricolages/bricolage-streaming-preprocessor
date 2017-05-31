@@ -20,7 +20,7 @@ public class UnixtimeDomain implements ColumnParametersEntry {
     private String zoneOffset;
 
     @Getter private final String type = "timestamp";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val utParams = new UnixTimeOp.Parameters();

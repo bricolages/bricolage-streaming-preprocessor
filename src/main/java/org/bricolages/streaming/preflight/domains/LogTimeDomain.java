@@ -30,7 +30,7 @@ public class LogTimeDomain implements ColumnParametersEntry {
     private String sourceColumn;
 
     @Getter private final String type = "timestamp";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val tzParams = new TimeZoneOp.Parameters();

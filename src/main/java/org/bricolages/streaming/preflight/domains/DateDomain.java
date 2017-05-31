@@ -23,7 +23,7 @@ public class DateDomain implements ColumnParametersEntry {
     private String targetOffset;
 
     @Getter private final String type = "timestamp";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val tzParams = new TimeZoneOp.Parameters();

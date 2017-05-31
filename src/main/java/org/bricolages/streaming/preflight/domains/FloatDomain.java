@@ -15,7 +15,7 @@ import lombok.*;
 @MultilineDescription("64bit floating point number")
 public class FloatDomain implements ColumnParametersEntry {
     @Getter private final String type = "float";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val list = new ArrayList<OperatorDefinitionEntry>();
