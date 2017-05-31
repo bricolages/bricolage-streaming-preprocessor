@@ -5,7 +5,7 @@ import lombok.*;
 
 @RequiredArgsConstructor
 public enum ColumnEncoding {
-    LZO("lzo"), RAW("raw");
+    ZSTD("zstd"), LZO("lzo"), DELTA("delta"), RAW("raw");
 
     final private String expression;
 
