@@ -20,7 +20,6 @@ public class DateDomain implements ColumnParametersEntry {
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("date", columnName, null));
         return list;
     }
 
