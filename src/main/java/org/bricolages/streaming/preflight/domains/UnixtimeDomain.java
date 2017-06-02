@@ -1,5 +1,4 @@
 package org.bricolages.streaming.preflight.domains;
-
 import java.util.ArrayList;
 import java.util.List;
 import org.bricolages.streaming.filter.UnixTimeOp;
@@ -7,6 +6,7 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
+import org.bricolages.streaming.ConfigError;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
@@ -23,6 +23,9 @@ public class UnixtimeDomain implements ColumnParametersEntry {
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+        if (zoneOffset == null) {
+            throw new ConfigError("missing parameter: zoneOffset");
+        }
         val utParams = new UnixTimeOp.Parameters();
         utParams.setZoneOffset(zoneOffset);
         val list = new ArrayList<OperatorDefinitionEntry>();

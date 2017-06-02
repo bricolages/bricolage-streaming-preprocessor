@@ -122,7 +122,7 @@ public class Application {
         }
 
         val preproc = preprocessor();
-        if (streamDefFilename != null) {
+        if (streamDefFilename != null) {   // preflight
             if (procUrl == null) {
                 System.err.println("missing argument: --process-url");
                 System.exit(1);
@@ -135,7 +135,13 @@ public class Application {
                 System.err.println("missing argument: --table-name");
                 System.exit(1);
             }
-            preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName, generateOnly);
+            try {
+                preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName, generateOnly);
+            }
+            catch (ApplicationError ex) {
+                System.err.println("preflight: error: " + ex.getMessage());
+                System.exit(1);
+            }
         }
         else if (procUrl != null) {
             val out = new BufferedWriter(new OutputStreamWriter(System.out));

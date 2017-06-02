@@ -20,6 +20,7 @@ import org.bricolages.streaming.s3.ObjectMapper;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.S3IOException;
 import org.bricolages.streaming.s3.S3ObjectLocation;
+import org.bricolages.streaming.ConfigError;
 
 import lombok.*;
 
@@ -105,6 +106,9 @@ public class Runner {
         streamDef.applyDefaultValues(preflightConfig.getDefaultValues());
 
         val mapping = mapper.map(src.toString());
+        if (mapping == null) {
+            throw new ConfigError("could not map source URL");
+        }
         val dest = mapping.getDestLocation();
         val streamName = mapping.getStreamName();
 

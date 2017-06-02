@@ -7,6 +7,7 @@ import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
+import org.bricolages.streaming.ConfigError;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
@@ -27,6 +28,12 @@ public class TimestampDomain implements ColumnParametersEntry {
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+        if (sourceOffset == null) {
+            throw new ConfigError("missing parameter: sourceOffset");
+        }
+        if (targetOffset == null) {
+            throw new ConfigError("missing parameter: targetOffset");
+        }
         val params = new TimeZoneOp.Parameters();
         params.setSourceOffset(sourceOffset);
         params.setTargetOffset(targetOffset);
