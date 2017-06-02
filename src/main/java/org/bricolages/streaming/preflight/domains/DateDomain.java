@@ -12,33 +12,19 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("date")
-@MultilineDescription("Date time")
+@MultilineDescription("Date")
 @NoArgsConstructor
 public class DateDomain implements ColumnParametersEntry {
-    @Getter
-    @MultilineDescription("Expected source data timezone, given by the string like '+00:00'")
-    private String sourceOffset;
-    @Getter
-    @MultilineDescription("Target timezone, given by the string like '+09:00'")
-    private String targetOffset;
-
-    @Getter private final String type = "timestamp";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final String type = "date";
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
-        val tzParams = new TimeZoneOp.Parameters();
-        tzParams.setSourceOffset(sourceOffset);
-        tzParams.setTargetOffset(targetOffset);
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("timezone", columnName, tzParams));
+        list.add(new OperatorDefinitionEntry("date", columnName, null));
         return list;
     }
 
     public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getDate();
-        if (defaultValue == null) { return; }
-        this.sourceOffset = this.sourceOffset == null ? defaultValue.sourceOffset : this.sourceOffset;
-        this.targetOffset = this.targetOffset == null ? defaultValue.targetOffset : this.targetOffset;
     }
 
     // This is necessary to accept empty value

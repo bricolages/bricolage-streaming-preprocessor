@@ -2,7 +2,7 @@ package org.bricolages.streaming.preflight.domains;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bricolages.streaming.filter.UnixTimeOp;
+import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
 import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
@@ -11,31 +11,41 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
-@JsonTypeName("unixtime")
-@MultilineDescription("Timestamp converted from unix time")
+@JsonTypeName("timestamp")
+@MultilineDescription("Timestamp with zone adjust")
 @NoArgsConstructor
-public class UnixtimeDomain implements ColumnParametersEntry {
+public class TimestampDomain implements ColumnParametersEntry {
+    @Getter
+    @MultilineDescription("Source timezone, given by the string like '+00:00'")
+    private String sourceOffset;
+
     @Getter
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
-    private String zoneOffset;
+    private String targetOffset;
 
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
-        val utParams = new UnixTimeOp.Parameters();
-        utParams.setZoneOffset(zoneOffset);
-        val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("unixtime", columnName, utParams));
-        return list;
+        val params = new TimeZoneOp.Parameters();
+        params.setSourceOffset(sourceOffset);
+        params.setTargetOffset(targetOffset);
+        val ops = new ArrayList<OperatorDefinitionEntry>();
+        ops.add(new OperatorDefinitionEntry("timezone", columnName, params));
+        return ops;
     }
 
     public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getUnixtime();
+        val defaultValue = defaultValues.getTimestamp();
         if (defaultValue == null) { return; }
-        this.zoneOffset = this.zoneOffset == null ? defaultValue.zoneOffset : this.zoneOffset;
+        if (this.sourceOffset == null) {
+            this.sourceOffset = defaultValue.sourceOffset;
+        }
+        if (this.targetOffset == null) {
+            this.targetOffset = defaultValue.targetOffset;
+        }
     }
 
     // This is necessary to accept empty value
-    @JsonCreator public UnixtimeDomain(String nil) { /* noop */ }
+    @JsonCreator public TimestampDomain(String nil) { /* noop */ }
 }

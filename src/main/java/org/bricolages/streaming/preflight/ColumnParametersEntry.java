@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(BigintDomain.class),
     @JsonSubTypes.Type(FloatDomain.class),
     @JsonSubTypes.Type(DateDomain.class),
+    @JsonSubTypes.Type(TimestampDomain.class),
 })
 public interface ColumnParametersEntry {
     String getType();

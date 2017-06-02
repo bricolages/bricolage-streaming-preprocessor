@@ -24,7 +24,7 @@ public class StringDomain implements ColumnParametersEntry {
     public String getType() {
         return String.format("varchar(%d)", bytes);
     }
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val list = new ArrayList<OperatorDefinitionEntry>();

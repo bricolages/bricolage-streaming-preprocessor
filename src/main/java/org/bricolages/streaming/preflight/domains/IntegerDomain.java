@@ -15,7 +15,7 @@ import lombok.*;
 @MultilineDescription("32bit signed integral number")
 public class IntegerDomain implements ColumnParametersEntry {
     @Getter private final String type = "integer";
-    @Getter private final ColumnEncoding encoding = ColumnEncoding.LZO;
+    @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val list = new ArrayList<OperatorDefinitionEntry>();
