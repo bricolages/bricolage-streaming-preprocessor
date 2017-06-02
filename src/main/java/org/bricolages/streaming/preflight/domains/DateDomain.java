@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("date")
-@MultilineDescription("Date domain")
+@MultilineDescription("Date")
 @NoArgsConstructor
 public class DateDomain implements ColumnParametersEntry {
     @Getter private final String type = "date";
