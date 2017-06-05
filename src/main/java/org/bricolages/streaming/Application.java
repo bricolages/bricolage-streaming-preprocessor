@@ -44,6 +44,7 @@ public class Application {
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
+        boolean generateOnly = false;
         boolean domainsReference = false;
 
         for (int i = 0; i < args.length; i++) {
@@ -90,6 +91,9 @@ public class Application {
                 }
                 procUrl = locatorFactory().parse(kv[1]);
             }
+            else if (args[i].equals("--generate-only")) {
+                generateOnly = true;
+            }
             else if (Objects.equals(args[i], "--domains-reference")) {
                 domainsReference = true;
             }
@@ -118,7 +122,7 @@ public class Application {
         }
 
         val preproc = preprocessor();
-        if (streamDefFilename != null) {
+        if (streamDefFilename != null) {   // preflight
             if (procUrl == null) {
                 System.err.println("missing argument: --process-url");
                 System.exit(1);
@@ -131,7 +135,13 @@ public class Application {
                 System.err.println("missing argument: --table-name");
                 System.exit(1);
             }
-            preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName);
+            try {
+                preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName, generateOnly);
+            }
+            catch (ApplicationError ex) {
+                System.err.println("preflight: error: " + ex.getMessage());
+                System.exit(1);
+            }
         }
         else if (procUrl != null) {
             val out = new BufferedWriter(new OutputStreamWriter(System.out));

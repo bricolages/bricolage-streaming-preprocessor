@@ -10,6 +10,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import lombok.*;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class PreflightConfig {
     @Getter private DomainDefaultValues defaultValues;
 
@@ -18,5 +20,9 @@ public class PreflightConfig {
             .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
             .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
         return mapper.readValue(yamlSource, PreflightConfig.class);
+    }
+
+    public static PreflightConfig defaultInstance() {
+        return new PreflightConfig(new DomainDefaultValues());
     }
 }
