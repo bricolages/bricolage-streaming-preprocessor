@@ -1,25 +1,22 @@
 package org.bricolages.streaming.preflight;
-
 import java.util.StringJoiner;
 import lombok.*;
 
+@RequiredArgsConstructor
 class CreateTableGenerator {
-    private final StreamDefinitionEntry streamDef;
-    private final String fullTableName;
-    CreateTableGenerator(StreamDefinitionEntry streamDef, String fullTableName) {
-        this.streamDef = streamDef;
-        this.fullTableName = fullTableName;
-    }
+    final StreamDefinitionEntry streamDef;
+    final String fullTableName;
 
     String generate() {
         val sb = new StringBuilder();
         sb.append("--dest-table: ");
         sb.append(fullTableName);
         sb.append("\n\n");
-        sb.append("create table $dest_table \n(");
+        sb.append("create table $dest_table\n(");
         generateColumnDefinitionList(sb);
         sb.append("\n)\n");
-        sb.append("sortkey(jst_time)\n");
+        sb.append("diststyle even\n");
+        sb.append("sortkey (jst_time)\n");
         sb.append(";\n");
 
         return sb.toString();
@@ -43,4 +40,3 @@ class CreateTableGenerator {
         return sj.toString();
     }
 }
-
