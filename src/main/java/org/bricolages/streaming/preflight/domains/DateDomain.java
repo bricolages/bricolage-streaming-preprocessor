@@ -23,9 +23,6 @@ public class DateDomain implements ColumnParametersEntry {
         return list;
     }
 
-    public void applyDefault(DomainDefaultValues defaultValues) {
-    }
-
     // This is necessary to accept empty value
     @JsonCreator public DateDomain(String nil) { /* noop */ }
 }

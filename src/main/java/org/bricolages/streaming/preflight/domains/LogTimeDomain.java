@@ -51,14 +51,6 @@ public class LogTimeDomain implements ColumnParametersEntry {
         return list;
     }
 
-    public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getLogTime();
-        if (defaultValue == null) { return; }
-        this.sourceOffset = this.sourceOffset == null ? defaultValue.sourceOffset : this.sourceOffset;
-        this.targetOffset = this.targetOffset == null ? defaultValue.targetOffset : this.targetOffset;
-        this.sourceColumn = this.sourceColumn == null ? defaultValue.sourceColumn : this.sourceColumn;
-    }
-
     // This is necessary to accept empty value
     @JsonCreator public LogTimeDomain(String nil) { /* noop */ }
 }

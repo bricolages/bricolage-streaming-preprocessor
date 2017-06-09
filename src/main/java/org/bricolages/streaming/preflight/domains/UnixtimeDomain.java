@@ -33,12 +33,6 @@ public class UnixtimeDomain implements ColumnParametersEntry {
         return list;
     }
 
-    public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getUnixtime();
-        if (defaultValue == null) { return; }
-        this.zoneOffset = this.zoneOffset == null ? defaultValue.zoneOffset : this.zoneOffset;
-    }
-
     // This is necessary to accept empty value
     @JsonCreator public UnixtimeDomain(String nil) { /* noop */ }
 }

@@ -35,10 +35,4 @@ public class StringDomain implements ColumnParametersEntry {
     public StringDomain(String bytes) {
         this.bytes = Integer.valueOf(bytes);
     }
-
-    public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getString();
-        if (defaultValue == null) { return; }
-        this.bytes = this.bytes == null ? defaultValue.bytes : this.bytes;
-    }
 }

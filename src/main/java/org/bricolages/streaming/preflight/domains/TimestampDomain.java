@@ -42,17 +42,6 @@ public class TimestampDomain implements ColumnParametersEntry {
         return ops;
     }
 
-    public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getTimestamp();
-        if (defaultValue == null) { return; }
-        if (this.sourceOffset == null) {
-            this.sourceOffset = defaultValue.sourceOffset;
-        }
-        if (this.targetOffset == null) {
-            this.targetOffset = defaultValue.targetOffset;
-        }
-    }
-
     // This is necessary to accept empty value
     @JsonCreator public TimestampDomain(String nil) { /* noop */ }
 }
