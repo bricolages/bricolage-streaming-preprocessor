@@ -1,27 +1,31 @@
 package org.bricolages.streaming.preflight;
 
 import java.util.List;
-import org.bricolages.streaming.preflight.domains.*;
+import org.bricolages.streaming.preflight.types.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+    defaultImpl = ColumnDefinitionEntry.class
+)
 @JsonSubTypes({
-    @JsonSubTypes.Type(CustomColumnParametersEntry.class),
-    @JsonSubTypes.Type(IntegerDomain.class),
-    @JsonSubTypes.Type(UnixtimeDomain.class),
-    @JsonSubTypes.Type(LogTimeDomain.class),
-    @JsonSubTypes.Type(StringDomain.class),
-    @JsonSubTypes.Type(BooleanDomain.class),
-    @JsonSubTypes.Type(BigintDomain.class),
-    @JsonSubTypes.Type(FloatDomain.class),
-    @JsonSubTypes.Type(DateDomain.class),
-    @JsonSubTypes.Type(TimestampDomain.class),
+    @JsonSubTypes.Type(IntegerType.class),
+    @JsonSubTypes.Type(UnixtimeType.class),
+    @JsonSubTypes.Type(StringType.class),
+    @JsonSubTypes.Type(BooleanType.class),
+    @JsonSubTypes.Type(BigintType.class),
+    @JsonSubTypes.Type(FloatType.class),
+    @JsonSubTypes.Type(DateType.class),
+    @JsonSubTypes.Type(TimestampType.class),
+    @JsonSubTypes.Type(DomainType.class),
 })
 public interface ColumnParametersEntry {
+    String getName();
     String getType();
-
     ColumnEncoding getEncoding();
-
+    String getOriginalName();
     List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName);
 }

@@ -1,10 +1,9 @@
-package org.bricolages.streaming.preflight.domains;
+package org.bricolages.streaming.preflight.types;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import org.bricolages.streaming.ConfigError;
@@ -15,7 +14,7 @@ import lombok.*;
 @JsonTypeName("timestamp")
 @MultilineDescription("Timestamp with zone adjust")
 @NoArgsConstructor
-public class TimestampDomain implements ColumnParametersEntry {
+public class TimestampType extends PrimitiveType {
     @Getter
     @MultilineDescription("Source timezone, given by the string like '+00:00'")
     private String sourceOffset;
@@ -43,5 +42,5 @@ public class TimestampDomain implements ColumnParametersEntry {
     }
 
     // This is necessary to accept empty value
-    @JsonCreator public TimestampDomain(String nil) { /* noop */ }
+    @JsonCreator public TimestampType(String nil) { /* noop */ }
 }

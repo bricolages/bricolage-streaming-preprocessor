@@ -31,9 +31,18 @@ public class Runner {
     final ObjectMapper mapper;
     final Config config;
 
-    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile) throws IOException {
+    private DomainCollection loadDomainCollection(String domainCollectionFilePath) throws IOException {
+        try {
+            val fileReader = new FileReader(domainCollectionFilePath);
+            return DomainCollection.load(fileReader);
+        } catch(FileNotFoundException ex) {
+            return DomainCollection.empty();
+        }
+    }
+
+    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile, DomainCollection domainCollection) throws IOException {
         val fileReader = new FileReader(streamDefFile.getFilepath());
-        return StreamDefinitionEntry.load(fileReader);
+        return StreamDefinitionEntry.load(fileReader, domainCollection);
     }
 
     private void saveCreateTableStmt(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, String fullTableName) throws IOException {
@@ -90,7 +99,8 @@ public class Runner {
 
     public void run(String streamDefFilename, SourceLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, S3IOException {
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
-        val streamDef = loadStreamDef(streamDefFile);
+        val domainCollection = loadDomainCollection("config/domains.yml");
+        val streamDef = loadStreamDef(streamDefFile, domainCollection);
 
         val mapping = mapper.map(src.toString());
         if (mapping == null) {

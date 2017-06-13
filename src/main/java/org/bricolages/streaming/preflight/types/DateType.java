@@ -1,28 +1,26 @@
-package org.bricolages.streaming.preflight.domains;
+package org.bricolages.streaming.preflight.types;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
-@JsonTypeName("bigint")
-@MultilineDescription("64bit signed integral number")
-public class BigintDomain implements ColumnParametersEntry {
-    @Getter private final String type = "bigint";
+@JsonTypeName("date")
+@MultilineDescription("Date")
+@NoArgsConstructor
+public class DateType extends PrimitiveType {
+    @Getter private final String type = "date";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("bigint", columnName, new HashMap<>()));
         return list;
     }
 
-    // This is necessary to accept null value
-    @JsonCreator public BigintDomain(String nil) { /* noop */ }
+    // This is necessary to accept empty value
+    @JsonCreator public DateType(String nil) { /* noop */ }
 }
