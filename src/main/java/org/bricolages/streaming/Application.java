@@ -94,7 +94,7 @@ public class Application {
             else if (args[i].equals("--generate-only")) {
                 generateOnly = true;
             }
-            else if (Objects.equals(args[i], "--domains-reference")) {
+            else if (Objects.equals(args[i], "--types-reference")) {
                 domainsReference = true;
             }
             else if (Objects.equals(args[i], "--help")) {

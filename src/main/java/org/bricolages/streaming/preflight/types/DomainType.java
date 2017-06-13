@@ -8,13 +8,17 @@ import org.bricolages.streaming.preflight.DomainCollection.DomainResolver;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("domain")
 @MultilineDescription({
-    "Domain"
+    "A special type to load domain by given name",
+    "This provides a shorthand such as `!domain [name]`"
 })
 public class DomainType implements ColumnParametersEntry {
+    @JsonProperty("name")
+    @MultilineDescription("Domain name to load")
     private String domainName;
     private DomainResolver resolver;
     
