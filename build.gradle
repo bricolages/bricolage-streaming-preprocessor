@@ -15,7 +15,6 @@ apply plugin: 'spring-boot'
 apply plugin: 'maven'
 
 group 'org.bricolages.streaming'
-version 'SNAPSHOT'
 
 dependencyManagement {
     imports {
@@ -64,6 +63,8 @@ dependencies {
 
 jar.baseName = 'bricolage-streaming-preprocessor'
 mainClassName = 'org.bricolages.streaming.Application'
+springBoot.backupSource = false
+bootRepackage.classifier = "executable"
 
 ///// DB migration //////////////////////////////////////////////////////////////////////
 
@@ -85,4 +86,5 @@ test {
 
 uploadArchives.repositories.mavenDeployer {
     repository url: "$System.env.MAVEN_REPO"
+    pom.version = "1.0-SNAPSHOT"
 }
