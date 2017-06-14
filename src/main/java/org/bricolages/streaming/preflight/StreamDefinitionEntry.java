@@ -2,7 +2,7 @@ package org.bricolages.streaming.preflight;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import org.bricolages.streaming.preflight.DomainCollection.DomainResolver;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -16,16 +16,38 @@ class StreamDefinitionEntry {
     @Getter private List<ColumnParametersEntry> columns;
 
     void validate() {
-        val names = new HashSet<String>();
-        for (ColumnParametersEntry columnDef: columns) {
-            val name = columnDef.getName();
+        val names = new HashMap<String, Integer>();
+        for (int index = 0; index < columns.size(); index++) {
+            ColumnParametersEntry columnDef = columns.get(index);
+            String name;
+            String type;
+            ColumnEncoding encoding;
+            try {
+                name = columnDef.getName();
+                type = columnDef.getType();
+                encoding = columnDef.getEncoding();
+            } catch (DomainResolutionException ex) {
+                throw new StreamDefinitionLoadingException(index, ex.getMessage());
+            }
+
+            // validate `name`
             if (name == null) {
-                throw new RuntimeException("name is null"); // FIXME
+                throw new StreamDefinitionLoadingException(index, "domain name is null");
             }
-            if (names.contains(name)) {
-                throw new RuntimeException(String.format("duplicated domain name: `%s`", name));
+            if (names.containsKey(name)) {
+                throw new StreamDefinitionLoadingException(index, String.format("duplicated domain name with column[%d]: `%s`", index, name));
             }
-            names.add(name);
+            names.put(name, index);
+
+            // validate `type`
+            if (type == null) {
+                throw new StreamDefinitionLoadingException(index, name, "type is null");
+            }
+
+            // validate `encoding`
+            if (encoding == null) {
+                throw new StreamDefinitionLoadingException(index, name, "encoding is null");
+            }
         }
     }
 
@@ -34,6 +56,8 @@ class StreamDefinitionEntry {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
             .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
             .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-        return mapper.setInjectableValues(inject).readValue(yamlSource, StreamDefinitionEntry.class);
+        val entry = mapper.setInjectableValues(inject).readValue(yamlSource, StreamDefinitionEntry.class);
+        entry.validate();
+        return entry;
     }
 }

@@ -30,6 +30,8 @@ public class OperatorDefinitionEntry {
         try {
             return mapper.writeValueAsString(params);
         } catch(JsonProcessingException ex)  {
+            // this json serialization must be succeed
+            // because data is from a valid yaml
             throw new RuntimeException(ex);
         }
     }

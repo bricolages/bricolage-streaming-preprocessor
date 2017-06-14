@@ -8,7 +8,12 @@ import lombok.*;
 public class StreamDefinitionEntryTest {
     @Test
     public void load() throws Exception {
-        val reader = new StringReader("columns:\n  - name: jst_time\n    encoding: zstd");
+        val reader = new StringReader(String.join("\n", new String[] {
+            "columns:",
+            "  - name: jst_time",
+            "    type: timestamp",
+            "    encoding: zstd",
+        }));
         val def = StreamDefinitionEntry.load(reader, DomainCollection.empty());
         assertEquals("jst_time", def.getColumns().get(0).getName());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getEncoding());
@@ -65,5 +70,15 @@ public class StreamDefinitionEntryTest {
         assertEquals("int", filter.get(1).getOperatorId());
         assertEquals("reject", filter.get(2).getOperatorId());
         assertEquals("{\"type\":\"integer\",\"value\":0}", filter.get(2).getParams().toString());
+    }
+
+    @Test(expected = StreamDefinitionLoadingException.class)
+    public void load_invalidYaml() throws Exception {
+        val reader = new StringReader(String.join("\n", new String[] {
+            "columns:",
+            "  - type: int",
+        }));
+
+        StreamDefinitionEntry.load(reader, DomainCollection.empty());
     }
 }

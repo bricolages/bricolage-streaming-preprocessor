@@ -38,7 +38,7 @@ public class DomainCollection extends HashMap<String, ColumnParametersEntry> {
         public ColumnParametersEntry resolve(String domainName) {
             val domain = this.domainCollection.get(domainName);
             if (domain == null) {
-                throw new RuntimeException(String.format("undefined domain: `%s`", domainName));
+                throw new DomainResolutionException(String.format("undefined domain: `%s`", domainName));
             }
             return domain;
         }
