@@ -2,23 +2,46 @@ package org.bricolages.streaming.event;
 import org.bricolages.streaming.s3.S3ObjectLocation;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.sqs.model.Message;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.AmazonClientException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import lombok.*;
 
 @Getter
 public class S3Event extends Event {
     static final class Parser implements MessageParser {
+        boolean isBareS3Message(String body) {
+            return body.contains("\"eventName\":\"ObjectCreated:") && body.contains("\"s3\":{");
+        }
+
+        boolean isSnsWrappedS3Message(String body) {
+            return body.contains("\\\"eventName\\\":\\\"ObjectCreated:") && body.contains("\\\"s3\\\":{");
+        }
+
         @Override
         public boolean isCompatible(Message msg) {
-            return msg.getBody().contains("\"eventName\":\"ObjectCreated:")
-                && msg.getBody().contains("\"s3\":{");
+            val body = msg.getBody();
+            return isBareS3Message(body) || isSnsWrappedS3Message(body);
         }
 
         @Override
         public Event parse(Message msg) throws MessageParseException {
+            val body = msg.getBody();
+            if (isSnsWrappedS3Message(body)) {
+                val mapper = new ObjectMapper();
+                val typeRef = new TypeReference<HashMap<String, String>>() {};
+                try {
+                    HashMap<String, String> map = mapper.readValue(body, typeRef);
+                    // set message body to unwraped message
+                    msg.setBody(map.get("Message"));
+                } catch (IOException ex) {
+                    throw new MessageParseException(ex);
+                }
+            }
             return S3Event.forMessage(msg);
         }
     }
