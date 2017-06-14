@@ -26,17 +26,17 @@ class ObjectFilterGenerator {
     private Stream<OperatorDefinition> generateSingleColumnOperators(ColumnParametersEntry columnDef) {
         val columnName = columnDef.getName();
         try {
-            val opDefs = columnDef.getOperatorDefinitionEntries(columnName);
+            val opDefs = columnDef.getOperatorDefinitionEntries();
             val originalName = columnDef.getOriginalName();
             val ret = new ArrayList<OperatorDefinition>();
             if (originalName != null) {
                 val renameParams = new RenameOp.Parameters();
                 renameParams.setTo(columnName);
-                val opDef = new OperatorDefinitionEntry("rename", originalName, renameParams);
-                ret.add(new OperatorDefinition(opDef.getOperatorId(), opDef.getTargetColumn(), opDef.getParams(), 0));
+                val opDef = new OperatorDefinitionEntry("rename", renameParams);
+                ret.add(new OperatorDefinition(opDef.getOperatorId(), originalName, opDef.getParams(), 0));
             }
             for (val opDef: opDefs) {
-                ret.add(new OperatorDefinition(opDef.getOperatorId(), opDef.getTargetColumn(), opDef.getParams(), ret.size() * 10));
+                ret.add(new OperatorDefinition(opDef.getOperatorId(), columnName, opDef.getParams(), ret.size() * 10));
             }
             return ret.stream();
         }

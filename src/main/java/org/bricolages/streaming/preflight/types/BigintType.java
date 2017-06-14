@@ -16,9 +16,9 @@ public class BigintType extends PrimitiveType {
     @Getter private final String type = "bigint";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("bigint", columnName, new HashMap<>()));
+        list.add(new OperatorDefinitionEntry("bigint", new HashMap<>()));
         return list;
     }
 

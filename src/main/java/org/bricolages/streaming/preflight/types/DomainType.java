@@ -42,8 +42,8 @@ public class DomainType implements ColumnParametersEntry {
         return getDomain().getOriginalName();
     }
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
-        return getDomain().getOperatorDefinitionEntries(columnName);
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
+        return getDomain().getOperatorDefinitionEntries();
     }
 
     @JsonCreator

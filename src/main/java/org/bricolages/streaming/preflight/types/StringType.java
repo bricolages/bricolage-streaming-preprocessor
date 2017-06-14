@@ -25,7 +25,7 @@ public class StringType extends PrimitiveType {
     }
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
         return list; // empty list
     }

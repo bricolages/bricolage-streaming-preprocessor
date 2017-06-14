@@ -16,7 +16,7 @@ public class DateType extends PrimitiveType {
     @Getter private final String type = "date";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
         return list;
     }

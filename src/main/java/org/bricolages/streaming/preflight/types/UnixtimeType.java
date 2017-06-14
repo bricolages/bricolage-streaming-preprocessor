@@ -21,14 +21,14 @@ public class UnixtimeType extends PrimitiveType {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         if (zoneOffset == null) {
             throw new ConfigError("missing parameter: zoneOffset");
         }
         val utParams = new UnixTimeOp.Parameters();
         utParams.setZoneOffset(zoneOffset);
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("unixtime", columnName, utParams));
+        list.add(new OperatorDefinitionEntry("unixtime", utParams));
         return list;
     }
 

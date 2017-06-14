@@ -26,5 +26,5 @@ public interface ColumnParametersEntry {
     String getType();
     ColumnEncoding getEncoding();
     String getOriginalName();
-    List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName);
+    List<OperatorDefinitionEntry> getOperatorDefinitionEntries();
 }

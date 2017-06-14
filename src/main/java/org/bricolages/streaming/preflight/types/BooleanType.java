@@ -15,7 +15,7 @@ public class BooleanType extends PrimitiveType {
     @Getter private final String type = "boolean";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
         return list; // empty list
     }

@@ -16,9 +16,9 @@ public class FloatType extends PrimitiveType {
     @Getter private final String type = "float";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("float", columnName, new HashMap<>()));
+        list.add(new OperatorDefinitionEntry("float", new HashMap<>()));
         return list;
     }
 

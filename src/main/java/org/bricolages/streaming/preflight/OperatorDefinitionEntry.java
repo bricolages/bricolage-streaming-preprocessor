@@ -19,9 +19,6 @@ public class OperatorDefinitionEntry {
     @Getter
     private String operatorId;
 
-    @Getter
-    private String targetColumn;
-
     @JsonDeserialize(using = ObjectTreeDeserializer.class)
     private Object params;
 

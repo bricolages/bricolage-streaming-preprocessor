@@ -16,9 +16,9 @@ public class IntegerType extends PrimitiveType {
     @Getter private final String type = "integer";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("int", columnName, new HashMap<>()));
+        list.add(new OperatorDefinitionEntry("int", new HashMap<>()));
         return list;
     }
 

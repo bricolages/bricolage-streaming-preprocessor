@@ -41,7 +41,7 @@ public class ColumnDefinitionEntry implements ColumnParametersEntry {
         return null;
     }
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val wholeFilter = new ArrayList<OperatorDefinitionEntry>();
 
         if (prependFilter != null) {
@@ -50,7 +50,7 @@ public class ColumnDefinitionEntry implements ColumnParametersEntry {
         if (filter != null) {
             wholeFilter.addAll(filter);
         } else {
-            val parentFilter = parent.getOperatorDefinitionEntries(columnName);
+            val parentFilter = parent.getOperatorDefinitionEntries();
             if (parentFilter != null) {
                 wholeFilter.addAll(parentFilter);
             }

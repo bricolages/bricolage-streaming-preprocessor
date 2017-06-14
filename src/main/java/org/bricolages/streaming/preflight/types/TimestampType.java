@@ -26,7 +26,7 @@ public class TimestampType extends PrimitiveType {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         if (sourceOffset == null) {
             throw new ConfigError("missing parameter: sourceOffset");
         }
@@ -37,7 +37,7 @@ public class TimestampType extends PrimitiveType {
         params.setSourceOffset(sourceOffset);
         params.setTargetOffset(targetOffset);
         val ops = new ArrayList<OperatorDefinitionEntry>();
-        ops.add(new OperatorDefinitionEntry("timezone", columnName, params));
+        ops.add(new OperatorDefinitionEntry("timezone", params));
         return ops;
     }
 

@@ -39,7 +39,7 @@ public class StreamDefinitionEntryTest {
         assertEquals("jst_time", def.getColumns().get(0).getName());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getEncoding());
         assertEquals("time", def.getColumns().get(0).getOriginalName());
-        val filter = def.getColumns().get(0).getOperatorDefinitionEntries("jst_time");
+        val filter = def.getColumns().get(0).getOperatorDefinitionEntries();
         assertEquals(1, filter.size());
         assertEquals("timezone", filter.get(0).getOperatorId());
     }
@@ -52,18 +52,16 @@ public class StreamDefinitionEntryTest {
             "    name: item_id",
             "    prepend_filter:",
             "      - op: reject",
-            "        target_column: item_id",
             "        params: { type: null }",
             "    append_filter:",
             "      - op: reject",
-            "        target_column: item_id",
             "        params: { type: integer, value: 0 }",
         }));
         val def = StreamDefinitionEntry.load(reader, DomainCollection.empty());
         assertEquals("item_id", def.getColumns().get(0).getName());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getEncoding());
         assertSame(null, def.getColumns().get(0).getOriginalName());
-        val filter = def.getColumns().get(0).getOperatorDefinitionEntries("item_id");
+        val filter = def.getColumns().get(0).getOperatorDefinitionEntries();
         assertEquals(3, filter.size());
         assertEquals("reject", filter.get(0).getOperatorId());
         assertEquals("{\"type\":null}", filter.get(0).getParams().toString());
