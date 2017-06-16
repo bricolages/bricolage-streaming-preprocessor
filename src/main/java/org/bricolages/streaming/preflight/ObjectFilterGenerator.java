@@ -38,6 +38,7 @@ class ObjectFilterGenerator {
             for (val opDef: opDefs) {
                 ret.add(new OperatorDefinition(opDef.getOperatorId(), columnName, opDef.getParams(), ret.size() * 10));
             }
+            ret.add(new OperatorDefinition("deletenulls", "*", "{}", ret.size() * 10));
             return ret.stream();
         }
         catch (ConfigError ex) {
