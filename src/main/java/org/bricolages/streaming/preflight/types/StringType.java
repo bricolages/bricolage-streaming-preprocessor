@@ -1,9 +1,8 @@
-package org.bricolages.streaming.preflight.domains;
+package org.bricolages.streaming.preflight.types;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -16,7 +15,7 @@ import lombok.*;
     "This provides a shorthand such as `!string [bytes]`",
 })
 @NoArgsConstructor
-public class StringDomain implements ColumnParametersEntry {
+public class StringType extends PrimitiveType {
     @Getter
     @MultilineDescription("Declares max byte length")
     private Integer bytes;
@@ -26,19 +25,13 @@ public class StringDomain implements ColumnParametersEntry {
     }
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
         return list; // empty list
     }
 
     @JsonCreator
-    public StringDomain(String bytes) {
+    public StringType(String bytes) {
         this.bytes = Integer.valueOf(bytes);
-    }
-
-    public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getString();
-        if (defaultValue == null) { return; }
-        this.bytes = this.bytes == null ? defaultValue.bytes : this.bytes;
     }
 }

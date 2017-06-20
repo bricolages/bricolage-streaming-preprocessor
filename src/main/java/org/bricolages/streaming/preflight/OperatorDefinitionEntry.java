@@ -19,9 +19,6 @@ public class OperatorDefinitionEntry {
     @Getter
     private String operatorId;
 
-    @Getter
-    private String targetColumn;
-
     @JsonDeserialize(using = ObjectTreeDeserializer.class)
     private Object params;
 
@@ -30,6 +27,8 @@ public class OperatorDefinitionEntry {
         try {
             return mapper.writeValueAsString(params);
         } catch(JsonProcessingException ex)  {
+            // this json serialization must be succeed
+            // because data is from a valid yaml
             throw new RuntimeException(ex);
         }
     }

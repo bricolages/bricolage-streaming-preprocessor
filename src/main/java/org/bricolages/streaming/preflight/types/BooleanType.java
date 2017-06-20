@@ -1,9 +1,8 @@
-package org.bricolages.streaming.preflight.domains;
+package org.bricolages.streaming.preflight.types;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,15 +11,15 @@ import lombok.*;
 
 @JsonTypeName("boolean")
 @MultilineDescription("Boolean")
-public class BooleanDomain implements ColumnParametersEntry {
+public class BooleanType extends PrimitiveType {
     @Getter private final String type = "boolean";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
         return list; // empty list
     }
 
     // This is necessary to accept null value
-    @JsonCreator public BooleanDomain(String nil) { /* noop */ }
+    @JsonCreator public BooleanType(String nil) { /* noop */ }
 }

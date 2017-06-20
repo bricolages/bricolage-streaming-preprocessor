@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+
 import lombok.*;
 
 @RequiredArgsConstructor
@@ -23,14 +25,14 @@ public class ReferenceGenerator {
             val typeNameAnno = clazz.getAnnotation(JsonTypeName.class);
             if (typeNameAnno == null) { continue; }
 
-            docBuilder.append("## `" + typeNameAnno.value() + "` domain\n");
+            docBuilder.append("## `" + typeNameAnno.value() + "` type\n");
             val classDescAnno = clazz.getAnnotation(MultilineDescription.class);
             if (classDescAnno != null) {
                 val classDesc = String.join("\n\n", classDescAnno.value());
                 docBuilder.append(classDesc + "\n\n");
             }
             val fields = Arrays.stream(clazz.getDeclaredFields()).
-                filter(field -> field.getAnnotation(JsonProperty.class) != null).
+                filter(field -> field.getAnnotation(JsonProperty.class) != null || field.getAnnotation(MultilineDescription.class) != null).
                 collect(Collectors.toList());
             if (fields.isEmpty()) {
                 docBuilder.append("No parameters.\n\n");
@@ -39,7 +41,12 @@ public class ReferenceGenerator {
 
             for (val field: fields) {
                 val fieldTypeName = field.getType().getSimpleName();
-                docBuilder.append("- `" + field.getName() + "`: `" + fieldTypeName + "`\n");
+                val fieldPropAnnno = field.getAnnotation(JsonProperty.class);
+                String fieldName = field.getName().replaceAll("([^_A-Z])([A-Z])", "$1_$2").toLowerCase();
+                if (fieldPropAnnno != null) {
+                    fieldName = fieldPropAnnno.value();
+                }
+                docBuilder.append("- `" + fieldName + "`: `" + fieldTypeName + "`\n");
                 val fieldDescAnno = field.getAnnotation(MultilineDescription.class);
                 if (fieldDescAnno != null) {
                     val fieldDesc = String.join("\n\n", fieldDescAnno.value());
@@ -49,7 +56,7 @@ public class ReferenceGenerator {
             docBuilder.append("\n");
         }
 
-        val file = new File("domains.md");
+        val file = new File("types.md");
         try (val os = new FileOutputStream(file)) {
             os.write(docBuilder.toString().getBytes());
         }

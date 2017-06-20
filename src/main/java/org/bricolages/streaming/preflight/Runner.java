@@ -15,7 +15,6 @@ import org.bricolages.streaming.filter.FilterResult;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.filter.ObjectFilter;
 import org.bricolages.streaming.filter.OperatorDefinition;
-import org.bricolages.streaming.preflight.domains.DomainDefaultValues;
 import org.bricolages.streaming.s3.ObjectMapper;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.S3IOException;
@@ -32,19 +31,18 @@ public class Runner {
     final ObjectMapper mapper;
     final Config config;
 
-    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile) throws IOException {
-        val fileReader = new FileReader(streamDefFile.getFilepath());
-        return StreamDefinitionEntry.load(fileReader);
+    private DomainCollection loadDomainCollection(String domainCollectionFilePath) throws IOException {
+        try {
+            val fileReader = new FileReader(domainCollectionFilePath);
+            return DomainCollection.load(fileReader);
+        } catch(FileNotFoundException ex) {
+            return DomainCollection.empty();
+        }
     }
 
-    private PreflightConfig loadPreflightConfig(String defaultValuesFilePath) throws IOException {
-        try {
-            val fileReader = new FileReader(defaultValuesFilePath);
-            return PreflightConfig.load(fileReader);
-        }
-        catch (FileNotFoundException ex) {
-            return PreflightConfig.defaultInstance();
-        }
+    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile, DomainCollection domainCollection) throws IOException {
+        val fileReader = new FileReader(streamDefFile.getFilepath());
+        return StreamDefinitionEntry.load(fileReader, domainCollection);
     }
 
     private void saveCreateTableStmt(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, String fullTableName) throws IOException {
@@ -100,10 +98,9 @@ public class Runner {
     }
 
     public void run(String streamDefFilename, SourceLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, S3IOException {
-        val preflightConfig = loadPreflightConfig("config/preflight.yml");
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
-        val streamDef = loadStreamDef(streamDefFile);
-        streamDef.applyDefaultValues(preflightConfig.getDefaultValues());
+        val domainCollection = loadDomainCollection("config/domains.yml");
+        val streamDef = loadStreamDef(streamDefFile, domainCollection);
 
         val mapping = mapper.map(src.toString());
         if (mapping == null) {

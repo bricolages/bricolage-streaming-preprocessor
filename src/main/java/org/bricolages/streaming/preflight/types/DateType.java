@@ -1,10 +1,8 @@
-package org.bricolages.streaming.preflight.domains;
+package org.bricolages.streaming.preflight.types;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,18 +12,15 @@ import lombok.*;
 @JsonTypeName("date")
 @MultilineDescription("Date")
 @NoArgsConstructor
-public class DateDomain implements ColumnParametersEntry {
+public class DateType extends PrimitiveType {
     @Getter private final String type = "date";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         val list = new ArrayList<OperatorDefinitionEntry>();
         return list;
     }
 
-    public void applyDefault(DomainDefaultValues defaultValues) {
-    }
-
     // This is necessary to accept empty value
-    @JsonCreator public DateDomain(String nil) { /* noop */ }
+    @JsonCreator public DateType(String nil) { /* noop */ }
 }

@@ -1,10 +1,9 @@
-package org.bricolages.streaming.preflight.domains;
+package org.bricolages.streaming.preflight.types;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.ColumnParametersEntry;
 import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import org.bricolages.streaming.ConfigError;
@@ -15,7 +14,7 @@ import lombok.*;
 @JsonTypeName("timestamp")
 @MultilineDescription("Timestamp with zone adjust")
 @NoArgsConstructor
-public class TimestampDomain implements ColumnParametersEntry {
+public class TimestampType extends PrimitiveType {
     @Getter
     @MultilineDescription("Source timezone, given by the string like '+00:00'")
     private String sourceOffset;
@@ -27,7 +26,7 @@ public class TimestampDomain implements ColumnParametersEntry {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries(String columnName) {
+    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
         if (sourceOffset == null) {
             throw new ConfigError("missing parameter: sourceOffset");
         }
@@ -38,21 +37,10 @@ public class TimestampDomain implements ColumnParametersEntry {
         params.setSourceOffset(sourceOffset);
         params.setTargetOffset(targetOffset);
         val ops = new ArrayList<OperatorDefinitionEntry>();
-        ops.add(new OperatorDefinitionEntry("timezone", columnName, params));
+        ops.add(new OperatorDefinitionEntry("timezone", params));
         return ops;
     }
 
-    public void applyDefault(DomainDefaultValues defaultValues) {
-        val defaultValue = defaultValues.getTimestamp();
-        if (defaultValue == null) { return; }
-        if (this.sourceOffset == null) {
-            this.sourceOffset = defaultValue.sourceOffset;
-        }
-        if (this.targetOffset == null) {
-            this.targetOffset = defaultValue.targetOffset;
-        }
-    }
-
     // This is necessary to accept empty value
-    @JsonCreator public TimestampDomain(String nil) { /* noop */ }
+    @JsonCreator public TimestampType(String nil) { /* noop */ }
 }

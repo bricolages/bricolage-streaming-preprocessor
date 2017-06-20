@@ -30,12 +30,12 @@ class CreateTableGenerator {
         sb.append(sj.toString());
     }
 
-    String generateColumnDefinition(ColumnDefinitionEntry columnDef) {
+    String generateColumnDefinition(ColumnParametersEntry columnDef) {
         val sj = new StringJoiner(" ", " ", "");
-        sj.add(columnDef.getColumName());
-        sj.add(columnDef.getParams().getType());
+        sj.add(columnDef.getName());
+        sj.add(columnDef.getType());
         sj.add("encode");
-        sj.add(columnDef.getParams().getEncoding().toString());
+        sj.add(columnDef.getEncoding().toString());
         
         return sj.toString();
     }
