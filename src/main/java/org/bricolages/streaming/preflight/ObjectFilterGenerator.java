@@ -16,14 +16,18 @@ class ObjectFilterGenerator {
     }
 
     public List<OperatorDefinition> generate() {
-        return generateOperatorDefinitions().collect(Collectors.toList());
+        val allOperators = new ArrayList<OperatorDefinition>();
+        val singleColumnOperators = generateSingleColumnOperators().collect(Collectors.toList());
+        allOperators.addAll(singleColumnOperators);
+        allOperators.add(new OperatorDefinition("deletenulls", "*", "{}", allOperators.size() * 10));
+        return singleColumnOperators;
     }
 
-    private Stream<OperatorDefinition> generateOperatorDefinitions() {
-        return streamDef.getColumns().stream().flatMap(this::generateSingleColumnOperators);
+    private Stream<OperatorDefinition> generateSingleColumnOperators() {
+        return streamDef.getColumns().stream().flatMap(this::generateSingleColumnOperatorsPerColumn);
     }
 
-    private Stream<OperatorDefinition> generateSingleColumnOperators(ColumnParametersEntry columnDef) {
+    private Stream<OperatorDefinition> generateSingleColumnOperatorsPerColumn(ColumnParametersEntry columnDef) {
         val columnName = columnDef.getName();
         try {
             val opDefs = columnDef.getOperatorDefinitionEntries();
@@ -38,7 +42,6 @@ class ObjectFilterGenerator {
             for (val opDef: opDefs) {
                 ret.add(new OperatorDefinition(opDef.getOperatorId(), columnName, opDef.getParams(), ret.size() * 10));
             }
-            ret.add(new OperatorDefinition("deletenulls", "*", "{}", ret.size() * 10));
             return ret.stream();
         }
         catch (ConfigError ex) {
