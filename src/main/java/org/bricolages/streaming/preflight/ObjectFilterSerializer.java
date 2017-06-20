@@ -21,7 +21,11 @@ class ObjectFilterSerializer {
         val rows = operators.stream().map(op -> {
             ArrayList<String> row = new ArrayList<String>(5);
             row.add(streamName);
-            row.add(op.getTargetColumn());
+            if (op.isSingleColumn()) {
+                row.add(op.getTargetColumn());
+            } else {
+                row.add("*");
+            }
             row.add(String.valueOf(op.getApplicationOrder()));
             row.add(op.getOperatorId());
             row.add(op.getParams());
