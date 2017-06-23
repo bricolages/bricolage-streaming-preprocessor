@@ -15,6 +15,7 @@ import org.bricolages.streaming.filter.FilterResult;
 import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.filter.ObjectFilter;
 import org.bricolages.streaming.filter.OperatorDefinition;
+import org.bricolages.streaming.preflight.definition.*;
 import org.bricolages.streaming.s3.ObjectMapper;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.S3IOException;
@@ -40,9 +41,18 @@ public class Runner {
         }
     }
 
-    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile, DomainCollection domainCollection) throws IOException {
+    private WellknownColumnCollection loadWellknownCollumnCollection(String wellknownColumnCollectionFilePath, DomainCollection domainCollection) throws IOException {
+        try {
+            val fileReader = new FileReader(wellknownColumnCollectionFilePath);
+            return WellknownColumnCollection.load(fileReader, domainCollection);
+        } catch(FileNotFoundException ex) {
+            return WellknownColumnCollection.empty();
+        }
+    }
+
+    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile, DomainCollection domainCollection, WellknownColumnCollection columnCollection) throws IOException {
         val fileReader = new FileReader(streamDefFile.getFilepath());
-        return StreamDefinitionEntry.load(fileReader, domainCollection);
+        return StreamDefinitionEntry.load(fileReader, domainCollection, columnCollection);
     }
 
     private void saveCreateTableStmt(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, String fullTableName) throws IOException {
@@ -100,7 +110,8 @@ public class Runner {
     public void run(String streamDefFilename, SourceLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, S3IOException {
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
         val domainCollection = loadDomainCollection("config/domains.yml");
-        val streamDef = loadStreamDef(streamDefFile, domainCollection);
+        val wellknownColumnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
+        val streamDef = loadStreamDef(streamDefFile, domainCollection, wellknownColumnCollection);
 
         val mapping = mapper.map(src.toString());
         if (mapping == null) {

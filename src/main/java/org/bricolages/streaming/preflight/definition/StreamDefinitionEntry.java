@@ -1,31 +1,33 @@
-package org.bricolages.streaming.preflight;
+package org.bricolages.streaming.preflight.definition;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
-import org.bricolages.streaming.preflight.DomainCollection.DomainResolver;
+import org.bricolages.streaming.preflight.definition.DomainCollection.DomainResolver;
+import org.bricolages.streaming.preflight.definition.WellknownColumnCollection.WellknownColumnResolver;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.*;
 
-class StreamDefinitionEntry {
-    @Getter private List<ColumnParametersEntry> columns;
+public class StreamDefinitionEntry {
+    @Getter private List<ColumnDefinition> columns;
 
-    void validate() {
+    public void validate() {
         val names = new HashMap<String, Integer>();
         for (int index = 0; index < columns.size(); index++) {
-            ColumnParametersEntry columnDef = columns.get(index);
+            ColumnDefinition columnDef = columns.get(index);
             String name;
             String type;
             ColumnEncoding encoding;
             try {
                 name = columnDef.getName();
-                type = columnDef.getType();
-                encoding = columnDef.getEncoding();
+                type = columnDef.getDomain().getType();
+                encoding = columnDef.getDomain().getEncoding();
             } catch (DomainResolutionException ex) {
                 throw new StreamDefinitionLoadingException(index, ex.getMessage());
             }
@@ -51,8 +53,10 @@ class StreamDefinitionEntry {
         }
     }
 
-    static StreamDefinitionEntry load(Reader yamlSource, DomainCollection domains) throws IOException {
-        InjectableValues inject = new InjectableValues.Std().addValue(DomainResolver.class, domains.getResolver());
+    public static StreamDefinitionEntry load(Reader yamlSource, DomainCollection domainCollection, WellknownColumnCollection columnCollection) throws IOException {
+        InjectableValues inject = new InjectableValues.Std()
+            .addValue(DomainResolver.class, domainCollection.getResolver())
+            .addValue(WellknownColumnResolver.class, columnCollection.getResolver());
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
             .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE)
             .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);

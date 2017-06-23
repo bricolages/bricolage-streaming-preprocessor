@@ -1,4 +1,4 @@
-package org.bricolages.streaming.preflight;
+package org.bricolages.streaming.preflight.definition;
 
 import java.io.IOException;
 import com.fasterxml.jackson.annotation.JsonProperty;

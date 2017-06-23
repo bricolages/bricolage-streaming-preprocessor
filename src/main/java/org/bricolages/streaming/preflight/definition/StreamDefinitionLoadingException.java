@@ -1,4 +1,4 @@
-package org.bricolages.streaming.preflight;
+package org.bricolages.streaming.preflight.definition;
 
 class StreamDefinitionLoadingException extends RuntimeException {
     StreamDefinitionLoadingException(int columnIndex, String message) {
