@@ -1,6 +1,9 @@
 package org.bricolages.streaming.preflight;
 import org.bricolages.streaming.filter.OperatorDefinition;
 import org.bricolages.streaming.filter.RenameOp;
+import org.bricolages.streaming.preflight.definition.ColumnDefinition;
+import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
+import org.bricolages.streaming.preflight.definition.StreamDefinitionEntry;
 import org.bricolages.streaming.ConfigError;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,24 +23,24 @@ class ObjectFilterGenerator {
         val singleColumnOperators = generateSingleColumnOperators().collect(Collectors.toList());
         allOperators.addAll(singleColumnOperators);
         allOperators.add(new OperatorDefinition("deletenulls", "*", "{}", allOperators.size() * 10));
-        return singleColumnOperators;
+        return allOperators;
     }
 
     private Stream<OperatorDefinition> generateSingleColumnOperators() {
         return streamDef.getColumns().stream().flatMap(this::generateSingleColumnOperatorsPerColumn);
     }
 
-    private Stream<OperatorDefinition> generateSingleColumnOperatorsPerColumn(ColumnParametersEntry columnDef) {
+    private Stream<OperatorDefinition> generateSingleColumnOperatorsPerColumn(ColumnDefinition columnDef) {
         val columnName = columnDef.getName();
         try {
-            val opDefs = columnDef.getOperatorDefinitionEntries();
+            val opDefs = columnDef.getDomain().getOperatorDefinitionEntries();
             val originalName = columnDef.getOriginalName();
             val ret = new ArrayList<OperatorDefinition>();
             if (originalName != null) {
-                val renameParams = new RenameOp.Parameters();
+                {val renameParams = new RenameOp.Parameters();
                 renameParams.setTo(columnName);
                 val opDef = new OperatorDefinitionEntry("rename", renameParams);
-                ret.add(new OperatorDefinition(opDef.getOperatorId(), originalName, opDef.getParams(), 0));
+                ret.add(new OperatorDefinition(opDef.getOperatorId(), originalName, opDef.getParams(), 0));}
             }
             for (val opDef: opDefs) {
                 ret.add(new OperatorDefinition(opDef.getOperatorId(), columnName, opDef.getParams(), ret.size() * 10));

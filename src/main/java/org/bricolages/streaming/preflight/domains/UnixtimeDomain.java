@@ -1,9 +1,9 @@
-package org.bricolages.streaming.preflight.types;
+package org.bricolages.streaming.preflight.domains;
 import java.util.ArrayList;
 import java.util.List;
 import org.bricolages.streaming.filter.UnixTimeOp;
-import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
+import org.bricolages.streaming.preflight.definition.ColumnEncoding;
+import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import org.bricolages.streaming.ConfigError;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,7 +13,7 @@ import lombok.*;
 @JsonTypeName("unixtime")
 @MultilineDescription("Timestamp converted from unix time")
 @NoArgsConstructor
-public class UnixtimeType extends PrimitiveType {
+public class UnixtimeDomain extends PrimitiveDomain {
     @Getter
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String zoneOffset;
@@ -33,5 +33,5 @@ public class UnixtimeType extends PrimitiveType {
     }
 
     // This is necessary to accept empty value
-    @JsonCreator public UnixtimeType(String nil) { /* noop */ }
+    @JsonCreator public UnixtimeDomain(String nil) { /* noop */ }
 }

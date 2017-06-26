@@ -1,10 +1,10 @@
-package org.bricolages.streaming.preflight.types;
+package org.bricolages.streaming.preflight.domains;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.bricolages.streaming.preflight.ColumnEncoding;
-import org.bricolages.streaming.preflight.OperatorDefinitionEntry;
+import org.bricolages.streaming.preflight.definition.ColumnEncoding;
+import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -12,7 +12,7 @@ import lombok.*;
 
 @JsonTypeName("float")
 @MultilineDescription("64bit floating point number")
-public class FloatType extends PrimitiveType {
+public class FloatDomain extends PrimitiveDomain {
     @Getter private final String type = "float";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
@@ -23,5 +23,5 @@ public class FloatType extends PrimitiveType {
     }
 
     // This is necessary to accept null value
-    @JsonCreator public FloatType(String nil) { /* noop */ }
+    @JsonCreator public FloatDomain(String nil) { /* noop */ }
 }

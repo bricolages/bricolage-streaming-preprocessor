@@ -1,4 +1,4 @@
-package org.bricolages.streaming.preflight;
+package org.bricolages.streaming.preflight.definition;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.*;

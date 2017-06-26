@@ -1,4 +1,7 @@
 package org.bricolages.streaming.preflight;
+
+import org.bricolages.streaming.preflight.definition.ColumnDefinition;
+import org.bricolages.streaming.preflight.definition.StreamDefinitionEntry;
 import java.util.StringJoiner;
 import lombok.*;
 
@@ -30,12 +33,12 @@ class CreateTableGenerator {
         sb.append(sj.toString());
     }
 
-    String generateColumnDefinition(ColumnParametersEntry columnDef) {
+    String generateColumnDefinition(ColumnDefinition columnDef) {
         val sj = new StringJoiner(" ", " ", "");
         sj.add(columnDef.getName());
-        sj.add(columnDef.getType());
+        sj.add(columnDef.getDomain().getType());
         sj.add("encode");
-        sj.add(columnDef.getEncoding().toString());
+        sj.add(columnDef.getDomain().getEncoding().toString());
         
         return sj.toString();
     }

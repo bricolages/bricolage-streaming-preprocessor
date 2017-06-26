@@ -1,4 +1,4 @@
-package org.bricolages.streaming.preflight;
+package org.bricolages.streaming.preflight.definition;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.*;
 
-public class DomainCollection extends HashMap<String, ColumnParametersEntry> {
-    static DomainCollection load(Reader yamlSource) throws IOException {
+public class DomainCollection extends HashMap<String, DomainParameters> {
+    public static DomainCollection load(Reader yamlSource) throws IOException {
         DomainResolver resolver = new DomainResolver();
         InjectableValues inject = new InjectableValues.Std().addValue(DomainResolver.class, resolver);
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
@@ -22,7 +22,7 @@ public class DomainCollection extends HashMap<String, ColumnParametersEntry> {
         return domainCollection;
     }
 
-    static DomainCollection empty() {
+    public static DomainCollection empty() {
         return new DomainCollection();
     }
 
@@ -35,7 +35,7 @@ public class DomainCollection extends HashMap<String, ColumnParametersEntry> {
     public static class DomainResolver {
         @Setter DomainCollection domainCollection;
 
-        public ColumnParametersEntry resolve(String domainName) {
+        public DomainParameters resolve(String domainName) {
             val domain = this.domainCollection.get(domainName);
             if (domain == null) {
                 throw new DomainResolutionException(String.format("undefined domain: `%s`", domainName));

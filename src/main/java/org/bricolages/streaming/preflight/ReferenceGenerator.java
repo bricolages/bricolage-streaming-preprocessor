@@ -7,10 +7,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import org.bricolages.streaming.preflight.definition.DomainParametersEntry;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import lombok.*;
 
@@ -19,7 +21,7 @@ public class ReferenceGenerator {
     public void generate() throws IOException {
         val docBuilder = new StringBuilder();
 
-        val annotation = ColumnParametersEntry.class.getAnnotation(JsonSubTypes.class);
+        val annotation = DomainParametersEntry.class.getAnnotation(JsonSubTypes.class);
         for (val type: annotation.value()) {
             val clazz = type.value();
             val typeNameAnno = clazz.getAnnotation(JsonTypeName.class);
