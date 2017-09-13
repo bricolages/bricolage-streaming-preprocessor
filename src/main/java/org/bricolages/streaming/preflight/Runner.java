@@ -87,8 +87,8 @@ public class Runner {
         private final String filepathWithoutExt;
 
         StreamDefinitionFile(String filepath) {
-            if (!FilenameUtils.isExtension(filepath, "yml")) {
-                throw new IllegalArgumentException("extension of stream definition file must be 'yml'");
+            if (!FilenameUtils.isExtension(filepath, "yml") && !FilenameUtils.isExtension(filepath, "strdef")) {
+                throw new IllegalArgumentException("extension of stream definition file must be 'yml' or 'strdef'");
             }
             this.filepath = filepath;
             this.filepathWithoutExt = FilenameUtils.removeExtension(filepath);
