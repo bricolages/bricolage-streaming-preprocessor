@@ -184,7 +184,12 @@ public class Preprocessor implements EventHandlers {
         String srcBucket = src.bucket();
         val mapResult = mapper.map(src.urlString());
         if (mapResult == null) {
+            // object mapping failed; this means invalid event or bad configuration.
+            // We should remove invalid events from queue and
+            // we must fix bad configuration by hand.
+            // We cannot resolve latter case automatically, optimize for former case.
             logNotMappedObject(src.toString());
+            eventQueue.deleteAsync(event);
             return;
         }
         String streamName = mapResult.getStreamName();
