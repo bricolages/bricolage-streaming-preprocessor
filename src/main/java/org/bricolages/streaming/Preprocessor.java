@@ -188,7 +188,8 @@ public class Preprocessor implements EventHandlers {
             // We should remove invalid events from queue and
             // we must fix bad configuration by hand.
             // We cannot resolve latter case automatically, optimize for former case.
-            logNotMappedObject(src.toString());
+            //logNotMappedObject(src.toString());
+            log.info("remove unmapped S3 object: {}", src.toString());
             eventQueue.deleteAsync(event);
             return;
         }
