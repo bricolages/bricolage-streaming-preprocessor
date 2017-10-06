@@ -180,6 +180,11 @@ public class Preprocessor implements EventHandlers {
     @Override
     public void handleS3Event(S3Event event) {
         log.debug("handling URL: {}", event.getLocation().toString());
+        if (event.isCopyEvent()) {
+            log.info("remove CopyEvent: {}", event.toString());
+            eventQueue.deleteAsync(event);
+            return;
+        }
         S3ObjectLocation src = event.getLocation();
         String srcBucket = src.bucket();
         val mapResult = mapper.map(src.urlString());
