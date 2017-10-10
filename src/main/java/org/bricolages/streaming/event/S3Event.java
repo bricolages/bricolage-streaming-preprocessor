@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.Objects;
 import lombok.*;
 
 @Getter
@@ -55,6 +56,7 @@ public class S3Event extends Event {
             S3EventNotification.S3EventNotificationRecord rec = body.getRecords().get(0);
             return new S3Event(
                 msg,
+                rec.getEventName(),
                 new S3ObjectLocation(
                     rec.getS3().getBucket().getName(),
                     URLDecoder.decode(rec.getS3().getObject().getKey(), "UTF-8")
@@ -69,13 +71,15 @@ public class S3Event extends Event {
         }
     }
 
+    final String eventName;
     final S3ObjectLocation location;
     final long objectSize;
     final S3EventNotification.S3EventNotificationRecord record;
     final boolean noDispatch;
 
-    S3Event(Message msg, S3ObjectLocation location, long objectSize, S3EventNotification.S3EventNotificationRecord record, boolean noDispatch) {
+    S3Event(Message msg, String eventName, S3ObjectLocation location, long objectSize, S3EventNotification.S3EventNotificationRecord record, boolean noDispatch) {
         super(msg);
+        this.eventName = eventName;
         this.location = location;
         this.objectSize = objectSize;
         this.record = record;
@@ -86,12 +90,16 @@ public class S3Event extends Event {
         h.handleS3Event(this);
     }
 
+    public boolean isCopyEvent() {
+        return Objects.equals(eventName, "ObjectCreated:Copy");
+    }
+
     public boolean doesNotDispatch() {
         return noDispatch;
     }
 
     @Override
     public String toString() {
-        return "#<S3Event messageId=" + getMessageId() + ", object=" + location + ">";
+        return "#<S3Event " + eventName + " messageId=" + getMessageId() + ", object=" + location + ">";
     }
 }
