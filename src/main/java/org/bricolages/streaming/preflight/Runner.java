@@ -113,7 +113,7 @@ public class Runner {
         val wellknownColumnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
         val streamDef = loadStreamDef(streamDefFile, domainCollection, wellknownColumnCollection);
 
-        val mapping = mapper.map(src.toString());
+        val mapping = mapper.mapByPatterns(src.toString());
         if (mapping == null) {
             throw new ConfigError("could not map source URL");
         }

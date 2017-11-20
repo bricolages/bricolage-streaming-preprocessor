@@ -22,27 +22,27 @@ public class ObjectMapperTest {
     public void map() throws Exception {
         val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
-        val result = map.map("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
+        val result = map.mapByPatterns("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
         assertEquals("schema.table", result.getStreamName());
-        assertNull(map.map("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz"));
+        assertNull(map.mapByPatterns("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz"));
     }
 
     @Test
     public void map_localfile() throws Exception {
         val map = newMapper(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
-        val result = map.map("file:/path/to/src-bucket/src-prefix/schema.table/datafile.json.gz");
+        val result = map.mapByPatterns("file:/path/to/src-bucket/src-prefix/schema.table/datafile.json.gz");
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
         assertEquals("schema.table", result.getStreamName());
-        assertNull(map.map("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz"));
+        assertNull(map.mapByPatterns("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz"));
     }
     
     @Test(expected=ConfigError.class)
     public void map_baddest() throws Exception {
         val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
-        map.map("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
+        map.mapByPatterns("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
     }
 
     @Test(expected=ConfigError.class)

@@ -1,5 +1,4 @@
 package org.bricolages.streaming;
-
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import lombok.*;
@@ -12,6 +11,17 @@ public interface StreamBundleRepository extends JpaRepository<StreamBundle, Long
         if (list.isEmpty()) return null;
         if (list.size() > 1) {
             throw new ApplicationError("FATAL: multiple stream bundle matched: " + stream.id + ", " + prefix);
+        }
+        return list.get(0);
+    }
+
+    List<StreamBundle> findByBucketAndPrefix(String bucket, String prefix);
+
+    default StreamBundle findStreamBundle(String bucket, String prefix) {
+        val list = findByBucketAndPrefix(bucket, prefix);
+        if (list.isEmpty()) return null;
+        if (list.size() > 1) {
+            throw new ApplicationError("FATAL: multiple stream bundle matched: bucket=" + bucket + ", prefix=" + prefix);
         }
         return list.get(0);
     }

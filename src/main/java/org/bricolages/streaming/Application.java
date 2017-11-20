@@ -118,7 +118,7 @@ public class Application {
         }
 
         if (mapUrl != null) {
-            val result = mapper().map(mapUrl.toString());
+            val result = mapper().mapByPatterns(mapUrl.toString());
             System.out.println(result.getDestLocation());
             System.exit(0);
         }

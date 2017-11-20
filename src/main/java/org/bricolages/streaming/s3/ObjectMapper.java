@@ -1,8 +1,15 @@
 package org.bricolages.streaming.s3;
+import org.bricolages.streaming.ApplicationError;
 import org.bricolages.streaming.ConfigError;
 import org.bricolages.streaming.SourceLocator;
-import java.util.Objects;
+import org.bricolages.streaming.DataStream;
+import org.bricolages.streaming.DataStreamRepository;
+import org.bricolages.streaming.StreamBundle;
+import org.bricolages.streaming.StreamBundleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -10,7 +17,7 @@ import java.util.regex.PatternSyntaxException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class ObjectMapper {
     final List<Entry> entries;
@@ -26,9 +33,54 @@ public class ObjectMapper {
         }
     }
 
-    public Result map(String src) throws ConfigError {
+    public Result map(S3ObjectLocation loc) throws ConfigError {
+        Result r1 = mapByPrefix(loc.bucket(), loc.key());
+        if (r1 != null) return r1;
+        Result r2 = mapByPatterns(loc.urlString());
+        if (r2 != null) return r2;
+        logUnknownS3Object(loc.urlString());
+        return null;
+    }
+
+    @Autowired
+    DataStreamRepository streamRepos;
+
+    @Autowired
+    StreamBundleRepository streamBundleRepos;
+
+    Result mapByPrefix(String bucket, String key) {
+        val components = key.split("/");
+        if (components.length < 3) {
+            logUnknownS3Object("s3://" + bucket + "/" + key);
+            return null;
+        }
+        val prefix = components[0];
+        val objName = components[components.length - 1];
+        String[] prefixes = Arrays.copyOfRange(components, 1, components.length - 1);
+        val objPrefix = String.join("/", prefixes);
+
+        val bundle = streamBundleRepos.findStreamBundle(bucket, prefix);
+        if (bundle == null) return null;
+        val stream = bundle.getStream();
+        if (stream == null) throw new ApplicationError("FATAL: could not get stream for stream_bundle: stream_bundle_id=" + bundle.getId());
+        return new Result(
+            stream.getStreamName(),
+            bundle.getPrefix(),
+            bundle.getDestBucket(),
+            bundle.getDestPrefix(),
+            objPrefix,
+            objName
+        );
+    }
+
+    public void logUnknownS3Object(String srcUrl) {
+        // FIXME: error??
+        log.error("unknown S3 object URL: {}", srcUrl);
+    }
+
+    public Result mapByPatterns(String srcUrl) throws ConfigError {
         for (Entry ent : entries) {
-            Matcher m = ent.sourcePattern().matcher(src);
+            Matcher m = ent.sourcePattern().matcher(srcUrl);
             if (m.matches()) {
                 return new Result(
                     safeSubst(ent.streamName, m),
@@ -40,8 +92,6 @@ public class ObjectMapper {
                 );
             }
         }
-        // FIXME: error??
-        log.error("unknown S3 object URL: {}", src);
         return null;
     }
 
