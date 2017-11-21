@@ -1,5 +1,4 @@
 package org.bricolages.streaming;
-
 import javax.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +27,19 @@ public class StreamBundle {
     @Getter
     String prefix;
 
-    StreamBundle(DataStream stream, String bucket, String prefix) {
+    @Column(name="dest_bucket", nullable=false)
+    @Getter
+    String destBucket;
+
+    @Column(name="dest_prefix", nullable=false)
+    @Getter
+    String destPrefix;
+
+    StreamBundle(DataStream stream, String bucket, String prefix, String destBucket, String destPrefix) {
         this.stream = stream;
         this.bucket = bucket;
         this.prefix = prefix;
+        this.destBucket = destBucket;
+        this.destPrefix = destPrefix;
     }
 }

@@ -222,7 +222,7 @@ public class Preprocessor implements EventHandlers {
         StreamBundle streamBundle = streamBundleRepos.findStreamBundle(stream, srcBucket, streamPrefix);
         if (streamBundle == null) {
             try {
-                streamBundle = new StreamBundle(stream, srcBucket, streamPrefix);
+                streamBundle = new StreamBundle(stream, srcBucket, streamPrefix, mapResult.getDestBucket(), mapResult.getDestPrefix());
                 streamBundleRepos.save(streamBundle);
                 logNewStreamBundle(stream.getId(), streamPrefix);
             } catch (DataIntegrityViolationException ex) {
