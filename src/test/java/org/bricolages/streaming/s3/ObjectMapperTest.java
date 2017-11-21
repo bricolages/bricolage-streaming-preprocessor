@@ -10,8 +10,8 @@ public class ObjectMapperTest {
         return new ObjectMapper(Arrays.asList(entries));
     }
 
-    ObjectMapper.Entry entry(String srcUrlPattern, String streamName, String destBucket, String streamPrefix, String objectPrefix, String objectName) {
-        return new ObjectMapper.Entry(srcUrlPattern, streamName, destBucket, streamPrefix, objectPrefix, objectName);
+    ObjectMapper.Entry entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
+        return new ObjectMapper.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
     }
 
     S3ObjectLocation loc(String url) throws S3UrlParseException {
@@ -20,7 +20,7 @@ public class ObjectMapperTest {
 
     @Test
     public void map() throws Exception {
-        val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
         val result = map.map("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
@@ -30,7 +30,7 @@ public class ObjectMapperTest {
 
     @Test
     public void map_localfile() throws Exception {
-        val map = newMapper(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newMapper(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
         val result = map.map("file:/path/to/src-bucket/src-prefix/schema.table/datafile.json.gz");
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
@@ -40,14 +40,14 @@ public class ObjectMapperTest {
     
     @Test(expected=ConfigError.class)
     public void map_baddest() throws Exception {
-        val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
         map.map("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
     }
 
     @Test(expected=ConfigError.class)
     public void map_badregex() throws Exception {
-        val map = newMapper(entry("****", "$3", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newMapper(entry("****", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
     }
 }
