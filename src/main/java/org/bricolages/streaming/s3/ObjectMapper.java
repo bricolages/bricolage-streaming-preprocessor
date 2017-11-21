@@ -1,7 +1,6 @@
 package org.bricolages.streaming.s3;
 import org.bricolages.streaming.ConfigError;
 import org.bricolages.streaming.SourceLocator;
-
 import java.util.Objects;
 import java.nio.file.Paths;
 import java.util.List;
@@ -33,8 +32,9 @@ public class ObjectMapper {
             if (m.matches()) {
                 return new Result(
                     safeSubst(ent.streamName, m),
-                    ent.destBucket,
                     safeSubst(ent.streamPrefix, m),
+                    ent.destBucket,
+                    safeSubst(ent.destPrefix, m),
                     safeSubst(ent.objectPrefix, m),
                     safeSubst(ent.objectName, m)
                 );
@@ -58,16 +58,18 @@ public class ObjectMapper {
     public static final class Entry {
         @Setter public String srcUrlPattern;
         @Setter public String streamName;
-        @Setter public String destBucket;
         @Setter public String streamPrefix;
+        @Setter public String destBucket;
+        @Setter public String destPrefix;
         @Setter public String objectPrefix;
         @Setter public String objectName;
 
-        public Entry(String srcUrlPattern, String streamName, String destBucket, String streamPrefix, String objectPrefix, String objectName) {
+        public Entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
             this.srcUrlPattern = srcUrlPattern;
             this.streamName = streamName;
-            this.destBucket = destBucket;
             this.streamPrefix = streamPrefix;
+            this.destBucket = destBucket;
+            this.destPrefix = destPrefix;
             this.objectPrefix = objectPrefix;
             this.objectName = objectName;
         }
@@ -84,14 +86,14 @@ public class ObjectMapper {
     @RequiredArgsConstructor
     public static final class Result {
         @Getter private final String streamName;
-
-        @Getter private final String destBucket;
         @Getter private final String streamPrefix;
+        @Getter private final String destBucket;
+        @Getter private final String destPrefix;
         @Getter private final String objectPrefix;
         @Getter private final String objectName;
 
         public S3ObjectLocation getDestLocation() {
-            return new S3ObjectLocation(destBucket, Paths.get(streamPrefix, objectPrefix, objectName).toString());
+            return new S3ObjectLocation(destBucket, Paths.get(destPrefix, objectPrefix, objectName).toString());
         }
     }
 }

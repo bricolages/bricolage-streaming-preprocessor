@@ -21,8 +21,9 @@ bricolage:
         url: ${bricolage.log.queue.url}
     mappings:
         - src-url-pattern: "s3://src-bucket/(\\w{4}\\.(\\w+\\.\\w+))/(\\d{4}/\\d{2}/\\d{2})/(.*\\.gz)"
-          dest-bucket: dst-bucket
           stream-prefix: "$1"
           stream-name: "$2"
+          dest-bucket: dst-bucket
+          dest-prefix: "$1"
           object-prefix: "$3"
           object-name: "$4"
