@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.exception;
 
 public class ApplicationException extends Exception {
     public ApplicationException(String message) {

@@ -1,5 +1,7 @@
-package org.bricolages.streaming.s3;
-import org.bricolages.streaming.*;
+package org.bricolages.streaming.stream;
+import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.s3.*;
+import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -11,16 +13,16 @@ import lombok.*;
 
 @DataJpaTest
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ObjectMapperTest {
-    ObjectMapper newRouter(ObjectMapper.Entry... entries) {
-        val router = new ObjectMapper(Arrays.asList(entries));
+public class DataPacketRouterTest {
+    DataPacketRouter newRouter(DataPacketRouter.Entry... entries) {
+        val router = new DataPacketRouter(Arrays.asList(entries));
         router.streamRepos = streamRepos;
         router.streamBundleRepos = bundleRepos;
         return router;
     }
 
-    ObjectMapper.Entry entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
-        return new ObjectMapper.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
+    DataPacketRouter.Entry entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
+        return new DataPacketRouter.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
     }
 
     S3ObjectLocation loc(String url) throws S3UrlParseException {

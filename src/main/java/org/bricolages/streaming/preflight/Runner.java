@@ -1,5 +1,4 @@
 package org.bricolages.streaming.preflight;
-
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -10,18 +9,12 @@ import java.io.FileNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 import org.bricolages.streaming.Config;
 import org.bricolages.streaming.Preprocessor;
-import org.bricolages.streaming.SourceLocator;
-import org.bricolages.streaming.filter.FilterResult;
-import org.bricolages.streaming.filter.ObjectFilterFactory;
-import org.bricolages.streaming.filter.ObjectFilter;
-import org.bricolages.streaming.filter.OperatorDefinition;
 import org.bricolages.streaming.preflight.definition.*;
-import org.bricolages.streaming.s3.ObjectMapper;
-import org.bricolages.streaming.s3.S3Agent;
-import org.bricolages.streaming.s3.S3IOException;
-import org.bricolages.streaming.s3.S3ObjectLocation;
-import org.bricolages.streaming.ConfigError;
-
+import org.bricolages.streaming.stream.DataPacketRouter;
+import org.bricolages.streaming.filter.*;
+import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.s3.*;
+import org.bricolages.streaming.exception.*;
 import lombok.*;
 
 @RequiredArgsConstructor
@@ -29,7 +22,7 @@ public class Runner {
     final Preprocessor preprocessor;
     final ObjectFilterFactory factory;
     final S3Agent s3;
-    final ObjectMapper mapper;
+    final DataPacketRouter router;
     final Config config;
 
     private DomainCollection loadDomainCollection(String domainCollectionFilePath) throws IOException {
@@ -113,12 +106,12 @@ public class Runner {
         val wellknownColumnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
         val streamDef = loadStreamDef(streamDefFile, domainCollection, wellknownColumnCollection);
 
-        val mapping = mapper.mapByPatterns(src.toString());
-        if (mapping == null) {
+        val route = router.mapByPatterns(src.toString());
+        if (route == null) {
             throw new ConfigError("could not map source URL");
         }
-        val dest = mapping.getDestLocation();
-        val streamName = mapping.getStreamName();
+        val dest = route.getDestLocation();
+        val streamName = route.getStreamName();
 
         val generator = new ObjectFilterGenerator(streamDef);
         val operators = generator.generate();

@@ -1,5 +1,4 @@
-package org.bricolages.streaming;
-
+package org.bricolages.streaming.stream;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.*;

@@ -1,11 +1,7 @@
-package org.bricolages.streaming.s3;
-import org.bricolages.streaming.ApplicationError;
-import org.bricolages.streaming.ConfigError;
-import org.bricolages.streaming.SourceLocator;
-import org.bricolages.streaming.DataStream;
-import org.bricolages.streaming.DataStreamRepository;
-import org.bricolages.streaming.StreamBundle;
-import org.bricolages.streaming.StreamBundleRepository;
+package org.bricolages.streaming.stream;
+import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.s3.*;
+import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -19,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
-public class ObjectMapper {
+public class DataPacketRouter {
     final List<Entry> entries;
 
     void check() throws ConfigError {

@@ -1,14 +1,12 @@
 package org.bricolages.streaming;
-import org.bricolages.streaming.filter.ObjectFilterFactory;
-import org.bricolages.streaming.filter.OpBuilder;
+import org.bricolages.streaming.filter.*;
+import org.bricolages.streaming.event.*;
+import org.bricolages.streaming.stream.*;
+import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.s3.*;
+import org.bricolages.streaming.exception.*;
 import org.bricolages.streaming.preflight.ReferenceGenerator;
 import org.bricolages.streaming.preflight.Runner;
-import org.bricolages.streaming.event.EventQueue;
-import org.bricolages.streaming.event.LogQueue;
-import org.bricolages.streaming.event.SQSQueue;
-import org.bricolages.streaming.s3.S3Agent;
-import org.bricolages.streaming.s3.ObjectMapper;
-import org.bricolages.streaming.s3.S3ObjectLocation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -118,7 +116,7 @@ public class Application {
         }
 
         if (mapUrl != null) {
-            val result = mapper().mapByPatterns(mapUrl.toString());
+            val result = router().mapByPatterns(mapUrl.toString());
             System.out.println(result.getDestLocation());
             System.exit(0);
         }
@@ -183,12 +181,12 @@ public class Application {
 
     @Bean
     public Runner preflightRunner() {
-        return new Runner(preprocessor(), filterFactory(), s3(), mapper(), config);
+        return new Runner(preprocessor(), filterFactory(), s3(), router(), config);
     }
 
     @Bean
     public Preprocessor preprocessor() {
-        return new Preprocessor(eventQueue(), logQueue(), s3(), mapper(), filterFactory());
+        return new Preprocessor(eventQueue(), logQueue(), s3(), router(), filterFactory());
     }
 
     @Bean
@@ -214,8 +212,8 @@ public class Application {
     }
 
     @Bean
-    public ObjectMapper mapper() {
-        return new ObjectMapper(this.config.getMappings());
+    public DataPacketRouter router() {
+        return new DataPacketRouter(this.config.getRoutes());
     }
 
     @Bean

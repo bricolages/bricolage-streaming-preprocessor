@@ -1,5 +1,4 @@
-package org.bricolages.streaming;
-
+package org.bricolages.streaming.locator;
 import java.io.BufferedReader;
 import java.io.IOException;
 

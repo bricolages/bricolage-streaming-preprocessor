@@ -1,5 +1,5 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.ApplicationAbort;
+import org.bricolages.streaming.exception.ApplicationAbort;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;

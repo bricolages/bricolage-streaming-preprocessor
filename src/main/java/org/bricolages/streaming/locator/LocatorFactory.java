@@ -1,18 +1,17 @@
-package org.bricolages.streaming;
-
+package org.bricolages.streaming.locator;
+import org.bricolages.streaming.s3.S3Agent;
+import org.bricolages.streaming.s3.S3ObjectLocation;
+import org.bricolages.streaming.exception.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.bricolages.streaming.s3.S3Agent;
-import org.bricolages.streaming.s3.S3ObjectLocation;
-
 import lombok.*;
 
 @RequiredArgsConstructor
 public class LocatorFactory {
     final S3Agent s3agent;
 
-    SourceLocator parse(String urlString) throws URISyntaxException, IOException {
+    public SourceLocator parse(String urlString) throws URISyntaxException, IOException {
         val uri = new URI(urlString);
         val scheme = uri.getScheme();
         if (scheme == null) {
