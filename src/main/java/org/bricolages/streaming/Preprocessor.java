@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Objects;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -229,6 +230,13 @@ public class Preprocessor implements EventHandlers {
                 streamBundle = streamBundleRepos.findStreamBundle(stream, srcBucket, mapResult.getStreamPrefix());
             }
         }
+        if (! Objects.equals(streamBundle.getDestBucket(), mapResult.getDestBucket())) {
+            throw new ApplicationError("FATAL: assertion failed: dest_bucket is different: bundle=" + streamBundle.getDestBucket() + ", map=" + mapResult.getDestBucket());
+        }
+        if (! Objects.equals(streamBundle.getDestPrefix(), mapResult.getDestPrefix())) {
+            throw new ApplicationError("FATAL: assertion failed: dest_prefix is different: bundle=" + streamBundle.getDestPrefix() + ", map=" + mapResult.getDestPrefix());
+        }
+
         if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
             log.info("discard event: {}", event.getLocation().toString());
