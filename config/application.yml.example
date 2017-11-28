@@ -1,4 +1,6 @@
 spring:
+    main:
+        banner-mode: "off"
     datasource:
         url: jdbc:postgresql://DBHOST:5432/DBNAME
         driver-class-name: org.postgresql.Driver
