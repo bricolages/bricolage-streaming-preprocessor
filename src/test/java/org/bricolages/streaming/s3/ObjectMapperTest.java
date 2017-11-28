@@ -12,8 +12,11 @@ import lombok.*;
 @DataJpaTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ObjectMapperTest {
-    ObjectMapper newMapper(ObjectMapper.Entry... entries) {
-        return new ObjectMapper(Arrays.asList(entries));
+    ObjectMapper newRouter(ObjectMapper.Entry... entries) {
+        val router = new ObjectMapper(Arrays.asList(entries));
+        router.streamRepos = streamRepos;
+        router.streamBundleRepos = bundleRepos;
+        return router;
     }
 
     ObjectMapper.Entry entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
@@ -26,7 +29,7 @@ public class ObjectMapperTest {
 
     @Test
     public void mapByPatterns() throws Exception {
-        val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
         val result = map.mapByPatterns("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
@@ -36,7 +39,7 @@ public class ObjectMapperTest {
 
     @Test
     public void map_localfile() throws Exception {
-        val map = newMapper(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newRouter(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
         val result = map.mapByPatterns("file:/path/to/src-bucket/src-prefix/schema.table/datafile.json.gz");
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
@@ -46,14 +49,14 @@ public class ObjectMapperTest {
     
     @Test(expected=ConfigError.class)
     public void map_baddest() throws Exception {
-        val map = newMapper(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
         map.mapByPatterns("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
     }
 
     @Test(expected=ConfigError.class)
     public void map_badregex() throws Exception {
-        val map = newMapper(entry("****", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        val map = newRouter(entry("****", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         map.check();
     }
 
@@ -64,10 +67,18 @@ public class ObjectMapperTest {
     @Test
     public void map() throws Exception {
         entityManager.persist(new DataStream("schema.table"));
-        DataStream stream = streamRepos.findStream("schema.table");
-        entityManager.persist(new StreamBundle(stream, "src-bucket", "src-prefix", "dest-bucket-2", "dest-prefix-2"));
-        StreamBundle bundle = bundleRepos.findStreamBundle("src-bucket", "src-prefix");
-        assertNotNull(bundle.getId());
-        assertEquals("src-bucket", bundle.getBucket());
+        val stream = streamRepos.findStream("schema.table");
+        entityManager.persist(new StreamBundle(stream, "src-bucket-2", "src-prefix-2", "dest-bucket-2", "dest-prefix-2"));
+        val bundle = bundleRepos.findStreamBundle("src-bucket-2", "src-prefix-2");
+
+        val router = newRouter(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        router.check();
+
+        val result = router.map(loc("s3://src-bucket-2/src-prefix-2/schema.table/datafile.json.gz"));
+        assertEquals(loc("s3://dest-bucket-2/dest-prefix-2/schema.table/datafile.json.gz"), result.getDestLocation());
+        assertEquals("schema.table", result.getStreamName());
+
+        assertNull(router.map(loc("s3://src-bucket-UNKNOWN/src-prefix-UNKNOWN/schema.table/datafile.json.gz")));
+        assertNull(router.map(loc("s3://src-bucket-2/datafile.json.gz")));
     }
 }
