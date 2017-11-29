@@ -35,7 +35,7 @@ public class StreamBundle {
     @Getter
     String destPrefix;
 
-    StreamBundle(DataStream stream, String bucket, String prefix, String destBucket, String destPrefix) {
+    public StreamBundle(DataStream stream, String bucket, String prefix, String destBucket, String destPrefix) {
         this.stream = stream;
         this.bucket = bucket;
         this.prefix = prefix;

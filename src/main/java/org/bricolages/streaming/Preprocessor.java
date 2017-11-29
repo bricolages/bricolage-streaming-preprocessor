@@ -57,7 +57,7 @@ public class Preprocessor implements EventHandlers {
     }
 
     public boolean processUrl(SourceLocator src, BufferedWriter out) {
-        val mapResult = mapper.map(src.toString());
+        val mapResult = mapper.mapByPatterns(src.toString());
         if (mapResult == null) {
             log.warn("S3 object could not mapped: {}", src);
             return false;
@@ -188,7 +188,7 @@ public class Preprocessor implements EventHandlers {
         }
         S3ObjectLocation src = event.getLocation();
         String srcBucket = src.bucket();
-        val mapResult = mapper.map(src.urlString());
+        val mapResult = mapper.map(src);
         if (mapResult == null) {
             // object mapping failed; this means invalid event or bad configuration.
             // We should remove invalid events from queue and
