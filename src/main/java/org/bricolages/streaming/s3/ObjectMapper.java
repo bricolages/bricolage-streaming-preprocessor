@@ -48,16 +48,24 @@ public class ObjectMapper {
     @Autowired
     StreamBundleRepository streamBundleRepos;
 
+    /**
+     * Expects URL like: s3://src-bucket/prefix1/prefix2/prefix3/.../YYYY/MM/DD/objectName.gz
+     * streamPrefix: "prefix1/prefix2/prefix3/..."
+     * objectPrefix: "YYYY/MM/DD"
+     * objectName: "objectName.gz"
+     */
     Result mapByPrefix(String bucket, String key) {
         val components = key.split("/");
-        if (components.length < 3) {
+        if (components.length < 5) {
             logUnknownS3Object("s3://" + bucket + "/" + key);
             return null;
         }
-        val prefix = components[0];
+        String[] prefixComponents = Arrays.copyOfRange(components, 0, components.length - 4);
+        val prefix = String.join("/", prefixComponents);
+        String[] objPrefixComponents = Arrays.copyOfRange(components, components.length - 4, components.length - 1);
+        val objPrefix = String.join("/", objPrefixComponents);
         val objName = components[components.length - 1];
-        String[] prefixes = Arrays.copyOfRange(components, 1, components.length - 1);
-        val objPrefix = String.join("/", prefixes);
+        log.debug("parsed url: prefix={}, objPrefix={}, objName={}", prefix, objPrefix, objName);
 
         val bundle = streamBundleRepos.findStreamBundle(bucket, prefix);
         if (bundle == null) return null;

@@ -13,9 +13,6 @@ spring:
         time-between-eviction-runs-millis: 60000
         validation-query: "select 1"
 
-flyway:
-    enabled: false
-
 bricolage:
     event-queue:
         url: ${bricolage.event.queue.url}
