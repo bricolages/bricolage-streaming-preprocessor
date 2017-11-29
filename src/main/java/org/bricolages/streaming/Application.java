@@ -16,7 +16,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
@@ -192,7 +194,7 @@ public class Application {
     @Bean
     public EventQueue eventQueue() {
         val config = this.config.getEventQueue();
-        val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
+        val sqs = new SQSQueue(AmazonSQSClientBuilder.defaultClient(), config.url);
         if (config.visibilityTimeout > 0) sqs.setVisibilityTimeout(config.visibilityTimeout);
         if (config.maxNumberOfMessages > 0) sqs.setMaxNumberOfMessages(config.maxNumberOfMessages);
         if (config.waitTimeSeconds > 0) sqs.setWaitTimeSeconds(config.waitTimeSeconds);
@@ -202,13 +204,13 @@ public class Application {
     @Bean
     public LogQueue logQueue() {
         val config = this.config.getLogQueue();
-        val sqs = new SQSQueue(new AmazonSQSClient(), config.url);
+        val sqs = new SQSQueue(AmazonSQSClientBuilder.defaultClient(), config.url);
         return new LogQueue(sqs);
     }
 
     @Bean
     public S3Agent s3() {
-        return new S3Agent(new AmazonS3Client());
+        return new S3Agent(AmazonS3ClientBuilder.defaultClient());
     }
 
     @Bean
