@@ -1,10 +1,21 @@
 package org.bricolages.streaming.locator;
+import com.amazonaws.services.s3.AmazonS3URI;
 import java.nio.file.Paths;
 import lombok.*;
 
 @Getter
-@EqualsAndHashCode(of={"urlString"})
-public class S3ObjectLocator {
+@EqualsAndHashCode(of="urlString", callSuper=false)
+public class S3ObjectLocator extends Locator {
+    static public S3ObjectLocator parse(String url) throws LocatorParseException {
+        try {
+            val u = new AmazonS3URI(url);
+            return new S3ObjectLocator(u.getBucket(), u.getKey());
+        }
+        catch (IllegalArgumentException ex) {
+            throw new LocatorParseException("could not parse S3 URL: " + url);
+        }
+    }
+
     final String bucket;
     final String key;
     final String urlString;

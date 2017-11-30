@@ -14,8 +14,8 @@ public class S3ObjectMetadata {
     }
 
     // For tests
-    public S3ObjectMetadata(String url, Instant createdTime, long size, String eTag) throws S3UrlParseException {
-        this(S3ObjectLocator.forUrl(url), makeObjectMetadata(createdTime, size, eTag));
+    public S3ObjectMetadata(String url, Instant createdTime, long size, String eTag) throws LocatorParseException {
+        this(S3ObjectLocator.parse(url), makeObjectMetadata(createdTime, size, eTag));
     }
 
     static ObjectMetadata makeObjectMetadata(Instant createdTime, long size, String eTag) {

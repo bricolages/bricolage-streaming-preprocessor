@@ -1,5 +1,7 @@
 package org.bricolages.streaming.locator;
 import java.net.URI;
+import java.io.File;
+import java.io.IOException;
 import lombok.*;
 
 public class LocalFileLocator extends Locator {

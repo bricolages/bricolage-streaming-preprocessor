@@ -3,7 +3,6 @@ import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.locator.*;
-import org.bricolages.streaming.s3.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
@@ -18,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Preprocessor implements EventHandlers {
     final EventQueue eventQueue;
     final LogQueue logQueue;
-    final S3Agent s3;
+    final LocatorIOManager ioManager;
     final DataPacketRouter router;
     final ObjectFilterFactory filterFactory;
 
@@ -58,8 +57,8 @@ public class Preprocessor implements EventHandlers {
         eventQueue.flushDeleteForce();
     }
 
-    public boolean processUrl(S3ObjectLocation src, BufferedWriter out) {
-        val srcUrl = src.urlString();
+    public boolean processUrl(S3ObjectLocator src, BufferedWriter out) {
+        val srcUrl = src.toString();
         val route = router.routeWithoutDB(src);
         if (route == null) {
             log.warn("S3 object could not mapped: {}", srcUrl);
@@ -69,13 +68,13 @@ public class Preprocessor implements EventHandlers {
         FilterResult result = new FilterResult(srcUrl, null);
         try {
             ObjectFilter filter = filterFactory.load(route.getStream());
-            try (BufferedReader r = s3.openBufferedReader(src)) {
+            try (BufferedReader r = ioManager.openBufferedReader(src)) {
                 filter.apply(r, out, srcUrl, result);
             }
-            log.debug("src: {}, dest: {}, in: {}, out: {}", srcUrl, route.getDestLocation().urlString(), result.inputRows, result.outputRows);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", srcUrl, route.getDestLocator().toString(), result.inputRows, result.outputRows);
             return true;
         }
-        catch (IOException | S3IOException ex) {
+        catch (IOException | LocatorIOException ex) {
             log.error("src: {}, error: {}", srcUrl, ex.getMessage());
             return false;
         }
@@ -167,14 +166,14 @@ public class Preprocessor implements EventHandlers {
 
     @Override
     public void handleS3Event(S3Event event) {
-        log.debug("handling URL: {}", event.getLocation().toString());
+        log.debug("handling URL: {}", event.getLocator().toString());
         if (event.isCopyEvent()) {
             log.info("remove CopyEvent: {}", event.toString());
             eventQueue.deleteAsync(event);
             return;
         }
 
-        S3ObjectLocation src = event.getLocation();
+        S3ObjectLocator src = event.getLocator();
         val route = router.route(src);
         if (route == null) {
             // packet routing failed; this means invalid event or bad configuration.
@@ -187,21 +186,21 @@ public class Preprocessor implements EventHandlers {
             return;
         }
         val stream = route.getStream();
-        val dest = route.getDestLocation();
+        val dest = route.getDestLocator();
 
         if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
-            log.info("discard event: {}", event.getLocation().toString());
+            log.info("discard event: {}", event.getLocator().toString());
             eventQueue.deleteAsync(event);
             return;
         }
 
-        FilterResult result = new FilterResult(src.urlString(), dest.urlString());
+        FilterResult result = new FilterResult(src.toString(), dest.toString());
         try {
             repos.save(result);
             ObjectFilter filter = filterFactory.load(stream);
             S3ObjectMetadata obj = applyFilter(filter, src, dest, result, stream.getStreamName());
-            log.debug("src: {}, dest: {}, in: {}, out: {}", src.urlString(), dest.urlString(), result.inputRows, result.outputRows);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.toString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
             if (!event.doesNotDispatch() && !stream.doesNotDispatch()) {
@@ -211,17 +210,17 @@ public class Preprocessor implements EventHandlers {
             }
             eventQueue.deleteAsync(event);
         }
-        catch (S3IOException | IOException | ConfigError ex) {
-            log.error("src: {}, error: {}", src.urlString(), ex.getMessage());
+        catch (LocatorIOException | IOException | ConfigError ex) {
+            log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             result.failed(ex.getMessage());
             repos.save(result);
         }
     }
 
-    public S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, FilterResult result, String streamName) throws S3IOException, IOException {
-        try (S3Agent.Buffer buf = s3.openWriteBuffer(dest, streamName)) {
-            try (BufferedReader r = s3.openBufferedReader(src)) {
-                filter.apply(r, buf.getBufferedWriter(), src.urlString(), result);
+    public S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocator src, S3ObjectLocator dest, FilterResult result, String streamName) throws LocatorIOException, IOException {
+        try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest, streamName)) {
+            try (BufferedReader r = ioManager.openBufferedReader(src)) {
+                filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
             }
             return buf.commit();
         }

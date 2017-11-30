@@ -1,6 +1,5 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.locator.*;
-import org.bricolages.streaming.s3.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -66,10 +65,10 @@ public class DataPacketRouter {
         @Getter final String objectPrefix;
         @Getter final String objectName;
 
-        public S3ObjectLocation getDestLocation() {
+        public S3ObjectLocator getDestLocator() {
             if (stream == null) return null;
             if (bundle == null) return null;
-            return new S3ObjectLocation(bundle.getDestBucket(), Paths.get(bundle.getDestPrefix(), objectPrefix, objectName).toString());
+            return new S3ObjectLocator(bundle.getDestBucket(), Paths.get(bundle.getDestPrefix(), objectPrefix, objectName).toString());
         }
 
         public String getStreamName() {
@@ -78,7 +77,7 @@ public class DataPacketRouter {
         }
     }
 
-    public Result route(S3ObjectLocation src) throws ConfigError {
+    public Result route(S3ObjectLocator src) throws ConfigError {
         Result r1 = routeBySavedRoutes(src);
         if (r1 != null) return r1;
         Result r2 = routeByPatterns(src);
@@ -86,7 +85,7 @@ public class DataPacketRouter {
             return r2;
         }
         else {
-            logUnknownS3Object(src.urlString());
+            logUnknownS3Object(src.toString());
             return null;
         }
     }
@@ -103,10 +102,10 @@ public class DataPacketRouter {
      * objectPrefix: "YYYY/MM/DD"
      * objectName: "objectName.gz"
      */
-    Result routeBySavedRoutes(S3ObjectLocation src) {
+    Result routeBySavedRoutes(S3ObjectLocator src) {
         val components = src.key().split("/");
         if (components.length < 5) {
-            logUnknownS3Object(src.urlString());
+            logUnknownS3Object(src.toString());
             return null;
         }
         String[] prefixComponents = Arrays.copyOfRange(components, 0, components.length - 4);
@@ -124,7 +123,7 @@ public class DataPacketRouter {
         return new Result(stream, bundle, objPrefix, objName);
     }
 
-    Result routeByPatterns(S3ObjectLocation src) throws ConfigError {
+    Result routeByPatterns(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
         val stream = findOrCreateStream(components.streamName);
@@ -137,7 +136,7 @@ public class DataPacketRouter {
     }
 
     // For preflight
-    public Result routeWithoutDB(S3ObjectLocation src) throws ConfigError {
+    public Result routeWithoutDB(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
         val stream = new DataStream(components.streamName);
@@ -145,9 +144,9 @@ public class DataPacketRouter {
         return new Result(stream, bundle, components.objectPrefix, components.objectName);
     }
 
-    RouteComponents matchRoutes(S3ObjectLocation src) throws ConfigError {
+    RouteComponents matchRoutes(S3ObjectLocator src) throws ConfigError {
         for (Entry ent : entries) {
-            Matcher m = ent.sourcePattern().matcher(src.urlString());
+            Matcher m = ent.sourcePattern().matcher(src.toString());
             if (m.matches()) {
                 return new RouteComponents(
                     safeSubst(ent.streamName, m),

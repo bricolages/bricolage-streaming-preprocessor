@@ -3,7 +3,6 @@ import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.locator.*;
-import org.bricolages.streaming.s3.*;
 import org.bricolages.streaming.exception.*;
 import org.bricolages.streaming.preflight.ReferenceGenerator;
 import org.bricolages.streaming.preflight.Runner;
@@ -116,9 +115,9 @@ public class Application {
         }
 
         if (mapUrl != null) {
-            val src = S3ObjectLocation.forUrl(mapUrl);
+            val src = S3ObjectLocator.parse(mapUrl);
             val route = router().routeWithoutDB(src);
-            System.out.println(route.getDestLocation());
+            System.out.println(route.getDestLocator());
             System.exit(0);
         }
 
@@ -137,7 +136,7 @@ public class Application {
                 System.exit(1);
             }
             try {
-                val src = S3ObjectLocation.forUrl(procUrl);
+                val src = S3ObjectLocator.parse(procUrl);
                 preflightRunner().run(streamDefFilename, src, schemaName, tableName, generateOnly);
             }
             catch (ApplicationError ex) {
@@ -146,7 +145,7 @@ public class Application {
             }
         }
         else if (procUrl != null) {
-            val src = S3ObjectLocation.forUrl(procUrl);
+            val src = S3ObjectLocator.parse(procUrl);
             val out = new BufferedWriter(new OutputStreamWriter(System.out));
             val success = preproc.processUrl(src, out);
             out.flush();
@@ -184,12 +183,12 @@ public class Application {
 
     @Bean
     public Runner preflightRunner() {
-        return new Runner(preprocessor(), filterFactory(), s3(), router(), config);
+        return new Runner(preprocessor(), filterFactory(), router(), config);
     }
 
     @Bean
     public Preprocessor preprocessor() {
-        return new Preprocessor(eventQueue(), logQueue(), s3(), router(), filterFactory());
+        return new Preprocessor(eventQueue(), logQueue(), ioManager(), router(), filterFactory());
     }
 
     @Bean
@@ -210,8 +209,8 @@ public class Application {
     }
 
     @Bean
-    public S3Agent s3() {
-        return new S3Agent(AmazonS3ClientBuilder.defaultClient());
+    public LocatorIOManager ioManager() {
+        return new LocatorIOManager(AmazonS3ClientBuilder.defaultClient());
     }
 
     @Bean
@@ -230,10 +229,5 @@ public class Application {
     @Bean
     public OpBuilder opBuilder() {
         return new OpBuilder(sequentialNumberRepository);
-    }
-
-    @Bean
-    public LocatorFactory locatorFactory() {
-        return new LocatorFactory(s3());
     }
 }
