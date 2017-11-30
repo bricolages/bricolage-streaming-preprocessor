@@ -39,8 +39,8 @@ public class Application {
 
     public void run(String[] args) throws Exception {
         boolean oneshot = false;
-        SourceLocator mapUrl = null;
-        SourceLocator procUrl = null;
+        String mapUrl = null;
+        String procUrl = null;
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
@@ -81,7 +81,7 @@ public class Application {
                     System.err.println("missing argument for --map-url");
                     System.exit(1);
                 }
-                mapUrl = locatorFactory().parse(kv[1]);
+                mapUrl = kv[1];
             }
             else if (args[i].startsWith("--process-url=")) {
                 val kv = args[i].split("=", 2);
@@ -89,7 +89,7 @@ public class Application {
                     System.err.println("missing argument for --process-url");
                     System.exit(1);
                 }
-                procUrl = locatorFactory().parse(kv[1]);
+                procUrl = kv[1];
             }
             else if (args[i].equals("--generate-only")) {
                 generateOnly = true;
@@ -116,8 +116,9 @@ public class Application {
         }
 
         if (mapUrl != null) {
-            val result = router().mapByPatterns(mapUrl.toString());
-            System.out.println(result.getDestLocation());
+            val src = S3ObjectLocation.forUrl(mapUrl);
+            val route = router().routeWithoutDB(src);
+            System.out.println(route.getDestLocation());
             System.exit(0);
         }
 
@@ -136,7 +137,8 @@ public class Application {
                 System.exit(1);
             }
             try {
-                preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName, generateOnly);
+                val src = S3ObjectLocation.forUrl(procUrl);
+                preflightRunner().run(streamDefFilename, src, schemaName, tableName, generateOnly);
             }
             catch (ApplicationError ex) {
                 System.err.println("preflight: error: " + ex.getMessage());
@@ -144,8 +146,9 @@ public class Application {
             }
         }
         else if (procUrl != null) {
+            val src = S3ObjectLocation.forUrl(procUrl);
             val out = new BufferedWriter(new OutputStreamWriter(System.out));
-            val success = preproc.processUrl(procUrl, out);
+            val success = preproc.processUrl(src, out);
             out.flush();
             if (success) {
                 System.err.println("SUCCEEDED");

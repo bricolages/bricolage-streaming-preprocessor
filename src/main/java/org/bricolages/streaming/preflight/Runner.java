@@ -100,13 +100,13 @@ public class Runner {
         }
     }
 
-    public void run(String streamDefFilename, SourceLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, S3IOException {
+    public void run(String streamDefFilename, S3ObjectLocation src, String schemaName, String tableName, boolean generateOnly) throws IOException, S3IOException {
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
         val domainCollection = loadDomainCollection("config/domains.yml");
         val wellknownColumnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
         val streamDef = loadStreamDef(streamDefFile, domainCollection, wellknownColumnCollection);
 
-        val route = router.mapByPatterns(src.toString());
+        DataPacketRouter.Result route = router.routeWithoutDB(src);
         if (route == null) {
             throw new ConfigError("could not map source URL");
         }
@@ -127,11 +127,11 @@ public class Runner {
         }
     }
 
-    void applyFilter(ObjectFilter filter, SourceLocator src, S3ObjectLocation dest, String streamName) throws IOException, S3IOException {
+    void applyFilter(ObjectFilter filter, S3ObjectLocation src, S3ObjectLocation dest, String streamName) throws IOException, S3IOException {
         System.err.printf("*** preproc start");
-        System.err.printf("preproc source     : %s\n", src.toString());
-        System.err.printf("preproc destination: %s\n", dest.toString());
-        val result = new FilterResult(src.toString(), dest.urlString());
+        System.err.printf("preproc source     : %s\n", src.urlString());
+        System.err.printf("preproc destination: %s\n", dest.urlString());
+        val result = new FilterResult(src.urlString(), dest.urlString());
         preprocessor.applyFilter(filter, src, dest, result, streamName);
         System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", result.inputRows, result.outputRows, result.errorRows);
     }
