@@ -1,4 +1,5 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.stream;
+import org.bricolages.streaming.exception.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import lombok.*;

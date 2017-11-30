@@ -1,5 +1,5 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.ApplicationException;
+import org.bricolages.streaming.exception.ApplicationException;
 
 public class MessageParseException extends ApplicationException {
     MessageParseException(String message) {

@@ -1,6 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.junit.Test;
-import org.bricolages.streaming.ApplicationError;
+import org.bricolages.streaming.exception.ApplicationError;
 import static org.junit.Assert.*;
 import lombok.*;
 

@@ -4,7 +4,7 @@ import org.bricolages.streaming.filter.RenameOp;
 import org.bricolages.streaming.preflight.definition.ColumnDefinition;
 import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.definition.StreamDefinitionEntry;
-import org.bricolages.streaming.ConfigError;
+import org.bricolages.streaming.exception.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,5 +1,5 @@
 package org.bricolages.streaming.s3;
-import org.bricolages.streaming.ApplicationAbort;
+import org.bricolages.streaming.exception.ApplicationAbort;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;

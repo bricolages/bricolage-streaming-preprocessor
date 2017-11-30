@@ -1,7 +1,5 @@
 package org.bricolages.streaming.filter;
-
-import org.bricolages.streaming.ApplicationError;
-import org.bricolages.streaming.SequencialNumberRepository;
+import org.bricolages.streaming.exception.ApplicationError;
 import lombok.*;
 
 public class SequenceOp extends SingleColumnOp {

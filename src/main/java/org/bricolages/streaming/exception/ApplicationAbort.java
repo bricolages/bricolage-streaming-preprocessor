@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.exception;
 
 public class ApplicationAbort extends ApplicationError {
     public ApplicationAbort(String message) {

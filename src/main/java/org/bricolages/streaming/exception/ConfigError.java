@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.exception;
 
 public class ConfigError extends ApplicationError {
     public ConfigError(String message) {

@@ -1,5 +1,4 @@
-package org.bricolages.streaming;
-
+package org.bricolages.streaming.locator;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +9,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
-
 import lombok.*;
 
 public class LocalFileSourceLocator implements SourceLocator {

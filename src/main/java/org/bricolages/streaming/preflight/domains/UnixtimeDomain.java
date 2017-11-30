@@ -1,11 +1,11 @@
 package org.bricolages.streaming.preflight.domains;
-import java.util.ArrayList;
-import java.util.List;
 import org.bricolages.streaming.filter.UnixTimeOp;
 import org.bricolages.streaming.preflight.definition.ColumnEncoding;
 import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
-import org.bricolages.streaming.ConfigError;
+import org.bricolages.streaming.exception.*;
+import java.util.ArrayList;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;

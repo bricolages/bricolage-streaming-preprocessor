@@ -1,7 +1,10 @@
 package org.bricolages.streaming;
 import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
+import org.bricolages.streaming.stream.*;
+import org.bricolages.streaming.locator.*;
 import org.bricolages.streaming.s3.*;
+import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.io.BufferedReader;
@@ -17,7 +20,7 @@ public class Preprocessor implements EventHandlers {
     final EventQueue eventQueue;
     final LogQueue logQueue;
     final S3Agent s3;
-    final ObjectMapper mapper;
+    final DataPacketRouter router;
     final ObjectFilterFactory filterFactory;
 
     public void run() throws IOException {
@@ -57,7 +60,7 @@ public class Preprocessor implements EventHandlers {
     }
 
     public boolean processUrl(SourceLocator src, BufferedWriter out) {
-        val mapResult = mapper.mapByPatterns(src.toString());
+        val mapResult = router.mapByPatterns(src.toString());
         if (mapResult == null) {
             log.warn("S3 object could not mapped: {}", src);
             return false;
@@ -188,7 +191,7 @@ public class Preprocessor implements EventHandlers {
         }
         S3ObjectLocation src = event.getLocation();
         String srcBucket = src.bucket();
-        val mapResult = mapper.map(src);
+        val mapResult = router.map(src);
         if (mapResult == null) {
             // object mapping failed; this means invalid event or bad configuration.
             // We should remove invalid events from queue and

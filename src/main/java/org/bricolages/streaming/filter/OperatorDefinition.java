@@ -1,6 +1,6 @@
 package org.bricolages.streaming.filter;
-import org.bricolages.streaming.ConfigError;
-import org.bricolages.streaming.DataStream;
+import org.bricolages.streaming.exception.ConfigError;
+import org.bricolages.streaming.stream.DataStream;
 import javax.persistence.*;
 import java.util.List;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.stream;
 import javax.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
