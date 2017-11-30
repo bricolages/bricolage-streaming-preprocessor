@@ -1,7 +1,6 @@
 package org.bricolages.streaming.locator;
 import org.bricolages.streaming.s3.S3Agent;
 import org.bricolages.streaming.s3.S3ObjectLocation;
-import org.bricolages.streaming.exception.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,13 +24,5 @@ public class LocatorFactory {
             return new S3ObjectSourceLocator(s3agent, new S3ObjectLocation(uri.getHost(), uri.getPath().replaceFirst("^/", "")));
         }
         throw new UnsupportedSchemeException("Unsupported scheme: " + scheme);
-    }
-
-    public static class UnsupportedSchemeException extends ApplicationError {
-        static final long serialVersionUID = 1L;
-        
-        UnsupportedSchemeException(String message) {
-            super(message);
-        }
     }
 }
