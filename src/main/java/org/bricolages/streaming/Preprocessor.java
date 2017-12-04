@@ -185,7 +185,7 @@ public class Preprocessor implements EventHandlers {
 
         if (stream.doesDefer()) {
             // Processing is temporary disabled; process objects later
-            return null;
+            return;
         }
         if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
