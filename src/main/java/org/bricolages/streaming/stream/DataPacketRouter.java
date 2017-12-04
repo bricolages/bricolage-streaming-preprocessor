@@ -81,13 +81,10 @@ public class DataPacketRouter {
         Result r1 = routeBySavedRoutes(src);
         if (r1 != null) return r1;
         Result r2 = routeByPatterns(src);
-        if (r2 != null) {
-            return r2;
-        }
-        else {
-            logUnknownS3Object(src.toString());
-            return null;
-        }
+        if (r2 != null) return r2;
+
+        logUnknownS3Object(src);
+        return null;
     }
 
     @Autowired
@@ -105,7 +102,7 @@ public class DataPacketRouter {
     Result routeBySavedRoutes(S3ObjectLocator src) {
         val components = src.key().split("/");
         if (components.length < 5) {
-            logUnknownS3Object(src.toString());
+            log.info("could not apply routeBySavedRoutes: {}", src);
             return null;
         }
         String[] prefixComponents = Arrays.copyOfRange(components, 0, components.length - 4);
@@ -229,7 +226,7 @@ public class DataPacketRouter {
         log.warn("new stream bundle: stream_id={}, stream_prefix={}", streamId, streamPrefix);
     }
 
-    public void logUnknownS3Object(String url) {
-        log.warn("unknown S3 object URL: {}", url);
+    public void logUnknownS3Object(S3ObjectLocator loc) {
+        log.warn("unknown S3 object URL: {}", loc);
     }
 }

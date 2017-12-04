@@ -29,7 +29,7 @@ public class DataPacketRouterTest {
     }
 
     @Test
-    public void routeByPatterns() throws Exception {
+    public void routeWithoutDB() throws Exception {
         val router = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         router.check();
         val result = router.routeWithoutDB(loc("s3://src-bucket/src-prefix/schema.table/datafile.json.gz"));
@@ -37,6 +37,16 @@ public class DataPacketRouterTest {
         assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocator());
         assertEquals("schema.table", result.getStreamName());
         assertNull(router.routeWithoutDB(loc("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz")));
+    }
+
+    @Test
+    public void routeByPatterns() throws Exception {
+        val router = newRouter(entry("s3://src-bucket/(\\w{4}\\.(?:\\w+\\.\\w+\\.)?(\\w+\\.\\w+))/(\\d{4}/\\d{2}/\\d{2})/(.*\\.gz)", "$2", "$1", "dest-bucket", "$1", "$3", "$4"));
+        router.check();
+        val result = router.routeByPatterns(loc("s3://src-bucket/f34b.logger.activity.schema.activity_log/2017/12/04/20171204_0221_0_23bcc31f-b9fd-406e-abf0-09a7cea072ca.gz"));
+        assertNotNull(result);
+        assertEquals(loc("s3://dest-bucket/f34b.logger.activity.schema.activity_log/2017/12/04/20171204_0221_0_23bcc31f-b9fd-406e-abf0-09a7cea072ca.gz"), result.getDestLocator());
+        assertEquals("schema.activity_log", result.getStreamName());
     }
 
     /* FIXME: temporary off: We should not try to route local file
