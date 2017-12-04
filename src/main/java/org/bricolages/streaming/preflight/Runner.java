@@ -18,7 +18,6 @@ import lombok.*;
 
 @RequiredArgsConstructor
 public class Runner {
-    final Preprocessor preprocessor;
     final ObjectFilterFactory factory;
     final DataPacketRouter router;
     final Config config;
@@ -119,18 +118,13 @@ public class Runner {
         val fullTableName = schemaName + "." + tableName;
         saveCreateTableStmt(streamDefFile, streamDef, fullTableName);
         saveLoadJob(streamDefFile, dest, fullTableName);
+        if (generateOnly) return;
 
-        if (!generateOnly) {
-            applyFilter(filter, src, dest, streamName);
-        }
-    }
-
-    void applyFilter(ObjectFilter filter, S3ObjectLocator src, S3ObjectLocator dest, String streamName) throws IOException, LocatorIOException {
         System.err.printf("*** preproc start");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
         val result = new FilterResult(src.toString(), dest.toString());
-        preprocessor.applyFilter(filter, src, dest, result, streamName);
+        filter.processLocator(src, dest, result, streamName);
         System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", result.inputRows, result.outputRows, result.errorRows);
     }
 }

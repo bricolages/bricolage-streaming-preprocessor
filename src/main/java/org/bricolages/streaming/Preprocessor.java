@@ -58,24 +58,19 @@ public class Preprocessor implements EventHandlers {
     }
 
     public boolean processUrl(S3ObjectLocator src, BufferedWriter out) {
-        val srcUrl = src.toString();
         val route = router.routeWithoutDB(src);
         if (route == null) {
-            log.warn("S3 object could not mapped: {}", srcUrl);
+            log.warn("S3 object could not mapped: {}", src.toString());
             return false;
         }
-
-        FilterResult result = new FilterResult(srcUrl, null);
+        val filter = filterFactory.load(route.getStream());
         try {
-            ObjectFilter filter = filterFactory.load(route.getStream());
-            try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                filter.apply(r, out, srcUrl, result);
-            }
-            log.debug("src: {}, dest: {}, in: {}, out: {}", srcUrl, route.getDestLocator().toString(), result.inputRows, result.outputRows);
+            val result = filter.processLocatorAndPrint(src, out);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), result.inputRows, result.outputRows);
             return true;
         }
         catch (IOException | LocatorIOException ex) {
-            log.error("src: {}, error: {}", srcUrl, ex.getMessage());
+            log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             return false;
         }
     }
@@ -199,7 +194,7 @@ public class Preprocessor implements EventHandlers {
         try {
             repos.save(result);
             ObjectFilter filter = filterFactory.load(stream);
-            S3ObjectMetadata obj = applyFilter(filter, src, dest, result, stream.getStreamName());
+            S3ObjectMetadata obj = filter.processLocator(src, dest, result, stream.getStreamName());
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.toString(), result.inputRows, result.outputRows);
             result.succeeded();
             repos.save(result);
@@ -214,15 +209,6 @@ public class Preprocessor implements EventHandlers {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             result.failed(ex.getMessage());
             repos.save(result);
-        }
-    }
-
-    public S3ObjectMetadata applyFilter(ObjectFilter filter, S3ObjectLocator src, S3ObjectLocator dest, FilterResult result, String streamName) throws LocatorIOException, IOException {
-        try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest, streamName)) {
-            try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                filter.apply(r, buf.getBufferedWriter(), src.toString(), result);
-            }
-            return buf.commit();
         }
     }
 }

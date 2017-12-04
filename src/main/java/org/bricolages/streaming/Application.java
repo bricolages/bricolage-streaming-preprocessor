@@ -183,7 +183,7 @@ public class Application {
 
     @Bean
     public Runner preflightRunner() {
-        return new Runner(preprocessor(), filterFactory(), router(), config);
+        return new Runner(filterFactory(), router(), config);
     }
 
     @Bean
