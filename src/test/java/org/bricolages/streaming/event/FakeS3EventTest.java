@@ -1,5 +1,5 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.s3.S3ObjectMetadata;
+import org.bricolages.streaming.locator.S3ObjectMetadata;
 import java.time.Instant;
 import org.junit.Test;
 import static org.junit.Assert.*;

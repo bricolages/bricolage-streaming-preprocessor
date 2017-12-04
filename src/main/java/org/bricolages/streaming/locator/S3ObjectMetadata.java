@@ -1,4 +1,4 @@
-package org.bricolages.streaming.s3;
+package org.bricolages.streaming.locator;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import java.util.Date;
 import java.time.Instant;
@@ -6,16 +6,16 @@ import lombok.*;
 
 @RequiredArgsConstructor
 public class S3ObjectMetadata {
-    final S3ObjectLocation location;
+    final S3ObjectLocator locator;
     final ObjectMetadata meta;
 
-    public S3ObjectMetadata(S3ObjectLocation loc, Instant createdTime, long size, String eTag) {
+    public S3ObjectMetadata(S3ObjectLocator loc, Instant createdTime, long size, String eTag) {
         this(loc, makeObjectMetadata(createdTime, size, eTag));
     }
 
     // For tests
-    public S3ObjectMetadata(String url, Instant createdTime, long size, String eTag) throws S3UrlParseException {
-        this(S3ObjectLocation.forUrl(url), makeObjectMetadata(createdTime, size, eTag));
+    public S3ObjectMetadata(String url, Instant createdTime, long size, String eTag) throws LocatorParseException {
+        this(S3ObjectLocator.parse(url), makeObjectMetadata(createdTime, size, eTag));
     }
 
     static ObjectMetadata makeObjectMetadata(Instant createdTime, long size, String eTag) {
@@ -27,11 +27,11 @@ public class S3ObjectMetadata {
     }
 
     public String bucket() {
-        return location.bucket();
+        return locator.bucket();
     }
 
     public String key() {
-        return location.key();
+        return locator.key();
     }
 
     public Instant createdTime() {

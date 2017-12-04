@@ -3,7 +3,6 @@ import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.locator.*;
-import org.bricolages.streaming.s3.*;
 import org.bricolages.streaming.exception.*;
 import org.bricolages.streaming.preflight.ReferenceGenerator;
 import org.bricolages.streaming.preflight.Runner;
@@ -39,8 +38,8 @@ public class Application {
 
     public void run(String[] args) throws Exception {
         boolean oneshot = false;
-        SourceLocator mapUrl = null;
-        SourceLocator procUrl = null;
+        String mapUrl = null;
+        String procUrl = null;
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
@@ -81,7 +80,7 @@ public class Application {
                     System.err.println("missing argument for --map-url");
                     System.exit(1);
                 }
-                mapUrl = locatorFactory().parse(kv[1]);
+                mapUrl = kv[1];
             }
             else if (args[i].startsWith("--process-url=")) {
                 val kv = args[i].split("=", 2);
@@ -89,7 +88,7 @@ public class Application {
                     System.err.println("missing argument for --process-url");
                     System.exit(1);
                 }
-                procUrl = locatorFactory().parse(kv[1]);
+                procUrl = kv[1];
             }
             else if (args[i].equals("--generate-only")) {
                 generateOnly = true;
@@ -116,8 +115,9 @@ public class Application {
         }
 
         if (mapUrl != null) {
-            val result = router().mapByPatterns(mapUrl.toString());
-            System.out.println(result.getDestLocation());
+            val src = S3ObjectLocator.parse(mapUrl);
+            val route = router().routeWithoutDB(src);
+            System.out.println(route.getDestLocator());
             System.exit(0);
         }
 
@@ -136,7 +136,8 @@ public class Application {
                 System.exit(1);
             }
             try {
-                preflightRunner().run(streamDefFilename, procUrl, schemaName, tableName, generateOnly);
+                val src = S3ObjectLocator.parse(procUrl);
+                preflightRunner().run(streamDefFilename, src, schemaName, tableName, generateOnly);
             }
             catch (ApplicationError ex) {
                 System.err.println("preflight: error: " + ex.getMessage());
@@ -144,8 +145,9 @@ public class Application {
             }
         }
         else if (procUrl != null) {
+            val src = S3ObjectLocator.parse(procUrl);
             val out = new BufferedWriter(new OutputStreamWriter(System.out));
-            val success = preproc.processUrl(procUrl, out);
+            val success = preproc.processUrl(src, out);
             out.flush();
             if (success) {
                 System.err.println("SUCCEEDED");
@@ -181,12 +183,12 @@ public class Application {
 
     @Bean
     public Runner preflightRunner() {
-        return new Runner(preprocessor(), filterFactory(), s3(), router(), config);
+        return new Runner(filterFactory(), router(), config);
     }
 
     @Bean
     public Preprocessor preprocessor() {
-        return new Preprocessor(eventQueue(), logQueue(), s3(), router(), filterFactory());
+        return new Preprocessor(eventQueue(), logQueue(), ioManager(), router(), filterFactory());
     }
 
     @Bean
@@ -207,8 +209,8 @@ public class Application {
     }
 
     @Bean
-    public S3Agent s3() {
-        return new S3Agent(AmazonS3ClientBuilder.defaultClient());
+    public LocatorIOManager ioManager() {
+        return new LocatorIOManager(AmazonS3ClientBuilder.defaultClient());
     }
 
     @Bean
@@ -227,10 +229,5 @@ public class Application {
     @Bean
     public OpBuilder opBuilder() {
         return new OpBuilder(sequentialNumberRepository);
-    }
-
-    @Bean
-    public LocatorFactory locatorFactory() {
-        return new LocatorFactory(s3());
     }
 }

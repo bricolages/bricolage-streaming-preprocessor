@@ -1,5 +1,5 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.s3.S3ObjectLocation;
+import org.bricolages.streaming.locator.S3ObjectLocator;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.sqs.model.Message;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -57,7 +57,7 @@ public class S3Event extends Event {
             return new S3Event(
                 msg,
                 rec.getEventName(),
-                new S3ObjectLocation(
+                new S3ObjectLocator(
                     rec.getS3().getBucket().getName(),
                     URLDecoder.decode(rec.getS3().getObject().getKey(), "UTF-8")
                 ),
@@ -72,15 +72,15 @@ public class S3Event extends Event {
     }
 
     final String eventName;
-    final S3ObjectLocation location;
+    final S3ObjectLocator locator;
     final long objectSize;
     final S3EventNotification.S3EventNotificationRecord record;
     final boolean noDispatch;
 
-    S3Event(Message msg, String eventName, S3ObjectLocation location, long objectSize, S3EventNotification.S3EventNotificationRecord record, boolean noDispatch) {
+    S3Event(Message msg, String eventName, S3ObjectLocator locator, long objectSize, S3EventNotification.S3EventNotificationRecord record, boolean noDispatch) {
         super(msg);
         this.eventName = eventName;
-        this.location = location;
+        this.locator = locator;
         this.objectSize = objectSize;
         this.record = record;
         this.noDispatch = noDispatch;
@@ -100,6 +100,6 @@ public class S3Event extends Event {
 
     @Override
     public String toString() {
-        return "#<S3Event " + eventName + " messageId=" + getMessageId() + ", object=" + location + ">";
+        return "#<S3Event " + eventName + " messageId=" + getMessageId() + ", object=" + locator + ">";
     }
 }

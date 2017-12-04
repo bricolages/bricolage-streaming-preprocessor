@@ -1,6 +1,5 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.locator.*;
-import org.bricolages.streaming.s3.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;
@@ -25,42 +24,44 @@ public class DataPacketRouterTest {
         return new DataPacketRouter.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
     }
 
-    S3ObjectLocation loc(String url) throws S3UrlParseException {
-        return S3ObjectLocation.forUrl(url);
+    S3ObjectLocator loc(String url) throws LocatorParseException {
+        return S3ObjectLocator.parse(url);
     }
 
     @Test
-    public void mapByPatterns() throws Exception {
-        val map = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
-        map.check();
-        val result = map.mapByPatterns("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
+    public void routeByPatterns() throws Exception {
+        val router = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        router.check();
+        val result = router.routeWithoutDB(loc("s3://src-bucket/src-prefix/schema.table/datafile.json.gz"));
         assertNotNull(result);
-        assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
+        assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocator());
         assertEquals("schema.table", result.getStreamName());
-        assertNull(map.mapByPatterns("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz"));
+        assertNull(router.routeWithoutDB(loc("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz")));
     }
 
+    /* FIXME: temporary off: We should not try to route local file
     @Test
-    public void map_localfile() throws Exception {
-        val map = newRouter(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
-        map.check();
-        val result = map.mapByPatterns("file:/path/to/src-bucket/src-prefix/schema.table/datafile.json.gz");
-        assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocation());
+    public void route_localfile() throws Exception {
+        val router = newRouter(entry("file:/(?:.+/)?src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        router.check();
+        val result = router.routeWithoutDB(loc("file:/path/to/src-bucket/src-prefix/schema.table/datafile.json.gz"));
+        assertEquals(loc("s3://dest-bucket/dest-prefix/schema.table/datafile.json.gz"), result.getDestLocator());
         assertEquals("schema.table", result.getStreamName());
-        assertNull(map.mapByPatterns("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz"));
+        assertNull(router.routeWithoutDB(loc("s3://src-bucket-2/src-prefix/schema.table/datafile.json.gz")));
     }
+    */
     
     @Test(expected=ConfigError.class)
-    public void map_baddest() throws Exception {
-        val map = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
-        map.check();
-        map.mapByPatterns("s3://src-bucket/src-prefix/schema.table/datafile.json.gz");
+    public void route_baddest() throws Exception {
+        val router = newRouter(entry("s3://src-bucket/src-prefix/(schema\\.table)/(.*\\.gz)", "$3", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        router.check();
+        router.routeWithoutDB(loc("s3://src-bucket/src-prefix/schema.table/datafile.json.gz"));
     }
 
     @Test(expected=ConfigError.class)
-    public void map_badregex() throws Exception {
-        val map = newRouter(entry("****", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
-        map.check();
+    public void route_badregex() throws Exception {
+        val router = newRouter(entry("****", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
+        router.check();
     }
 
     @Autowired TestEntityManager entityManager;
@@ -68,7 +69,7 @@ public class DataPacketRouterTest {
     @Autowired StreamBundleRepository bundleRepos;
 
     @Test
-    public void map() throws Exception {
+    public void route() throws Exception {
         entityManager.persist(new DataStream("schema.table"));
         val stream = streamRepos.findStream("schema.table");
         entityManager.persist(new StreamBundle(stream, "src-bucket", "0000.schema.table_2", "dest-bucket-2", "dest-prefix-2"));
@@ -77,12 +78,12 @@ public class DataPacketRouterTest {
         val router = newRouter(entry("s3://src-bucket/(0000.(schema\\.table))/(2017/11/28)/(.*\\.gz)", "$2", "$1", "dest-bucket", "dest/$1", "$2", "$3"));
         router.check();
 
-        val result = router.map(loc("s3://src-bucket/0000.schema.table_2/2017/11/28/datafile.json.gz"));
+        val result = router.route(loc("s3://src-bucket/0000.schema.table_2/2017/11/28/datafile.json.gz"));
         assertNotNull(result);
         assertEquals("schema.table", result.getStreamName());
-        assertEquals(loc("s3://dest-bucket-2/dest-prefix-2/2017/11/28/datafile.json.gz"), result.getDestLocation());
+        assertEquals(loc("s3://dest-bucket-2/dest-prefix-2/2017/11/28/datafile.json.gz"), result.getDestLocator());
 
-        assertNull(router.map(loc("s3://src-bucket-UNKNOWN/src-prefix-UNKNOWN/schema.table/datafile.json.gz")));
-        assertNull(router.map(loc("s3://src-bucket-2/datafile.json.gz")));
+        assertNull(router.route(loc("s3://src-bucket-UNKNOWN/src-prefix-UNKNOWN/schema.table/datafile.json.gz")));
+        assertNull(router.route(loc("s3://src-bucket-2/datafile.json.gz")));
     }
 }

@@ -13,11 +13,11 @@ public class ObjectFilterTest {
         ops.add(builder.build(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
         ops.add(builder.build(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
         ops.add(builder.build(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
-        return new ObjectFilter(ops);
+        return new ObjectFilter(null, ops);
     }
 
     @Test
-    public void apply() throws Exception {
+    public void processStream() throws Exception {
         val src = "{\"int_col\":1}\n" +
             "{\"int_col\":1,\"bigint_col\":99}\n" +
             "{\n" +
@@ -35,7 +35,7 @@ public class ObjectFilterTest {
         val out = new StringWriter();
         val bufOut = new BufferedWriter(out);
         val r = new FilterResult();
-        f.apply(in, bufOut, "in", r);
+        f.processStream(in, bufOut, r, "in");
         bufOut.close();
 
         assertEquals(expected, out.toString());
@@ -45,18 +45,18 @@ public class ObjectFilterTest {
     }
 
     @Test
-    public void applyString() throws Exception {
+    public void processRecord() throws Exception {
         val f = newFilter();
-        assertEquals("{\"int_col\":1}", f.applyString("{\"int_col\":1}"));
-        assertEquals("{\"int_col\":1,\"bigint_col\":99}", f.applyString("{\"int_col\":1,\"bigint_col\":99}"));
-        assertEquals("{\"int_col\":1}", f.applyString("{\"int_col\":1,\"bigint_col\":\"b\"}"));
-        assertNull(f.applyString("{}"));
-        assertNull(f.applyString("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}"));
+        assertEquals("{\"int_col\":1}", f.processRecord("{\"int_col\":1}"));
+        assertEquals("{\"int_col\":1,\"bigint_col\":99}", f.processRecord("{\"int_col\":1,\"bigint_col\":99}"));
+        assertEquals("{\"int_col\":1}", f.processRecord("{\"int_col\":1,\"bigint_col\":\"b\"}"));
+        assertNull(f.processRecord("{}"));
+        assertNull(f.processRecord("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}"));
     }
 
     @Test(expected=JSONException.class)
-    public void applyString_parseError() throws Exception {
+    public void processRecord_ParseError() throws Exception {
         val f = newFilter();
-        f.applyString("{");
+        f.processRecord("{");
     }
 }

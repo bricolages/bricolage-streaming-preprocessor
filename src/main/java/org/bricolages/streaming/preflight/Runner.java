@@ -13,15 +13,12 @@ import org.bricolages.streaming.preflight.definition.*;
 import org.bricolages.streaming.stream.DataPacketRouter;
 import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.locator.*;
-import org.bricolages.streaming.s3.*;
 import org.bricolages.streaming.exception.*;
 import lombok.*;
 
 @RequiredArgsConstructor
 public class Runner {
-    final Preprocessor preprocessor;
     final ObjectFilterFactory factory;
-    final S3Agent s3;
     final DataPacketRouter router;
     final Config config;
 
@@ -66,7 +63,7 @@ public class Runner {
         }
     }
 
-    private void saveLoadJob(StreamDefinitionFile streamDefFile, S3ObjectLocation dest, String fullTableName) throws IOException {
+    private void saveLoadJob(StreamDefinitionFile streamDefFile, S3ObjectLocator dest, String fullTableName) throws IOException {
         val path = streamDefFile.getLoadJobFilepath();
         System.err.printf("generating load job: %s\n", path.toString());
         try (val loadJobFile = new FileOutputStream(path)) {
@@ -100,17 +97,17 @@ public class Runner {
         }
     }
 
-    public void run(String streamDefFilename, SourceLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, S3IOException {
+    public void run(String streamDefFilename, S3ObjectLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, LocatorIOException {
         val streamDefFile = new StreamDefinitionFile(streamDefFilename);
         val domainCollection = loadDomainCollection("config/domains.yml");
         val wellknownColumnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
         val streamDef = loadStreamDef(streamDefFile, domainCollection, wellknownColumnCollection);
 
-        val route = router.mapByPatterns(src.toString());
+        DataPacketRouter.Result route = router.routeWithoutDB(src);
         if (route == null) {
             throw new ConfigError("could not map source URL");
         }
-        val dest = route.getDestLocation();
+        val dest = route.getDestLocator();
         val streamName = route.getStreamName();
 
         val generator = new ObjectFilterGenerator(streamDef);
@@ -121,18 +118,13 @@ public class Runner {
         val fullTableName = schemaName + "." + tableName;
         saveCreateTableStmt(streamDefFile, streamDef, fullTableName);
         saveLoadJob(streamDefFile, dest, fullTableName);
+        if (generateOnly) return;
 
-        if (!generateOnly) {
-            applyFilter(filter, src, dest, streamName);
-        }
-    }
-
-    void applyFilter(ObjectFilter filter, SourceLocator src, S3ObjectLocation dest, String streamName) throws IOException, S3IOException {
         System.err.printf("*** preproc start");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
-        val result = new FilterResult(src.toString(), dest.urlString());
-        preprocessor.applyFilter(filter, src, dest, result, streamName);
+        val result = new FilterResult(src.toString(), dest.toString());
+        filter.processLocator(src, dest, result, streamName);
         System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", result.inputRows, result.outputRows, result.errorRows);
     }
 }
