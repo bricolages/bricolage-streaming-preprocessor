@@ -117,8 +117,25 @@ public class Application {
         if (mapUrl != null) {
             val src = S3ObjectLocator.parse(mapUrl);
             val route = router().routeWithoutDB(src);
-            System.out.println(route.getDestLocator());
-            System.exit(0);
+            if (route != null) {
+                System.out.println("streamName: " + route.getStreamName());
+
+                val bundle = route.getBundle();
+                System.out.println("streamBucket: " + bundle.getBucket());
+                System.out.println("streamPrefix: " + bundle.getPrefix());
+                System.out.println("destBucket: " + bundle.getDestBucket());
+                System.out.println("destPrefix: " + bundle.getDestPrefix());
+
+                System.out.println("objectPrefix: " + route.getObjectPrefix());
+                System.out.println("objectName: " + route.getObjectName());
+
+                System.out.println("destUrl: " + route.getDestLocator());
+                System.exit(0);
+            }
+            else {
+                System.err.println("routing failed");
+                System.exit(1);
+            }
         }
 
         val preproc = preprocessor();
@@ -215,7 +232,7 @@ public class Application {
 
     @Bean
     public DataPacketRouter router() {
-        return new DataPacketRouter(this.config.getRoutes());
+        return new DataPacketRouter(this.config.getMappings());
     }
 
     @Bean

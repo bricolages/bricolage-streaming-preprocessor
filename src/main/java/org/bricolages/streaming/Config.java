@@ -15,7 +15,7 @@ public class Config {
     @Getter
     private final LogQueue logQueue = new LogQueue();
     @Getter
-    private List<DataPacketRouter.Entry> routes = new ArrayList<>();
+    private List<DataPacketRouter.Entry> mappings = new ArrayList<>();
 
     @Setter
     static class EventQueue {
