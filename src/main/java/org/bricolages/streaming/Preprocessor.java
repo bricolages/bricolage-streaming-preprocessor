@@ -183,6 +183,10 @@ public class Preprocessor implements EventHandlers {
         val stream = route.getStream();
         val dest = route.getDestLocator();
 
+        if (stream.doesDefer()) {
+            // Processing is temporary disabled; process objects later
+            return null;
+        }
         if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
             log.info("discard event: {}", event.getLocator().toString());

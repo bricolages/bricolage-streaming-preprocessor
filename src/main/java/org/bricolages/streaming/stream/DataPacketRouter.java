@@ -127,10 +127,6 @@ public class DataPacketRouter {
         val components = matchRoutes(src);
         if (components == null) return null;
         val stream = findOrCreateStream(components.streamName);
-        if (stream.doesDefer()) {
-            // Processing is temporary disabled; process objects later
-            return null;
-        }
         val bundle = findOrCreateStreamBundle(stream, components);
         return new Result(stream, bundle, components.objectPrefix, components.objectName);
     }
