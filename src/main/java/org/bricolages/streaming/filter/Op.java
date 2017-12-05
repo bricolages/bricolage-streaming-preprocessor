@@ -45,26 +45,49 @@ public abstract class Op {
         }
     }
 
-    protected float getFloat(Object value) throws FilterException {
-        if (value instanceof Integer) {
-            return ((Integer)value).floatValue();
+    // Returns true if value is a float.
+    // If it seems integers, this method returns false.
+    protected boolean isFloat(Object value) {
+        if (value instanceof Double) {
+            return true;
         }
-        else if (value instanceof Long) {
-            return ((Long)value).floatValue();
+        else if (value instanceof Float) {
+            return true;
         }
         else if (value instanceof String) {
             try {
-                return Float.valueOf((String)value);
+                Double.valueOf((String)value);
+                return true;
+            }
+            catch (NumberFormatException ex) {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected double getFloat(Object value) throws FilterException {
+        if (value instanceof Integer) {
+            return ((Integer)value).doubleValue();
+        }
+        else if (value instanceof Long) {
+            return ((Long)value).doubleValue();
+        }
+        else if (value instanceof String) {
+            try {
+                return Double.valueOf((String)value);
             }
             catch (NumberFormatException ex) {
                 throw new FilterException(ex);
             }
         }
         else if (value instanceof Float) {
-            return ((Float)value).floatValue();
+            return ((Float)value).doubleValue();
         }
         else if (value instanceof Double) {
-            return ((Double)value).floatValue();
+            return ((Double)value).doubleValue();
         }
         else {
             throw new FilterException("unexpected value for integer");
@@ -74,6 +97,15 @@ public abstract class Op {
     protected OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset) throws FilterException {
         try {
             return Instant.ofEpochSecond(t).atOffset(offset);
+        }
+        catch (DateTimeException ex) {
+            throw new FilterException(ex);
+        }
+    }
+
+    protected OffsetDateTime unixTimeToOffsetDateTime(double t, ZoneOffset offset) throws FilterException {
+        try {
+            return Instant.ofEpochMilli((long)(t * 1000)).atOffset(offset);
         }
         catch (DateTimeException ex) {
             throw new FilterException(ex);
