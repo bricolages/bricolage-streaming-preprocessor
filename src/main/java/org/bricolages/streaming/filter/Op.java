@@ -93,8 +93,6 @@ public abstract class Op {
         }
     }
 
-    static protected final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
-    static protected final DateTimeFormatter RAILS_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
     static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|\\w{1,5}|[+-]\\d{2}:?\\d{2})?");
 
     protected OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset, boolean truncate) throws FilterException {
@@ -108,35 +106,90 @@ public abstract class Op {
         }
         String str = m.group();
         // Order DOES matter
+        val t1 = tryParsingIsoInstant(str);
+        if (t1 != null) return t1;
+        val t2 = tryParsingIsoOffsetDateTime(str);
+        if (t2 != null) return t2;
+        val t3 = tryParsingRubyDateTime(str);
+        if (t3 != null) return t3;
+        val t4 = tryParsingRailsDateTime(str);
+        if (t4 != null) return t4;
+        val t5 = tryParsingIsoDateTime(str, defaultOffset);
+        if (t5 != null) return t5;
+        throw new FilterException("could not parse a timestamp: " + str);
+    }
+
+    /* "2016-07-01T12:34:56Z": Fluentd default.  This representation appears most
+     * ISO_INSTANT supports milliseconds
+     */
+    protected OffsetDateTime tryParsingIsoInstant(String str) {
         try {
-            // "2016-07-01T12:34:56Z": This representation appears most
             return OffsetDateTime.parse(str, DateTimeFormatter.ISO_INSTANT);
+        }
+        catch (DateTimeException e) {
+            return null;
+        }
+    }
+
+    /* "2016-07-01T12:34:56+00:00": Some log file have this.  Old Fluentd format?
+     * ISO_OFFSET_DATE_TIME supports milliseconds
+     */
+    protected OffsetDateTime tryParsingIsoOffsetDateTime(String str) {
+        try {
+            return OffsetDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        }
+        catch (DateTimeException e) {
+            return null;
+        }
+    }
+
+    static protected final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
+    static protected final DateTimeFormatter RUBY_DATE_TIME_FRAC = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS xxxx");
+
+    /* "2016-07-01 12:34:56 +0000": Ruby Time#to_s
+     */
+    protected OffsetDateTime tryParsingRubyDateTime(String str) {
+        try {
+            return OffsetDateTime.parse(str, RUBY_DATE_TIME);
         }
         catch (DateTimeException e1) {
             try {
-                // "2016-07-01T12:34:56+00:00": Some log file have this.  Old Fluentd format?
-                return OffsetDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                return OffsetDateTime.parse(str, RUBY_DATE_TIME_FRAC);
             }
             catch (DateTimeException e2) {
-                try {
-                    // "2016-07-01 12:34:56 +0000": Ruby Time#to_s
-                    return OffsetDateTime.parse(str, RUBY_DATE_TIME);
-                }
-                catch (DateTimeException e3) {
-                    try {
-                        // "2016-07-01 12:34:56 UTC": Rails TimeWithZone#to_s
-                        return ZonedDateTime.parse(str, RAILS_DATE_TIME).toOffsetDateTime();
-                    }
-                    catch (DateTimeException e4) {
-                        try {
-                            // "2016-07-01T12:34:56": No offset.
-                            return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
-                        } catch (DateTimeException e5) {
-                            throw new FilterException("could not parse a timestamp: " + str);
-                        }
-                    }
-                }
+                return null;
             }
+        }
+    }
+
+    static protected final DateTimeFormatter RAILS_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+    static protected final DateTimeFormatter RAILS_DATE_TIME_FRAC = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS z");
+
+    /* "2016-07-01 12:34:56 UTC": Rails TimeWithZone#to_s
+     */
+    protected OffsetDateTime tryParsingRailsDateTime(String str) {
+        try {
+            return ZonedDateTime.parse(str, RAILS_DATE_TIME).toOffsetDateTime();
+        }
+        catch (DateTimeException e1) {
+            try {
+                return ZonedDateTime.parse(str, RAILS_DATE_TIME_FRAC).toOffsetDateTime();
+            }
+            catch (DateTimeException e2) {
+                return null;
+            }
+        }
+    }
+
+    /* "2016-07-01T12:34:56": ISO format but without offset.
+     * This format means to lost time offset data, try this at last.
+     */
+    protected OffsetDateTime tryParsingIsoDateTime(String str, ZoneOffset defaultOffset) {
+        try {
+            return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
+        }
+        catch (DateTimeException e) {
+            return null;
         }
     }
 }
