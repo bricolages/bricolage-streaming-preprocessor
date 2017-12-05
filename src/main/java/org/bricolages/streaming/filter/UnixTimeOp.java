@@ -29,6 +29,11 @@ public class UnixTimeOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
-        return formatSqlTimestamp(unixTimeToOffsetDateTime(getInteger(value), zoneOffset));
+        if (isFloat(value)) {
+            return formatSqlTimestamp(unixTimeToOffsetDateTime(getFloat(value), zoneOffset));
+        }
+        else {
+            return formatSqlTimestamp(unixTimeToOffsetDateTime(getInteger(value), zoneOffset));
+        }
     }
 }

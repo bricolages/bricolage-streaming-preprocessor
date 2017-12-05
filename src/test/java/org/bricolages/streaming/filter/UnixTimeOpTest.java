@@ -21,6 +21,9 @@ public class UnixTimeOpTest {
         assertEquals("2016-07-01T16:41:06+09:00", f.applyValue(1467358866, null));
         assertEquals("2016-07-01T16:41:06+09:00", f.applyValue("1467358866", null));
         assertEquals("2016-07-01T16:41:06+09:00", f.applyValue(Double.valueOf(1467358866), null));
+
+        assertEquals("2016-07-01T16:41:06.246+09:00", f.applyValue(Double.valueOf(1467358866.246D), null));
+        assertEquals("2016-07-01T16:41:06.246+09:00", f.applyValue("1467358866.246", null));
     }
 
     @Test(expected = FilterException.class)
