@@ -13,7 +13,6 @@ import java.util.regex.PatternSyntaxException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-@RequiredArgsConstructor
 @Slf4j
 public class DataPacketRouter {
     @NoArgsConstructor
@@ -46,6 +45,11 @@ public class DataPacketRouter {
     }
 
     final List<Entry> entries;
+
+    public DataPacketRouter(List<Entry> entries) {
+        this.entries = entries;
+        log.info("Routing patterns registered: {} entries", entries.size());
+    }
 
     void check() throws ConfigError {
         for (Entry ent : entries) {

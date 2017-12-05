@@ -161,7 +161,7 @@ public class Preprocessor implements EventHandlers {
 
     @Override
     public void handleS3Event(S3Event event) {
-        log.debug("handling URL: {}", event.getLocator().toString());
+        log.info("handling URL: {}", event.getLocator());
         if (event.isCopyEvent()) {
             log.info("remove CopyEvent: {}", event.toString());
             eventQueue.deleteAsync(event);
