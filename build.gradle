@@ -71,15 +71,6 @@ mainClassName = 'org.bricolages.streaming.Application'
 springBoot.backupSource = false
 bootRepackage.classifier = "executable"
 
-///// DB migration //////////////////////////////////////////////////////////////////////
-
-task migrate << {
-    exec {
-        executable "sh"
-        args "-x", "-c", "cd db; ./ridgepole.sh --merge" + (project.hasProperty("dry-run") ? " --dry-run" : "")
-    }
-}
-
 ///// test ///////////////////////////////////////////////////////////////////////////////
 
 test {
