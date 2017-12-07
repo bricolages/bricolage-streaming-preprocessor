@@ -36,6 +36,8 @@ public class Application {
         }
     }
 
+    String appName = "bricolage-preproc";
+
     public void run(String[] args) throws Exception {
         boolean oneshot = false;
         String mapUrl = null;
@@ -43,6 +45,7 @@ public class Application {
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
+        String streamName = null;
         boolean generateOnly = false;
         boolean domainsReference = false;
 
@@ -51,44 +54,22 @@ public class Application {
                 oneshot = true;
             }
             else if (args[i].startsWith("--preflight=")) {
-                val kv = args[i].split("=", 2);
-                if (kv.length != 2) {
-                    System.err.println("missing stream definition file for --preflight");
-                    System.exit(1);
-                }
-                streamDefFilename = kv[1];
+                streamDefFilename = getArg(args[i], "--preflight");
             }
             else if (args[i].startsWith("--schema-name=")) {
-                val kv = args[i].split("=", 2);
-                if (kv.length != 2) {
-                    System.err.println("missing stream definition file for --schema-name");
-                    System.exit(1);
-                }
-                schemaName = kv[1];
+                schemaName = getArg(args[i], "--schema-name");
             }
             else if (args[i].startsWith("--table-name=")) {
-                val kv = args[i].split("=", 2);
-                if (kv.length != 2) {
-                    System.err.println("missing stream definition file for --table-name");
-                    System.exit(1);
-                }
-                tableName = kv[1];
+                tableName = getArg(args[i], "--table-name");
+            }
+            else if (args[i].startsWith("--stream-name=")) {
+                streamName = getArg(args[i], "--stream-name");
             }
             else if (args[i].startsWith("--map-url=")) {
-                val kv = args[i].split("=", 2);
-                if (kv.length != 2) {
-                    System.err.println("missing argument for --map-url");
-                    System.exit(1);
-                }
-                mapUrl = kv[1];
+                mapUrl = getArg(args[i], "--map-url");
             }
             else if (args[i].startsWith("--process-url=")) {
-                val kv = args[i].split("=", 2);
-                if (kv.length != 2) {
-                    System.err.println("missing argument for --process-url");
-                    System.exit(1);
-                }
-                procUrl = kv[1];
+                procUrl = getArg(args[i], "--process-url");
             }
             else if (args[i].equals("--generate-only")) {
                 generateOnly = true;
@@ -101,8 +82,7 @@ public class Application {
                 System.exit(0);
             }
             else if (args[i].startsWith("-")) {
-                System.err.println("unknown option: " + args[i]);
-                System.exit(1);
+                errorExit("unknown option: " + args[i]);
             }
             else {
                 int argc = args.length - 1;
@@ -114,76 +94,97 @@ public class Application {
             }
         }
 
-        if (mapUrl != null) {
-            val src = S3ObjectLocator.parse(mapUrl);
-            val route = router().routeWithoutDB(src);
-            if (route != null) {
-                System.out.println("streamName: " + route.getStreamName());
-
-                val bundle = route.getBundle();
-                System.out.println("streamBucket: " + bundle.getBucket());
-                System.out.println("streamPrefix: " + bundle.getPrefix());
-                System.out.println("destBucket: " + bundle.getDestBucket());
-                System.out.println("destPrefix: " + bundle.getDestPrefix());
-
-                System.out.println("objectPrefix: " + route.getObjectPrefix());
-                System.out.println("objectName: " + route.getObjectName());
-
-                System.out.println("destUrl: " + route.getDestLocator());
-                System.exit(0);
-            }
-            else {
-                System.err.println("routing failed");
-                System.exit(1);
-            }
-        }
-
-        val preproc = preprocessor();
         if (streamDefFilename != null) {   // preflight
-            if (procUrl == null) {
-                System.err.println("missing argument: --process-url");
-                System.exit(1);
-            }
+            this.appName = "preflight";
             if (schemaName == null) {
-                System.err.println("missing argument: --schema-name");
-                System.exit(1);
+                errorExit("missing option: --schema-name");
             }
             if (tableName == null) {
-                System.err.println("missing argument: --table-name");
-                System.exit(1);
+                errorExit("missing option: --table-name");
             }
             try {
-                val src = S3ObjectLocator.parse(procUrl);
-                preflightRunner().run(streamDefFilename, src, schemaName, tableName, generateOnly);
+                val tableSpec = schemaName + "." + tableName;
+                if (generateOnly) {
+                    if (streamName == null) {
+                        errorExit("missing option: --stream-name");
+                    }
+                    preflightRunner().generate(streamDefFilename, streamName, tableSpec);
+                }
+                else {
+                    if (procUrl == null) {
+                        errorExit("missing option: --process-url");
+                    }
+                    val src = S3ObjectLocator.parse(procUrl);
+                    preflightRunner().run(streamDefFilename, src, tableSpec);
+                }
             }
             catch (ApplicationError ex) {
                 System.err.println("preflight: error: " + ex.getMessage());
                 System.exit(1);
             }
         }
-        else if (procUrl != null) {
-            val src = S3ObjectLocator.parse(procUrl);
-            val out = new BufferedWriter(new OutputStreamWriter(System.out));
-            val success = preproc.processUrl(src, out);
-            out.flush();
-            if (success) {
-                System.err.println("SUCCEEDED");
-                System.exit(0);
+        else {   // preprocessor
+            if (mapUrl != null) {
+                val src = S3ObjectLocator.parse(mapUrl);
+                val route = router().routeWithoutDB(src);
+                if (route != null) {
+                    System.out.println("streamName: " + route.getStreamName());
+
+                    val bundle = route.getBundle();
+                    System.out.println("streamBucket: " + bundle.getBucket());
+                    System.out.println("streamPrefix: " + bundle.getPrefix());
+                    System.out.println("destBucket: " + bundle.getDestBucket());
+                    System.out.println("destPrefix: " + bundle.getDestPrefix());
+
+                    System.out.println("objectPrefix: " + route.getObjectPrefix());
+                    System.out.println("objectName: " + route.getObjectName());
+
+                    System.out.println("destUrl: " + route.getDestLocator());
+                    System.exit(0);
+                }
+                else {
+                    errorExit("routing failed");
+                }
+            }
+
+            val preproc = preprocessor();
+            if (procUrl != null) {
+                val src = S3ObjectLocator.parse(procUrl);
+                val out = new BufferedWriter(new OutputStreamWriter(System.out));
+                val success = preproc.processUrl(src, out);
+                out.flush();
+                if (success) {
+                    System.err.println("SUCCEEDED");
+                    System.exit(0);
+                }
+                else {
+                    System.err.println("FAILED");
+                    System.exit(1);
+                }
+            }
+            else if (oneshot) {
+                preproc.runOneshot();
+            }
+            else if (domainsReference) {
+                new ReferenceGenerator().generate();
             }
             else {
-                System.err.println("FAILED");
-                System.exit(1);
+                preproc.run();
             }
         }
-        else if (oneshot) {
-            preproc.runOneshot();
+    }
+
+    String getArg(String arg, String optName) {
+        val kv = arg.split("=", 2);
+        if (kv.length != 2) {
+            errorExit("missing argument for " + optName);
         }
-        else if (domainsReference) {
-            new ReferenceGenerator().generate();
-        }
-        else {
-            preproc.run();
-        }
+        return kv[1];
+    }
+
+    void errorExit(String msg) {
+        System.err.println("error: " + msg);
+        System.exit(1);
     }
 
     void printUsage(PrintStream s) {

@@ -8,7 +8,6 @@ import java.util.List;
 import java.io.FileNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 import org.bricolages.streaming.Config;
-import org.bricolages.streaming.Preprocessor;
 import org.bricolages.streaming.preflight.definition.*;
 import org.bricolages.streaming.stream.DataPacketRouter;
 import org.bricolages.streaming.filter.*;
@@ -40,7 +39,9 @@ public class Runner {
         }
     }
 
-    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile, DomainCollection domainCollection, WellknownColumnCollection columnCollection) throws IOException {
+    private StreamDefinitionEntry loadStreamDef(StreamDefinitionFile streamDefFile) throws IOException {
+        val domainCollection = loadDomainCollection("config/domains.yml");
+        val columnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
         val fileReader = new FileReader(streamDefFile.getFilepath());
         return StreamDefinitionEntry.load(fileReader, domainCollection, columnCollection);
     }
@@ -97,29 +98,39 @@ public class Runner {
         }
     }
 
-    public void run(String streamDefFilename, S3ObjectLocator src, String schemaName, String tableName, boolean generateOnly) throws IOException, LocatorIOException {
-        val streamDefFile = new StreamDefinitionFile(streamDefFilename);
-        val domainCollection = loadDomainCollection("config/domains.yml");
-        val wellknownColumnCollection = loadWellknownCollumnCollection("config/wellknown_columns.yml", domainCollection);
-        val streamDef = loadStreamDef(streamDefFile, domainCollection, wellknownColumnCollection);
-
-        DataPacketRouter.Result route = router.routeWithoutDB(src);
+    public void run(String streamDefPath, S3ObjectLocator src, String tableSpec) throws IOException, LocatorIOException {
+        val route = router.routeWithoutDB(src);
         if (route == null) {
             throw new ConfigError("could not map source URL");
         }
-        val dest = route.getDestLocator();
         val streamName = route.getStreamName();
+        val dest = route.getDestLocator();
+
+        val operators = generateDefs(streamDefPath, streamName, dest, tableSpec);
+
+        preprocess(operators, streamName, src, dest);
+    }
+
+    public void generate(String streamDefPath, String streamName, String tableSpec) throws IOException, LocatorIOException {
+        generateDefs(streamDefPath, streamName, new S3ObjectLocator("dummy-bucket", "dummy-key"), tableSpec);
+    }
+
+    List<OperatorDefinition> generateDefs(String streamDefPath, String streamName, S3ObjectLocator dest, String tableSpec) throws IOException, LocatorIOException {
+        val streamDefFile = new StreamDefinitionFile(streamDefPath);
+        val streamDef = loadStreamDef(streamDefFile);
 
         val generator = new ObjectFilterGenerator(streamDef);
         val operators = generator.generate();
-        val filter = factory.compose(operators);
+
         saveOperatorDefinitions(streamDefFile, streamName, operators);
+        saveCreateTableStmt(streamDefFile, streamDef, tableSpec);
+        saveLoadJob(streamDefFile, dest, tableSpec);
 
-        val fullTableName = schemaName + "." + tableName;
-        saveCreateTableStmt(streamDefFile, streamDef, fullTableName);
-        saveLoadJob(streamDefFile, dest, fullTableName);
-        if (generateOnly) return;
+        return operators;
+    }
 
+    void preprocess(List<OperatorDefinition> operators, String streamName, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
+        val filter = factory.compose(operators);
         System.err.printf("*** preproc start");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
