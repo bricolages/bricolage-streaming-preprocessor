@@ -98,10 +98,10 @@ public class Runner {
         }
     }
 
-    public void run(String streamDefPath, S3ObjectLocator src, String tableSpec) throws IOException, LocatorIOException {
+    public void generateAndPreprocess(String streamDefPath, S3ObjectLocator src, String tableSpec) throws IOException, LocatorIOException {
         val route = router.routeWithoutDB(src);
         if (route == null) {
-            throw new ConfigError("could not map source URL");
+            throw new ConfigError("log object routing failed: " + src);
         }
         val streamName = route.getStreamName();
         val dest = route.getDestLocator();
@@ -111,8 +111,19 @@ public class Runner {
         preprocess(operators, streamName, src, dest);
     }
 
-    public void generate(String streamDefPath, String streamName, String tableSpec) throws IOException, LocatorIOException {
-        generateDefs(streamDefPath, streamName, new S3ObjectLocator("dummy-bucket", "dummy-key"), tableSpec);
+    public void generateWithRouting(String streamDefPath, S3ObjectLocator src, String tableSpec) throws IOException, LocatorIOException {
+        val route = router.routeWithoutDB(src);
+        if (route == null) {
+            throw new ConfigError("log object routing failed: " + src);
+        }
+        val streamName = route.getStreamName();
+        val dummyDest = new S3ObjectLocator("dummy-bucket", "dummy-key");
+        generateDefs(streamDefPath, streamName, dummyDest, tableSpec);
+    }
+
+    public void generateWithoutRouting(String streamDefPath, String streamName, String tableSpec) throws IOException, LocatorIOException {
+        val dummyDest = new S3ObjectLocator("dummy-bucket", "dummy-key");
+        generateDefs(streamDefPath, streamName, dummyDest, tableSpec);
     }
 
     List<OperatorDefinition> generateDefs(String streamDefPath, String streamName, S3ObjectLocator dest, String tableSpec) throws IOException, LocatorIOException {
