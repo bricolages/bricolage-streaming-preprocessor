@@ -113,7 +113,7 @@ public class Application {
                     if (procUrl == null && streamName == null) {
                         errorExit("--process-url or --stream-name is required");
                     }
-                    if (streamName == null) {
+                    if (streamName != null) {
                         preflightRunner().generateWithoutRouting(streamDefFilename, streamName, tableSpec);
                     }
                     else {
