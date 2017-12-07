@@ -96,26 +96,37 @@ public class Application {
 
         if (streamDefFilename != null) {   // preflight
             this.appName = "preflight";
+
             if (schemaName == null) {
                 errorExit("missing option: --schema-name");
             }
             if (tableName == null) {
                 errorExit("missing option: --table-name");
             }
+            val tableSpec = schemaName + "." + tableName;
+
             try {
-                val tableSpec = schemaName + "." + tableName;
                 if (generateOnly) {
-                    if (streamName == null) {
-                        errorExit("missing option: --stream-name");
+                    if (procUrl != null && streamName != null) {
+                        errorExit("--process-url and --stream-name are exclusive");
                     }
-                    preflightRunner().generate(streamDefFilename, streamName, tableSpec);
+                    if (procUrl == null && streamName == null) {
+                        errorExit("--process-url or --stream-name is required");
+                    }
+                    if (streamName == null) {
+                        preflightRunner().generateWithoutRouting(streamDefFilename, streamName, tableSpec);
+                    }
+                    else {
+                        val src = S3ObjectLocator.parse(procUrl);
+                        preflightRunner().generateWithRouting(streamDefFilename, src, tableSpec);
+                    }
                 }
                 else {
                     if (procUrl == null) {
                         errorExit("missing option: --process-url");
                     }
                     val src = S3ObjectLocator.parse(procUrl);
-                    preflightRunner().run(streamDefFilename, src, tableSpec);
+                    preflightRunner().generateAndPreprocess(streamDefFilename, src, tableSpec);
                 }
             }
             catch (ApplicationError ex) {
