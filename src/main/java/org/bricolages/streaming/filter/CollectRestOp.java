@@ -42,8 +42,10 @@ public class CollectRestOp extends Op {
         while (it.hasNext()) {
             val ent = it.next();
             if (!rejectColumns.containsKey(ent.getKey())) {
-                if (ent.getValue() != null) {
-                    buf.put(ent.getKey(), ent.getValue());
+                val k = ent.getKey();
+                val v = ent.getValue();
+                if (k instanceof String && v != null) {
+                    buf.put((String)k, v);
                 }
                 it.remove();
             }

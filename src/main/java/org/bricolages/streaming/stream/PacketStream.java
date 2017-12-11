@@ -27,6 +27,11 @@ public class PacketStream {
     List<OperatorDefinition> operatorDefinitions;
 
     @OneToMany(mappedBy="stream", fetch=FetchType.LAZY)
+    @OrderBy("column_id asc")
+    @Getter
+    List<StreamColumn> columns;
+
+    @OneToMany(mappedBy="stream", fetch=FetchType.LAZY)
     @Getter
     List<StreamBundle> bundles;
 
@@ -45,6 +50,9 @@ public class PacketStream {
     @Column(name="create_time")
     Timestamp createTime;
 
+    @Column(name="column_initialized", nullable=false)
+    boolean columnInitialized;
+
     public boolean doesDiscard() {
         return this.discard;
     }
@@ -60,5 +68,9 @@ public class PacketStream {
     public PacketStream(String streamName) {
         this.streamName = streamName;
         this.createTime = new Timestamp(System.currentTimeMillis());
+    }
+
+    public boolean doesUseColumn() {
+        return this.columnInitialized;
     }
 }

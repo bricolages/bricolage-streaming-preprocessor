@@ -1,7 +1,7 @@
 package org.bricolages.streaming.filter;
-
-import lombok.*;
 import java.util.regex.Pattern;
+import java.util.Map;
+import lombok.*;
 
 public class AggregateOp extends Op {
     static final void register(OpBuilder builder) {
@@ -39,13 +39,16 @@ public class AggregateOp extends Op {
         val it = record.entries();
         while (it.hasNext()) {
             val ent = it.next();
-            val m = targetColumns.matcher(ent.getKey());
-            if (m.find()) {
-                if (ent.getValue() != null) {
-                    buf.put(m.replaceFirst(""), ent.getValue());
-                }
-                if (!keepTargetColumns) {
-                    it.remove();
+            Object k = ent.getKey();
+            if (k instanceof String) {
+                val m = targetColumns.matcher((String)k);
+                if (m.find()) {
+                    if (ent.getValue() != null) {
+                        buf.put(m.replaceFirst(""), ent.getValue());
+                    }
+                    if (!keepTargetColumns) {
+                        it.remove();
+                    }
                 }
             }
         }

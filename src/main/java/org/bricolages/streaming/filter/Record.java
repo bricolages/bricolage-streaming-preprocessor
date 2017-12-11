@@ -1,6 +1,7 @@
 package org.bricolages.streaming.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,8 +15,11 @@ public class Record {
 
     static public Record parse(String json) throws JSONException {
         try {
-            Map<String, Object> obj = (Map<String, Object>)MAPPER.readValue(json, Map.class);
+            Map<Object, Object> obj = MAPPER.readValue(json, new TypeReference<Map<Object, Object>>() {});
             return new Record(obj);
+        }
+        catch (ClassCastException ex) {
+            throw new JSONException("record is not a map: " + json);
         }
         catch (JsonProcessingException ex) {
             throw new JSONException(ex.getMessage());
@@ -26,13 +30,13 @@ public class Record {
         }
     }
 
-    final Map<String, Object> object;
+    final Map<Object, Object> object;
 
     public Record() {
-        this(new HashMap<String, Object>());
+        this(new HashMap<Object, Object>());
     }
 
-    public Record(Map<String, Object> object) {
+    public Record(Map<Object, Object> object) {
         this.object = object;
     }
 
@@ -45,7 +49,7 @@ public class Record {
         }
     }
 
-    public Map<String, Object> getObject() {
+    public Map<Object, Object> getObject() {
         return object;
     }
 
@@ -65,7 +69,7 @@ public class Record {
         return object.isEmpty();
     }
 
-    public Iterator<Map.Entry<String, Object>> entries() {
+    public Iterator<Map.Entry<Object, Object>> entries() {
         return object.entrySet().iterator();
     }
 }

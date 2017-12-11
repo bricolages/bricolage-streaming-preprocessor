@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.locator.*;
 import java.util.List;
 import java.io.IOException;
@@ -9,11 +10,28 @@ import java.io.PrintWriter;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-@RequiredArgsConstructor
 @Slf4j
 public class ObjectFilter {
     final LocatorIOManager ioManager;
     final List<Op> operators;
+    final List<StreamColumnProcessor> processors;
+    final boolean useProcessor;
+
+    /** For column stream */
+    public ObjectFilter(LocatorIOManager ioManager, List<Op> operators, final List<StreamColumnProcessor> processors) {
+        this.ioManager = ioManager;
+        this.operators = operators;
+        this.processors = processors;
+        this.useProcessor = true;
+    }
+
+    /** For non-column stream */
+    public ObjectFilter(LocatorIOManager ioManager, List<Op> operators) {
+        this.ioManager = ioManager;
+        this.operators = operators;
+        this.processors = null;
+        this.useProcessor = false;
+    }
 
     public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result, String sourceName) throws LocatorIOException {
         try {
@@ -76,10 +94,35 @@ public class ObjectFilter {
     public String processRecord(String json) throws JSONException {
         Record record = Record.parse(json);
         if (record == null) return null;
+
+        // I apply (old) ops first, because it may includes record-wise operation such as reject op.
+        record = processRecordByOperators(record);
+        if (record == null) return null;
+
+        if (useProcessor) {
+            record = processRecordByProcessors(record);
+            if (record == null) return null;
+        }
+
+        return record.serialize();
+    }
+
+    Record processRecordByOperators(Record record) {
         for (Op op : operators) {
             record = op.apply(record);
             if (record == null) return null;
         }
-        return record.serialize();
+        return record;
+    }
+
+    Record processRecordByProcessors(Record record) {
+return null;
+        /*
+        for (ColumnProcessor proc : processors) {
+            record = proc.process(record);
+        }
+        record.removeAllNullColumns();
+        return record;
+        */
     }
 }
