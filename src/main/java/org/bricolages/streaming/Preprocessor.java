@@ -17,9 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Preprocessor implements EventHandlers {
     final EventQueue eventQueue;
     final LogQueue logQueue;
-    final LocatorIOManager ioManager;
     final DataPacketRouter router;
-    final ObjectFilterFactory filterFactory;
 
     public void run() throws IOException {
         log.info("server started");
@@ -63,7 +61,7 @@ public class Preprocessor implements EventHandlers {
             log.warn("S3 object could not mapped: {}", src.toString());
             return false;
         }
-        val filter = filterFactory.load(route.getStream());
+        val filter = route.loadFilter();
         try {
             val result = filter.processLocatorAndPrint(src, out);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), result.inputRows, result.outputRows);
@@ -153,7 +151,7 @@ public class Preprocessor implements EventHandlers {
     }
 
     @Autowired
-    FilterResultRepository repos;
+    FilterResultRepository logRepos;
 
     public void logNotMappedObject(String src) {
         log.warn("S3 object could not mapped: {}", src);
@@ -169,8 +167,8 @@ public class Preprocessor implements EventHandlers {
         }
 
         S3ObjectLocator src = event.getLocator();
-        val route = router.route(src);
-        if (route == null) {
+        BoundStream stream = router.route(src);
+        if (stream == null) {
             // packet routing failed; this means invalid event or bad configuration.
             // We should remove invalid events from queue and
             // we must fix bad configuration by hand.
@@ -180,14 +178,13 @@ public class Preprocessor implements EventHandlers {
             eventQueue.deleteAsync(event);
             return;
         }
-        if (route.isBlackhole()) {
+        if (stream.isBlackhole()) {
             // Should be removed by explicit configuration
             log.info("ignore event: {}", src.toString());
             eventQueue.deleteAsync(event);
             return;
         }
-        val stream = route.getStream();
-        val dest = route.getDestLocator();
+        val dest = stream.getDestLocator();
 
         if (stream.doesDefer()) {
             // Processing is temporary disabled; process objects later
@@ -202,23 +199,25 @@ public class Preprocessor implements EventHandlers {
 
         FilterResult result = new FilterResult(src.toString(), dest.toString());
         try {
-            repos.save(result);
-            ObjectFilter filter = filterFactory.load(stream);
-            S3ObjectMetadata obj = filter.processLocator(src, dest, result, stream.getStreamName());
+            logRepos.save(result);
+
+            S3ObjectMetadata meta = stream.processLocator(src, dest, result);
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.toString(), result.inputRows, result.outputRows);
             result.succeeded();
-            repos.save(result);
+            logRepos.save(result);
+
             if (!event.doesNotDispatch() && !stream.doesNotDispatch()) {
-                logQueue.send(new FakeS3Event(obj));
+                logQueue.send(new FakeS3Event(meta));
                 result.dispatched();
-                repos.save(result);
+                logRepos.save(result);
             }
+
             eventQueue.deleteAsync(event);
         }
         catch (LocatorIOException | IOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             result.failed(ex.getMessage());
-            repos.save(result);
+            logRepos.save(result);
         }
     }
 }

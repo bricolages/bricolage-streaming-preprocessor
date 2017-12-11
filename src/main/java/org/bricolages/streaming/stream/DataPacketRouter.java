@@ -1,4 +1,5 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.filter.ObjectFilterFactory;
 import org.bricolages.streaming.locator.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,9 @@ public class DataPacketRouter {
 
     @Getter final List<Entry> entries;
 
+    @Autowired
+    ObjectFilterFactory filterFactory;
+
     public DataPacketRouter(List<Entry> entries) {
         this.entries = entries;
         log.info("Routing patterns registered: {} entries", entries.size());
@@ -72,37 +76,10 @@ public class DataPacketRouter {
         }
     }
 
-    @RequiredArgsConstructor
-    public static class Result {
-        @Getter final DataStream stream;
-        @Getter final StreamBundle bundle;
-        @Getter final String objectPrefix;
-        @Getter final String objectName;
-
-        public S3ObjectLocator getDestLocator() {
-            if (stream == null) return null;
-            if (bundle == null) return null;
-            return new S3ObjectLocator(bundle.getDestBucket(), Paths.get(bundle.getDestPrefix(), objectPrefix, objectName).toString());
-        }
-
-        public String getStreamName() {
-            if (stream == null) return null;
-            return stream.getStreamName();
-        }
-
-        static public Result makeBlackhole() {
-            return new Result(null, null, null, null);
-        }
-
-        public boolean isBlackhole() {
-            return (objectName == null);
-        }
-    }
-
-    public Result route(S3ObjectLocator src) throws ConfigError {
-        Result r1 = routeBySavedRoutes(src);
+    public BoundStream route(S3ObjectLocator src) throws ConfigError {
+        val r1 = routeBySavedRoutes(src);
         if (r1 != null) return r1;
-        Result r2 = routeByPatterns(src);
+        val r2 = routeByPatterns(src);
         if (r2 != null) return r2;
 
         logUnknownS3Object(src);
@@ -121,7 +98,7 @@ public class DataPacketRouter {
      * objectPrefix: "YYYY/MM/DD"
      * objectName: "objectName.gz"
      */
-    Result routeBySavedRoutes(S3ObjectLocator src) {
+    BoundStream routeBySavedRoutes(S3ObjectLocator src) {
         val components = src.key().split("/");
         if (components.length < 5) {
             log.info("could not apply routeBySavedRoutes: {}", src);
@@ -139,25 +116,25 @@ public class DataPacketRouter {
         val stream = bundle.getStream();
         if (stream == null) throw new ApplicationError("FATAL: could not get stream for stream_bundle: stream_bundle_id=" + bundle.getId());
 
-        return new Result(stream, bundle, objPrefix, objName);
+        return new BoundStream(filterFactory, stream, bundle, objPrefix, objName);
     }
 
-    Result routeByPatterns(S3ObjectLocator src) throws ConfigError {
+    BoundStream routeByPatterns(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
-        if (components.isEmpty()) return Result.makeBlackhole();
+        if (components.isEmpty()) return BoundStream.makeBlackhole();
         val stream = findOrCreateStream(components.streamName);
         val bundle = findOrCreateStreamBundle(stream, components);
-        return new Result(stream, bundle, components.objectPrefix, components.objectName);
+        return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
     // For preflight
-    public Result routeWithoutDB(S3ObjectLocator src) throws ConfigError {
+    public BoundStream routeWithoutDB(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
         val stream = new DataStream(components.streamName);
         val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix, components.destBucket, components.destPrefix);
-        return new Result(stream, bundle, components.objectPrefix, components.objectName);
+        return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
     RouteComponents matchRoutes(S3ObjectLocator src) throws ConfigError {

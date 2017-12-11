@@ -234,7 +234,7 @@ public class Application {
 
     @Bean
     public Preprocessor preprocessor() {
-        return new Preprocessor(eventQueue(), logQueue(), ioManager(), router(), filterFactory());
+        return new Preprocessor(eventQueue(), logQueue(), router());
     }
 
     @Bean
