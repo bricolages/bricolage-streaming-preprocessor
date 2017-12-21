@@ -1,5 +1,4 @@
 package org.bricolages.streaming.preflight.definition;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
