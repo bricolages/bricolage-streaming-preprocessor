@@ -24,7 +24,7 @@ public class DataPacketRouter {
         @Setter public String destPrefix;
         @Setter public String objectPrefix;
         @Setter public String objectName;
-        @Setter public Boolean isBlackhole = false;
+        @Setter public Boolean blackhole = false;
 
         public Entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
             this.srcUrlPattern = srcUrlPattern;
@@ -45,7 +45,7 @@ public class DataPacketRouter {
         }
 
         public String description() {
-            if (isBlackhole) {
+            if (blackhole) {
                 return srcUrlPattern + " -> (blackhole)";
             }
             else {
@@ -164,7 +164,7 @@ public class DataPacketRouter {
         for (Entry ent : entries) {
             Matcher m = ent.sourcePattern().matcher(src.toString());
             if (m.matches()) {
-                if (ent.isBlackhole) {
+                if (ent.blackhole) {
                     return RouteComponents.makeEmpty();
                 }
                 return new RouteComponents(

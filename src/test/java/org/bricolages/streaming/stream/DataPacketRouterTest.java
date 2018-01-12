@@ -26,7 +26,7 @@ public class DataPacketRouterTest {
 
     DataPacketRouter.Entry blackholeEntry(String pat) {
         val ent = new DataPacketRouter.Entry(pat, null, null, null, null, null, null);
-        ent.setIsBlackhole(true);
+        ent.setBlackhole(true);
         return ent;
     }
 
