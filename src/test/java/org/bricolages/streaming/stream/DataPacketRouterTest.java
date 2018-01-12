@@ -24,6 +24,12 @@ public class DataPacketRouterTest {
         return new DataPacketRouter.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
     }
 
+    DataPacketRouter.Entry blackholeEntry(String pat) {
+        val ent = new DataPacketRouter.Entry(pat, null, null, null, null, null, null);
+        ent.setIsBlackhole(true);
+        return ent;
+    }
+
     S3ObjectLocator loc(String url) throws LocatorParseException {
         return S3ObjectLocator.parse(url);
     }
@@ -95,5 +101,15 @@ public class DataPacketRouterTest {
 
         assertNull(router.route(loc("s3://src-bucket-UNKNOWN/src-prefix-UNKNOWN/schema.table/datafile.json.gz")));
         assertNull(router.route(loc("s3://src-bucket-2/datafile.json.gz")));
+    }
+
+    @Test
+    public void route_blackhole() throws Exception {
+        val router = newRouter(blackholeEntry("s3://src-bucket/tmp/.*"));
+        router.check();
+
+        val result = router.route(loc("s3://src-bucket/tmp/this_file_is_ignored.gz"));
+        assertNotNull(result);
+        assertEquals(true, result.isBlackhole());
     }
 }
