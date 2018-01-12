@@ -48,6 +48,7 @@ public class Application {
         String streamName = null;
         boolean generateOnly = false;
         boolean domainsReference = false;
+        boolean dumpRoutes = false;
 
         for (int i = 0; i < args.length; i++) {
             if (Objects.equals(args[i], "--oneshot")) {
@@ -76,6 +77,9 @@ public class Application {
             }
             else if (Objects.equals(args[i], "--types-reference")) {
                 domainsReference = true;
+            }
+            else if (Objects.equals(args[i], "--dump-routes")) {
+                dumpRoutes = true;
             }
             else if (Objects.equals(args[i], "--help")) {
                 printUsage(System.out);
@@ -135,10 +139,25 @@ public class Application {
             }
         }
         else {   // preprocessor
+            if (dumpRoutes) {
+                val router = router();
+                for (val ent : router.getEntries()) {
+                    System.out.println(ent.description());
+                }
+                System.exit(0);
+            }
+
             if (mapUrl != null) {
                 val src = S3ObjectLocator.parse(mapUrl);
                 val route = router().routeWithoutDB(src);
-                if (route != null) {
+                if (route == null) {
+                    errorExit("routing failed");
+                }
+
+                if (route.isBlackhole()) {
+                    System.out.println("(blackhole)");
+                }
+                else {
                     System.out.println("streamName: " + route.getStreamName());
 
                     val bundle = route.getBundle();
@@ -151,11 +170,8 @@ public class Application {
                     System.out.println("objectName: " + route.getObjectName());
 
                     System.out.println("destUrl: " + route.getDestLocator());
-                    System.exit(0);
                 }
-                else {
-                    errorExit("routing failed");
-                }
+                System.exit(0);
             }
 
             val preproc = preprocessor();
@@ -204,6 +220,7 @@ public class Application {
         s.println("\t--oneshot             Process one ReceiveMessage and quit.");
         s.println("\t--map-url=S3URL       Prints destination S3 URL for S3URL and quit.");
         s.println("\t--process-url=S3URL   Process the data file S3URL as configured and print to stdout.");
+        s.println("\t--dump-routes         Prints routing information and quit.");
         s.println("\t--help                Prints this message and quit.");
     }
 

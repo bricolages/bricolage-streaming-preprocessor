@@ -24,6 +24,7 @@ public class DataPacketRouter {
         @Setter public String destPrefix;
         @Setter public String objectPrefix;
         @Setter public String objectName;
+        @Setter public Boolean isBlackhole = false;
 
         public Entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
             this.srcUrlPattern = srcUrlPattern;
@@ -42,9 +43,18 @@ public class DataPacketRouter {
             pat = Pattern.compile("^" + srcUrlPattern + "$");
             return pat;
         }
+
+        public String description() {
+            if (isBlackhole) {
+                return srcUrlPattern + " -> (blackhole)";
+            }
+            else {
+                return srcUrlPattern + " -> s3://" + destBucket + "/" + destPrefix + "/" + objectPrefix + "/" + objectName;
+            }
+        }
     }
 
-    final List<Entry> entries;
+    @Getter final List<Entry> entries;
 
     public DataPacketRouter(List<Entry> entries) {
         this.entries = entries;
@@ -78,6 +88,14 @@ public class DataPacketRouter {
         public String getStreamName() {
             if (stream == null) return null;
             return stream.getStreamName();
+        }
+
+        static public Result makeBlackhole() {
+            return new Result(null, null, null, null);
+        }
+
+        public boolean isBlackhole() {
+            return (objectName == null);
         }
     }
 
@@ -127,6 +145,7 @@ public class DataPacketRouter {
     Result routeByPatterns(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
+        if (components.isEmpty()) return Result.makeBlackhole();
         val stream = findOrCreateStream(components.streamName);
         val bundle = findOrCreateStreamBundle(stream, components);
         return new Result(stream, bundle, components.objectPrefix, components.objectName);
@@ -145,6 +164,9 @@ public class DataPacketRouter {
         for (Entry ent : entries) {
             Matcher m = ent.sourcePattern().matcher(src.toString());
             if (m.matches()) {
+                if (ent.isBlackhole) {
+                    return RouteComponents.makeEmpty();
+                }
                 return new RouteComponents(
                     safeSubst(ent.streamName, m),
                     src.bucket(),
@@ -177,6 +199,14 @@ public class DataPacketRouter {
         final String destPrefix;
         final String objectPrefix;
         final String objectName;
+
+        static RouteComponents makeEmpty() {
+            return new RouteComponents(null, null, null, null, null, null, null);
+        }
+
+        boolean isEmpty() {
+            return this.streamName == null;
+        }
     }
 
     DataStream findOrCreateStream(String streamName) {

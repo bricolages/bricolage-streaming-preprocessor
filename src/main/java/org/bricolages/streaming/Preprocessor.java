@@ -180,6 +180,12 @@ public class Preprocessor implements EventHandlers {
             eventQueue.deleteAsync(event);
             return;
         }
+        if (route.isBlackhole()) {
+            // Should be removed by explicit configuration
+            log.info("ignore event: {}", src.toString());
+            eventQueue.deleteAsync(event);
+            return;
+        }
         val stream = route.getStream();
         val dest = route.getDestLocator();
 
