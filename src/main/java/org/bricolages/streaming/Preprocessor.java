@@ -76,16 +76,22 @@ public class Preprocessor implements EventHandlers {
     boolean handleEvents() {
         boolean empty = true;
         for (val event : eventQueue.poll()) {
-            log.debug("processing message: {}", event.getMessageBody());
-            event.callHandler(this);
-            empty = false;
+            try {
+                log.debug("processing message: {}", event.getMessageBody());
+                event.callHandler(this);
+                empty = false;
+            }
+            catch (Exception ex) {
+                log.error("unexpected exception: {}", ex.getMessage());
+                ex.printStackTrace();
+                safeSleep(3);   // to avoid busy loop by a bug
+            }
         }
         return empty;
     }
 
     @Override
     public void handleUnknownEvent(UnknownEvent event) {
-        // FIXME: notify?
         log.warn("unknown message: {}", event.getMessageBody());
         eventQueue.deleteAsync(event);
     }
