@@ -1,5 +1,11 @@
 # Release Note
 
+## version 1.6.2
+- refactoring only
+
+## version 1.6.1
+- [fix] Fixes critial configuration error.
+
 ## version 1.6.0
 - [new] Adds "blackhole" routing.
 
