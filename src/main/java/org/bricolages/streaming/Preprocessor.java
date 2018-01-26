@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Preprocessor implements EventHandlers {
     final EventQueue eventQueue;
     final LogQueue logQueue;
-    final DataPacketRouter router;
+    final PacketRouter router;
 
     public void run() {
         log.info("server started");

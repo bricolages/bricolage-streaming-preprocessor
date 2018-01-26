@@ -15,7 +15,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DataPacketRouter {
+public class PacketRouter {
     @NoArgsConstructor
     public static final class Entry {
         @Setter public String srcUrlPattern;
@@ -60,7 +60,7 @@ public class DataPacketRouter {
     @Autowired
     ObjectFilterFactory filterFactory;
 
-    public DataPacketRouter(List<Entry> entries) {
+    public PacketRouter(List<Entry> entries) {
         this.entries = entries;
         log.info("Routing patterns registered: {} entries", entries.size());
     }

@@ -1,7 +1,7 @@
 package org.bricolages.streaming;
 import lombok.Getter;
 import lombok.Setter;
-import org.bricolages.streaming.stream.DataPacketRouter;
+import org.bricolages.streaming.stream.PacketRouter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class Config {
     @Getter
     private final LogQueue logQueue = new LogQueue();
     @Getter
-    private List<DataPacketRouter.Entry> mappings = new ArrayList<>();
+    private List<PacketRouter.Entry> mappings = new ArrayList<>();
 
     @Setter
     static class EventQueue {

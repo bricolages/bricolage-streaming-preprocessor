@@ -12,20 +12,20 @@ import lombok.*;
 
 @DataJpaTest
 @RunWith(SpringJUnit4ClassRunner.class)
-public class DataPacketRouterTest {
-    DataPacketRouter newRouter(DataPacketRouter.Entry... entries) {
-        val router = new DataPacketRouter(Arrays.asList(entries));
+public class PacketRouterTest {
+    PacketRouter newRouter(PacketRouter.Entry... entries) {
+        val router = new PacketRouter(Arrays.asList(entries));
         router.streamRepos = streamRepos;
         router.streamBundleRepos = bundleRepos;
         return router;
     }
 
-    DataPacketRouter.Entry entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
-        return new DataPacketRouter.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
+    PacketRouter.Entry entry(String srcUrlPattern, String streamName, String streamPrefix, String destBucket, String destPrefix, String objectPrefix, String objectName) {
+        return new PacketRouter.Entry(srcUrlPattern, streamName, streamPrefix, destBucket, destPrefix, objectPrefix, objectName);
     }
 
-    DataPacketRouter.Entry blackholeEntry(String pat) {
-        val ent = new DataPacketRouter.Entry(pat, null, null, null, null, null, null);
+    PacketRouter.Entry blackholeEntry(String pat) {
+        val ent = new PacketRouter.Entry(pat, null, null, null, null, null, null);
         ent.setBlackhole(true);
         return ent;
     }

@@ -260,8 +260,8 @@ public class Application {
     }
 
     @Bean
-    public DataPacketRouter router() {
-        return new DataPacketRouter(this.config.getMappings());
+    public PacketRouter router() {
+        return new PacketRouter(this.config.getMappings());
     }
 
     @Bean
