@@ -7,7 +7,6 @@ import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.Objects;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,7 @@ public class Preprocessor implements EventHandlers {
     final LogQueue logQueue;
     final DataPacketRouter router;
 
-    public void run() throws IOException {
+    public void run() {
         log.info("server started");
         trapSignals();
         try {
@@ -67,7 +66,7 @@ public class Preprocessor implements EventHandlers {
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), result.inputRows, result.outputRows);
             return true;
         }
-        catch (IOException | LocatorIOException ex) {
+        catch (LocatorIOException ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             return false;
         }
@@ -220,7 +219,7 @@ public class Preprocessor implements EventHandlers {
 
             eventQueue.deleteAsync(event);
         }
-        catch (LocatorIOException | IOException | ConfigError ex) {
+        catch (LocatorIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             result.failed(ex.getMessage());
             logRepos.save(result);
