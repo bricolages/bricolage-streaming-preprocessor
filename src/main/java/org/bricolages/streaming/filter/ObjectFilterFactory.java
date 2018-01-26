@@ -1,5 +1,5 @@
 package org.bricolages.streaming.filter;
-import org.bricolages.streaming.stream.DataStream;
+import org.bricolages.streaming.stream.PacketStream;
 import org.bricolages.streaming.locator.LocatorIOManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
@@ -15,7 +15,7 @@ public class ObjectFilterFactory {
     @Autowired
     LocatorIOManager ioManager;
 
-    public ObjectFilter load(DataStream stream) {
+    public ObjectFilter load(PacketStream stream) {
         val defs = stream.getOperatorDefinitions();
         return compose(defs);
     }

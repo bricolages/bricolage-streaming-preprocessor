@@ -10,12 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BoundStream {
     final ObjectFilterFactory filterFactory;
-    @Getter final DataStream stream;
+    @Getter final PacketStream stream;
     @Getter final StreamBundle bundle;
     @Getter final String objectPrefix;
     @Getter final String objectName;
 
-    public BoundStream(DataStream stream, StreamBundle bundle, String objectPrefix, String objectName) {
+    public BoundStream(PacketStream stream, StreamBundle bundle, String objectPrefix, String objectName) {
         this(null, stream, bundle, objectPrefix, objectName);
     }
 

@@ -17,7 +17,7 @@ public class StreamBundle {
     @ManyToOne
     @JoinColumn(name="stream_id")
     @Getter
-    DataStream stream;
+    PacketStream stream;
 
     @Column(name="s3_bucket", nullable=false)
     @Getter
@@ -35,7 +35,7 @@ public class StreamBundle {
     @Getter
     String destPrefix;
 
-    public StreamBundle(DataStream stream, String bucket, String prefix, String destBucket, String destPrefix) {
+    public StreamBundle(PacketStream stream, String bucket, String prefix, String destBucket, String destPrefix) {
         this.stream = stream;
         this.bucket = bucket;
         this.prefix = prefix;

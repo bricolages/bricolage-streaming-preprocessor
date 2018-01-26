@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 import org.bricolages.streaming.Config;
 import org.bricolages.streaming.preflight.definition.*;
-import org.bricolages.streaming.stream.DataPacketRouter;
+import org.bricolages.streaming.stream.PacketRouter;
 import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.locator.*;
 import org.bricolages.streaming.exception.*;
@@ -18,7 +18,7 @@ import lombok.*;
 @RequiredArgsConstructor
 public class Runner {
     final ObjectFilterFactory factory;
-    final DataPacketRouter router;
+    final PacketRouter router;
     final Config config;
 
     private DomainCollection loadDomainCollection(String domainCollectionFilePath) throws IOException {
