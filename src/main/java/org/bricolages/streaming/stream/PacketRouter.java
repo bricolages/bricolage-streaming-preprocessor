@@ -87,7 +87,7 @@ public class PacketRouter {
     }
 
     @Autowired
-    DataStreamRepository streamRepos;
+    PacketStreamRepository streamRepos;
 
     @Autowired
     StreamBundleRepository streamBundleRepos;
@@ -132,7 +132,7 @@ public class PacketRouter {
     public BoundStream routeWithoutDB(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
-        val stream = new DataStream(components.streamName);
+        val stream = new PacketStream(components.streamName);
         val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix, components.destBucket, components.destPrefix);
         return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
@@ -186,12 +186,12 @@ public class PacketRouter {
         }
     }
 
-    DataStream findOrCreateStream(String streamName) {
-        DataStream stream = streamRepos.findStream(streamName);
+    PacketStream findOrCreateStream(String streamName) {
+        PacketStream stream = streamRepos.findStream(streamName);
         if (stream == null) {
             try {
                 // create new stream with disabled (to avoid to produce non preprocessed output)
-                stream = new DataStream(streamName);
+                stream = new PacketStream(streamName);
                 streamRepos.save(stream);
                 logNewStream(stream.getId(), streamName);
             }
@@ -203,7 +203,7 @@ public class PacketRouter {
         return stream;
     }
 
-    StreamBundle findOrCreateStreamBundle(DataStream stream, RouteComponents components) {
+    StreamBundle findOrCreateStreamBundle(PacketStream stream, RouteComponents components) {
         val srcBucket = components.srcBucket;
         val srcPrefix = components.srcPrefix;
         val destBucket = components.destBucket;

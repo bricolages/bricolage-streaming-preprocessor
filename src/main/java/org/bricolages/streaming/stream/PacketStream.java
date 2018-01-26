@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Entity
 @Table(name="strload_streams")
-public class DataStream {
+public class PacketStream {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="stream_id")
@@ -57,7 +57,7 @@ public class DataStream {
         return this.disabled || !this.initialized;
     }
 
-    public DataStream(String streamName) {
+    public PacketStream(String streamName) {
         this.streamName = streamName;
         this.createTime = new Timestamp(System.currentTimeMillis());
     }

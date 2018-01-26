@@ -81,12 +81,12 @@ public class PacketRouterTest {
     }
 
     @Autowired TestEntityManager entityManager;
-    @Autowired DataStreamRepository streamRepos;
+    @Autowired PacketStreamRepository streamRepos;
     @Autowired StreamBundleRepository bundleRepos;
 
     @Test
     public void route() throws Exception {
-        entityManager.persist(new DataStream("schema.table"));
+        entityManager.persist(new PacketStream("schema.table"));
         val stream = streamRepos.findStream("schema.table");
         entityManager.persist(new StreamBundle(stream, "src-bucket", "0000.schema.table_2", "dest-bucket-2", "dest-prefix-2"));
         val bundle = bundleRepos.findStreamBundle("src-bucket-2", "src-prefix-2");
