@@ -1,7 +1,10 @@
 # Release Note
 
+## version 1.6.5
+- [fix] Catches more exceptions.
+
 ## version 1.6.4
-- Catches and reports all exceptions thrown from event handlers.
+- [fix] Catches and reports all exceptions thrown from event handlers.
 
 ## version 1.6.3
 - [fix] Temporary file name was wrong.
