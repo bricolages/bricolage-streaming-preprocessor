@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.nio.file.Path;
@@ -40,7 +41,7 @@ public class LocatorIOManager {
                 Files.copy(in, dest);
             }
         }
-        catch (IOException ex) {
+        catch (UncheckedIOException | IOException ex) {
             throw new LocatorIOException("I/O error: " + ex.getMessage());
         }
     }
@@ -66,7 +67,7 @@ public class LocatorIOManager {
                 return in;
             }
         }
-        catch (IOException ex) {
+        catch (UncheckedIOException | IOException ex) {
             throw new LocatorIOException("I/O error: " + ex.getMessage());
         }
     }
@@ -144,7 +145,7 @@ public class LocatorIOManager {
                 OutputStream out = dest.isGzip() ? new GZIPOutputStream(s) : s;
                 this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
             }
-            catch (IOException ex) {
+            catch (UncheckedIOException | IOException ex) {
                 throw new LocatorIOException("I/O error: " + ex.getMessage());
             }
         }
@@ -155,7 +156,7 @@ public class LocatorIOManager {
                 val result = upload(path, dest);
                 return new S3ObjectMetadata(dest, Instant.now(), Files.size(path), result.getETag());
             }
-            catch (IOException ex) {
+            catch (UncheckedIOException | IOException ex) {
                 throw new LocatorIOException("I/O error: " + ex.getMessage());
             }
         }
@@ -165,13 +166,13 @@ public class LocatorIOManager {
             try {
                 bufferedWriter.close();
             }
-            catch (IOException ex) {
+            catch (UncheckedIOException | IOException ex) {
                 // ignore
             }
             try {
                 Files.deleteIfExists(path);
             }
-            catch (IOException ex) {
+            catch (UncheckedIOException | IOException ex) {
                 log.error("could not remove temporary file: {}", ex);
             }
         }

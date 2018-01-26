@@ -3,7 +3,6 @@ import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.locator.*;
 import org.bricolages.streaming.exception.*;
 import java.nio.file.Paths;
-import java.io.IOException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,7 +54,7 @@ public class BoundStream {
         return filterFactory.load(stream);
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result) throws LocatorIOException, IOException, ConfigError {
+    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result) throws LocatorIOException, ConfigError {
         return loadFilter().processLocator(src, dest, result, stream.getStreamName());
     }
 }
