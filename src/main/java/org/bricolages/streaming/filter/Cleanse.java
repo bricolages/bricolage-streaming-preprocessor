@@ -77,7 +77,33 @@ public final class Cleanse {
         }
     }
 
-    static public double getFloat(Object value) throws FilterException {
+    static public float getFloat(Object value) throws FilterException {
+        if (value instanceof Integer) {
+            return ((Integer)value).floatValue();
+        }
+        else if (value instanceof Long) {
+            return ((Long)value).floatValue();
+        }
+        else if (value instanceof String) {
+            try {
+                return Float.valueOf((String)value);
+            }
+            catch (NumberFormatException ex) {
+                throw new FilterException(ex);
+            }
+        }
+        else if (value instanceof Float) {
+            return ((Float)value).floatValue();
+        }
+        else if (value instanceof Double) {
+            return ((Double)value).floatValue();
+        }
+        else {
+            throw new FilterException("unexpected value for float");
+        }
+    }
+
+    static public double getDouble(Object value) throws FilterException {
         if (value instanceof Integer) {
             return ((Integer)value).doubleValue();
         }
@@ -99,13 +125,13 @@ public final class Cleanse {
             return ((Double)value).doubleValue();
         }
         else {
-            throw new FilterException("unexpected value for integer");
+            throw new FilterException("unexpected value for double");
         }
     }
 
     static public OffsetDateTime getLocalOffsetDateTime(Object value, ZoneOffset sourceOffset, ZoneOffset zoneOffset) throws FilterException {
         if (isFloat(value)) {
-            return unixTimeToOffsetDateTime(getFloat(value), zoneOffset);
+            return unixTimeToOffsetDateTime(getDouble(value), zoneOffset);
         }
         else if (isInteger(value)) {
             return unixTimeToOffsetDateTime(getInteger(value), zoneOffset);

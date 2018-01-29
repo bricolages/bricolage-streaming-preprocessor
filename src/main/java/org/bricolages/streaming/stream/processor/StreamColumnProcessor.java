@@ -32,14 +32,13 @@ public abstract class StreamColumnProcessor {
         else if (Objects.equals(typeId, "date")) {
             return DateColumnProcessor.create(column);
         }
-/*
-        else if (Objects.equals(typeId, "float")) {
-            return FloatColumnProcessor.create(column);
+        else if (Objects.equals(typeId, "real")) {
+            return RealColumnProcessor.create(column);
         }
-        // FIXME: should support double type
-        //else if (Objects.equals(typeId, "double")) {
-        //    return DoubleColumnProcessor.create(column);
-        //}
+        else if (Objects.equals(typeId, "double")) {
+            return DoubleColumnProcessor.create(column);
+        }
+/*
         else if (Objects.equals(typeId, "object")) {
             return FloatColumnProcessor.create(column);
         }

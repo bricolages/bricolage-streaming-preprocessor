@@ -30,7 +30,7 @@ public class UnixTimeOp extends SingleColumnOp {
     public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
         if (Cleanse.isFloat(value)) {
-            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getFloat(value), zoneOffset));
+            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getDouble(value), zoneOffset));
         }
         else {
             return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getInteger(value), zoneOffset));
