@@ -17,10 +17,10 @@ public abstract class StreamColumnProcessor {
         if (Objects.equals(typeId, "integer")) {
             return IntegerColumnProcessor.create(column);
         }
-/*
         else if (Objects.equals(typeId, "bigint")) {
             return BigintColumnProcessor.create(column);
         }
+/*
         else if (Objects.equals(typeId, "boolean")) {
             return BooleanColumnProcessor.create(column);
         }
