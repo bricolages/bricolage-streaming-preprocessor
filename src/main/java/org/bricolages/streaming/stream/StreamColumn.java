@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Slf4j
 @Entity
 @Table(name="strload_columns")
@@ -55,4 +56,9 @@ public class StreamColumn {
 
     @Column(name="create_time", nullable=false)
     Timestamp createTime;
+
+    /* For tests */
+    public StreamColumn(String name, String type) {
+        this(0, null, name, type, null, null, 0, 0, null, null, null);
+    }
 }
