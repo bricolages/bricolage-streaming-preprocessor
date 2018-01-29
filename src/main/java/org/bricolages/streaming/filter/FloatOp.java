@@ -15,7 +15,7 @@ public class FloatOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object rawValue, Record record) throws FilterException {
         if (rawValue == null) return null;
-        float value = (float)getFloat(rawValue);
+        float value = (float)Cleanse.getFloat(rawValue);
         // getFloat returns Inf/-Inf for too big/small value
         if (Float.isInfinite(value) || Float.isNaN(value)) return null;
         return Float.valueOf(value);

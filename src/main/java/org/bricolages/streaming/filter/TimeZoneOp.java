@@ -35,6 +35,6 @@ public class TimeZoneOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
-        return formatSqlTimestamp(getOffsetDateTime(value, sourceOffset, true).withOffsetSameInstant(targetOffset));
+        return Cleanse.formatSqlTimestamp(Cleanse.getOffsetDateTime(value, sourceOffset, true).withOffsetSameInstant(targetOffset));
     }
 }

@@ -29,11 +29,11 @@ public class UnixTimeOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
-        if (isFloat(value)) {
-            return formatSqlTimestamp(unixTimeToOffsetDateTime(getFloat(value), zoneOffset));
+        if (Cleanse.isFloat(value)) {
+            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getFloat(value), zoneOffset));
         }
         else {
-            return formatSqlTimestamp(unixTimeToOffsetDateTime(getInteger(value), zoneOffset));
+            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getInteger(value), zoneOffset));
         }
     }
 }

@@ -15,7 +15,7 @@ public class BigIntOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
-        long i = getInteger(value);
+        long i = Cleanse.getInteger(value);
         return Long.valueOf(i);
     }
 }
