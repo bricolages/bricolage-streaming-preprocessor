@@ -7,6 +7,27 @@ import lombok.*;
 public final class Cleanse {
     private Cleanse() {}
 
+    static public boolean isInteger(Object value) {
+        if (value instanceof Integer || value instanceof Long) {
+            return true;
+        }
+        else if (value instanceof Float || value instanceof Double) {
+            return false;
+        }
+        else if (value instanceof String) {
+            try {
+                Long.valueOf((String)value);
+                return true;
+            }
+            catch (NumberFormatException ex) {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
     static public long getInteger(Object value) throws FilterException {
         if (value instanceof Integer) {
             return ((Integer)value).longValue();
@@ -79,6 +100,18 @@ public final class Cleanse {
         }
         else {
             throw new FilterException("unexpected value for integer");
+        }
+    }
+
+    static public OffsetDateTime getLocalOffsetDateTime(Object value, ZoneOffset sourceOffset, ZoneOffset zoneOffset) throws FilterException {
+        if (isFloat(value)) {
+            return unixTimeToOffsetDateTime(getFloat(value), zoneOffset);
+        }
+        else if (isInteger(value)) {
+            return unixTimeToOffsetDateTime(getInteger(value), zoneOffset);
+        }
+        else {
+            return getOffsetDateTime(value, sourceOffset, true).withOffsetSameInstant(zoneOffset);
         }
     }
 

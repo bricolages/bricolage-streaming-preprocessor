@@ -26,13 +26,10 @@ public abstract class StreamColumnProcessor {
         else if (Objects.equals(typeId, "string")) {
             return StringColumnProcessor.create(column);
         }
-/*
         else if (Objects.equals(typeId, "timestamp")) {
             return TimestampColumnProcessor.create(column);
         }
-        else if (Objects.equals(typeId, "unixtime")) {
-            return TimestampColumnProcessor.createForUnixTime(column);
-        }
+/*
         else if (Objects.equals(typeId, "date")) {
             return DateColumnProcessor.createForUnixTime(column);
         }
