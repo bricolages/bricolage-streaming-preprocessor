@@ -59,6 +59,6 @@ public class StreamColumn {
 
     /* For tests */
     public StreamColumn(String name, String type) {
-        this(0, null, name, type, null, null, 0, 0, null, null, null);
+        this(-1, null, name, type, null, null, 0, 0, null, null, null);
     }
 }

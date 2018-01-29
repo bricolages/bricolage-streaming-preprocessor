@@ -23,10 +23,10 @@ public abstract class StreamColumnProcessor {
         else if (Objects.equals(typeId, "boolean")) {
             return BooleanColumnProcessor.create(column);
         }
-/*
         else if (Objects.equals(typeId, "string")) {
             return StringColumnProcessor.create(column);
         }
+/*
         else if (Objects.equals(typeId, "timestamp")) {
             return TimestampColumnProcessor.create(column);
         }
