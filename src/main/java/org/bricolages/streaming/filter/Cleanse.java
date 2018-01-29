@@ -1,7 +1,7 @@
 package org.bricolages.streaming.filter;
 import java.time.*;
-import java.util.regex.Pattern;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 import lombok.*;
 
 public final class Cleanse {
@@ -133,6 +133,17 @@ public final class Cleanse {
         }
     }
 
+    static final DateTimeFormatter SQL_DATE_FORMAT = DateTimeFormatter.ISO_DATE;
+
+    static public String formatSqlDate(LocalDate dt) throws FilterException {
+        try {
+            return dt.format(SQL_DATE_FORMAT);
+        }
+        catch (DateTimeException ex) {
+            throw new FilterException(ex);
+        }
+    }
+
     // Redshift does not support timezone, but COPY just ignores zone.
     // So keeping timezone information in the JSON data file does not hurt loading task and is a good thing.
     static final DateTimeFormatter SQL_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -249,6 +260,19 @@ public final class Cleanse {
             catch (DateTimeException e2) {
                 return null;
             }
+        }
+    }
+
+    static public LocalDate getLocalDate(Object value) throws FilterException {
+        if (! (value instanceof String)) {
+            throw new FilterException("is not a string");
+        }
+        val str = (String)value;
+        try {
+            return LocalDate.parse(str, DateTimeFormatter.ISO_DATE);
+        }
+        catch (DateTimeException e) {
+            throw new FilterException("could not parse a date: " + str);
         }
     }
 }

@@ -29,10 +29,10 @@ public abstract class StreamColumnProcessor {
         else if (Objects.equals(typeId, "timestamp")) {
             return TimestampColumnProcessor.create(column);
         }
-/*
         else if (Objects.equals(typeId, "date")) {
-            return DateColumnProcessor.createForUnixTime(column);
+            return DateColumnProcessor.create(column);
         }
+/*
         else if (Objects.equals(typeId, "float")) {
             return FloatColumnProcessor.create(column);
         }
