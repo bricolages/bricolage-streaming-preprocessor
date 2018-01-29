@@ -20,10 +20,10 @@ public abstract class StreamColumnProcessor {
         else if (Objects.equals(typeId, "bigint")) {
             return BigintColumnProcessor.create(column);
         }
-/*
         else if (Objects.equals(typeId, "boolean")) {
             return BooleanColumnProcessor.create(column);
         }
+/*
         else if (Objects.equals(typeId, "string")) {
             return StringColumnProcessor.create(column);
         }
