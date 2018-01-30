@@ -4,7 +4,7 @@ import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class RealColumnProcessor extends SingleColumnProcessor {
-    static public final RealColumnProcessor create(StreamColumn column) {
+    static RealColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new RealColumnProcessor(column);
     }
 
@@ -13,7 +13,7 @@ public class RealColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         float n = Cleanse.getFloat(value);
         if (! Float.isFinite(n)) return null;

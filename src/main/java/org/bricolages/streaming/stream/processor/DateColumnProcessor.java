@@ -4,7 +4,7 @@ import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class DateColumnProcessor extends SingleColumnProcessor {
-    static public final DateColumnProcessor create(StreamColumn column) {
+    static DateColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new DateColumnProcessor(column);
     }
 
@@ -13,7 +13,7 @@ public class DateColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         return Cleanse.formatSqlDate(Cleanse.getLocalDate(value));
     }

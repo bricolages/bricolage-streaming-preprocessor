@@ -4,7 +4,7 @@ import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class DoubleColumnProcessor extends SingleColumnProcessor {
-    static public final DoubleColumnProcessor create(StreamColumn column) {
+    static DoubleColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new DoubleColumnProcessor(column);
     }
 
@@ -13,7 +13,7 @@ public class DoubleColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         double n = Cleanse.getDouble(value);
         if (! Double.isFinite(n)) return null;

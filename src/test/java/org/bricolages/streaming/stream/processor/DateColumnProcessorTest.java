@@ -6,32 +6,32 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class DateColumnProcessorTest {
-    StreamColumn col() {
-        return new StreamColumn("col0", "date");
+    DateColumnProcessor defaultProcessor() {
+        return new DateColumnProcessor(StreamColumn.forName("x"));
     }
 
     @Test
     public void process() throws Exception {
-        val proc = new DateColumnProcessor(col());
-        assertNull(proc.processValue(null, null));
-        assertEquals("2018-01-23", proc.processValue("2018-01-23", null));
+        val proc = defaultProcessor();
+        assertNull(proc.processValue(null));
+        assertEquals("2018-01-23", proc.processValue("2018-01-23"));
     }
 
     @Test(expected = FilterException.class)
     public void process_parse_error() throws Exception {
-        val proc = new DateColumnProcessor(col());
-        proc.processValue("2018/01/23", null);
+        val proc = defaultProcessor();
+        proc.processValue("2018/01/23");
     }
 
     @Test(expected = FilterException.class)
     public void process_inval_1() throws Exception {
-        val proc = new DateColumnProcessor(col());
-        proc.processValue("junk value", null);
+        val proc = defaultProcessor();
+        proc.processValue("junk value");
     }
 
     @Test(expected = FilterException.class)
     public void process_inval_2() throws Exception {
-        val proc = new DateColumnProcessor(col());
-        proc.processValue(new Object(), null);
+        val proc = defaultProcessor();
+        proc.processValue(new Object());
     }
 }

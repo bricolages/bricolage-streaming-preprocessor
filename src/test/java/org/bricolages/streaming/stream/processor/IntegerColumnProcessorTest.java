@@ -6,26 +6,26 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class IntegerColumnProcessorTest {
-    StreamColumn col() {
-        return new StreamColumn("col0", "integer");
+    IntegerColumnProcessor defaultProcessor() {
+        return new IntegerColumnProcessor(StreamColumn.forName("x"));
     }
 
     @Test
     public void process() throws Exception {
-        val proc = new IntegerColumnProcessor(col());
-        assertEquals(Integer.valueOf(1), proc.processValue(Integer.valueOf(1), null));
-        assertEquals(Integer.valueOf(1), proc.processValue("1", null));
+        val proc = defaultProcessor();
+        assertEquals(Integer.valueOf(1), proc.processValue(Integer.valueOf(1)));
+        assertEquals(Integer.valueOf(1), proc.processValue("1"));
     }
 
     @Test(expected = FilterException.class)
     public void process_inval_1() throws Exception {
-        val proc = new IntegerColumnProcessor(col());
-        proc.processValue("junk value", null);
+        val proc = defaultProcessor();
+        proc.processValue("junk value");
     }
 
     @Test(expected = FilterException.class)
     public void process_inval_2() throws Exception {
-        val proc = new IntegerColumnProcessor(col());
-        proc.processValue(new Object(), null);
+        val proc = defaultProcessor();
+        proc.processValue(new Object());
     }
 }

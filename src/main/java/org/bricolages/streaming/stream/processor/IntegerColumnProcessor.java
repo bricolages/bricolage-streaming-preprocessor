@@ -4,7 +4,7 @@ import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class IntegerColumnProcessor extends SingleColumnProcessor {
-    static public final IntegerColumnProcessor create(StreamColumn column) {
+    static IntegerColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new IntegerColumnProcessor(column);
     }
 
@@ -13,7 +13,7 @@ public class IntegerColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         long i = Cleanse.getInteger(value);
         if (Integer.MIN_VALUE <= i && i <= Integer.MAX_VALUE) {

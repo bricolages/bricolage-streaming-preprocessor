@@ -5,7 +5,7 @@ import java.util.Objects;
 import lombok.*;
 
 public class BooleanColumnProcessor extends SingleColumnProcessor {
-    static public final BooleanColumnProcessor create(StreamColumn column) {
+    static BooleanColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new BooleanColumnProcessor(column);
     }
 
@@ -14,7 +14,7 @@ public class BooleanColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         if (value instanceof Boolean) {
             return value;

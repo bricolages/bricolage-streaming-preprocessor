@@ -74,7 +74,7 @@ public class ObjectFilter {
                 if (line.trim().isEmpty()) return;  // should not count blank line
                 result.inputRows++;
                 try {
-                    String outStr = processRecord(line);
+                    String outStr = processJSON(line);
                     if (outStr != null) {
                         out.println(outStr);
                         result.outputRows++;
@@ -91,20 +91,24 @@ public class ObjectFilter {
         }
     }
 
-    public String processRecord(String json) throws JSONException {
+    public String processJSON(String json) throws JSONException {
         Record record = Record.parse(json);
         if (record == null) return null;
+        Record result = processRecord(record);
+        if (result == null) return null;
+        return result.serialize();
+    }
 
+    public Record processRecord(Record record) {
         // I apply (old) ops first, because it may includes record-wise operation such as reject op.
         record = processRecordByOperators(record);
         if (record == null) return null;
 
         if (useProcessor) {
             record = processRecordByProcessors(record);
-            if (record == null) return null;
         }
 
-        return record.serialize();
+        return record;
     }
 
     Record processRecordByOperators(Record record) {
@@ -115,14 +119,25 @@ public class ObjectFilter {
         return record;
     }
 
-    Record processRecordByProcessors(Record record) {
-return null;
-        /*
-        for (ColumnProcessor proc : processors) {
-            record = proc.process(record);
+    Record processRecordByProcessors(Record src) {
+        Record dest = new Record();
+        for (StreamColumnProcessor proc : processors) {
+            Object val = proc.process(src);
+            if (val != null) {
+                dest.put(proc.getDestName(), val);
+            }
         }
-        record.removeAllNullColumns();
-        return record;
-        */
+        // FIXME: report? error?
+        src.unconsumedEntries().forEach(ent -> {
+            val name = ent.getKey();
+            val value = ent.getValue();
+            if (value != null) {
+                // Do not overwrite
+                if (!dest.hasColumn(name)) {
+                    dest.put(name, value);
+                }
+            }
+        });
+        return dest.isEmpty() ? null : dest;
     }
 }

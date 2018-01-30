@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 import lombok.*;
 
 public class TimestampColumnProcessor extends SingleColumnProcessor {
-    static public final TimestampColumnProcessor create(StreamColumn column) {
+    static TimestampColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new TimestampColumnProcessor(column, column.getSourceOffset(), column.getZoneOffset());
     }
 
@@ -20,7 +20,7 @@ public class TimestampColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         OffsetDateTime tm = Cleanse.getLocalOffsetDateTime(value, sourceOffset, zoneOffset);
         if (tm == null) return null;

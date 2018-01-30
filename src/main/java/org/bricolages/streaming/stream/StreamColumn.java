@@ -30,21 +30,15 @@ public class StreamColumn {
     String type;
 
     @Column(name="source_name", nullable=true)
-    @Getter
     String sourceName;
-
-    /* Regexp pattern */
-    @Column(name="source_name_pattern", nullable=true)
-    @Getter
-    String sourceNamePattern;
 
     @Column(name="value_length", nullable=true)
     @Getter
-    int length;
+    Integer length;
 
     @Column(name="value_precision", nullable=true)
     @Getter
-    int precision;
+    Integer precision;
 
     @Column(name="source_offset", nullable=true)
     @Getter
@@ -57,8 +51,48 @@ public class StreamColumn {
     @Column(name="create_time", nullable=false)
     Timestamp createTime;
 
+    public String getSourceName() {
+        return (sourceName == null ? name : sourceName);
+    }
+
     /* For tests */
-    public StreamColumn(String name, String type) {
-        this(-1, null, name, type, null, null, 0, 0, null, null, null);
+    static public StreamColumn forName(String name) {
+        return new StreamColumn(-1, null, name, "dummy_type", null, 0, 0, null, null, null);
+    }
+
+    /* For tests */
+    static public StreamColumn forNames(String name, String sourceName) {
+        return new StreamColumn(-1, null, name, "dummy_type", sourceName, 0, 0, null, null, null);
+    }
+
+    /* For tests */
+    static public StreamColumn forParams(Params params) {
+        return new StreamColumn(
+            params.id,
+            params.stream,
+            params.name,
+            params.type,
+            params.sourceName,
+            params.length,
+            params.precision,
+            params.sourceOffset,
+            params.zoneOffset,
+            params.createTime
+        );
+    }
+
+    /* For tests */
+    @NoArgsConstructor
+    static public final class Params {
+        public long id = -1;
+        public PacketStream stream = null;
+        public String name = null;
+        public String type = null;
+        public String sourceName = null;
+        public Integer length = null;
+        public Integer precision = null;
+        public String sourceOffset = null;
+        public String zoneOffset = null;
+        public Timestamp createTime = null;
     }
 }

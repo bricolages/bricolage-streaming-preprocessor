@@ -10,23 +10,21 @@ public abstract class SingleColumnProcessor extends StreamColumnProcessor {
     }
 
     @Override
-    public Record process(Record record) {
-        Object result;
+    public Object process(Record record) {
+        val name = column.getSourceName();
+        val value = record.get(name);
+        record.consume(name);
         try {
-            result = processValue(record.get(column.getSourceName()), record);
+            return processValue(value);
         }
         catch (FilterException ex) {
-            result = null;
-        }
-        if (result == null) {
-            record.remove(column.getSourceName());
-            return record.isEmpty() ? null : record;
-        }
-        else {
-            record.put(column.getName(), result);
-            return record;
+            return null;
         }
     }
 
-    protected abstract Object processValue(Object value, Record record) throws FilterException;
+    public String getSourceName() {
+        return column.getSourceName();
+    }
+
+    protected abstract Object processValue(Object value) throws FilterException;
 }

@@ -4,7 +4,7 @@ import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class BigintColumnProcessor extends SingleColumnProcessor {
-    static public final BigintColumnProcessor create(StreamColumn column) {
+    static BigintColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new BigintColumnProcessor(column);
     }
 
@@ -13,7 +13,7 @@ public class BigintColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         long i = Cleanse.getInteger(value);
         return Long.valueOf(i);

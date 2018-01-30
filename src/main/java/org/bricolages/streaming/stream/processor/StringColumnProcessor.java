@@ -5,7 +5,7 @@ import org.bricolages.streaming.exception.*;
 import lombok.*;
 
 public class StringColumnProcessor extends SingleColumnProcessor {
-    static public final StringColumnProcessor create(StreamColumn column) {
+    static StringColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
         return new StringColumnProcessor(column, column.getLength());
     }
 
@@ -20,7 +20,7 @@ public class StringColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value, Record record) throws FilterException {
+    public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
         if (value instanceof String) {
             return processString((String)value);
