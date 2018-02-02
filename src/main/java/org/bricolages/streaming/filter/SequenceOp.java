@@ -28,10 +28,10 @@ public class SequenceOp extends SingleColumnOp {
     SequenceOp(OperatorDefinition def, SequencialNumberAllocator repo) {
         super(def);
         this.seqRepo = repo;
-        fetchSeq();
+        allocateSequenceBlock();
     }
 
-    void fetchSeq() {
+    void allocateSequenceBlock() {
         val seq = seqRepo.allocate();
         this.currentValue = seq.getLastValue();
         this.upperValue = seq.getNextValue();
@@ -44,7 +44,7 @@ public class SequenceOp extends SingleColumnOp {
 
         // We can use the last value of the block (e.g. 2000)
         if (currentValue > upperValue) {
-            fetchSeq();
+            allocateSequenceBlock();
             // Do not use the first number of the block (e.g. 2000)
             currentValue ++;
         }
