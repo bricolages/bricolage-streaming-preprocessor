@@ -105,4 +105,17 @@ public class ObjectFilterTest {
         // Do not overwrite
         assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1,\"dest\":2}"));
     }
+
+    @Test
+    public void processRecord_aggregate_object() throws Exception {
+        val procs = new ArrayList<StreamColumnProcessor>();
+        procs.add(new ObjectColumnProcessor(StreamColumn.forName("x"), 20));
+        val ops = new ArrayList<Op>();
+        ops.add(builder.build(new OperatorDefinition("aggregate", "schema.table", "x", "{\"targetColumns\":\"^q_\", \"aggregatedColumn\":\"x\"}")));
+        ObjectFilter f = new ObjectFilter(null, ops, procs);
+
+        assertTrue(f.useProcessor);
+        assertEquals("{\"x\":{\"a\":1,\"b\":2}}", f.processJSON("{\"q_a\":1,\"q_b\":2}"));
+        assertEquals("{\"y\":1}", f.processJSON("{\"y\":1,\"q_a\":\"tooooooooooooooooooooooooooooooooo long\"}"));
+    }
 }

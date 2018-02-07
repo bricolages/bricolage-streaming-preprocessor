@@ -35,6 +35,7 @@ public abstract class StreamColumnProcessor {
         register("real", RealColumnProcessor::build);
         register("string", StringColumnProcessor::build);
         register("timestamp", TimestampColumnProcessor::build);
+        register("object", ObjectColumnProcessor::build);
 
         registered = true;
     }
