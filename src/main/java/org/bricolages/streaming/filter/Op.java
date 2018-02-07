@@ -176,6 +176,7 @@ public abstract class Op {
     }
 
     static protected final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
+    static protected final DateTimeFormatter RUBY_DATE_TIME_NOTZ = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     static protected final DateTimeFormatter RUBY_DATE_TIME_FRAC = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS xxxx");
 
     /* "2016-07-01 12:34:56 +0000": Ruby Time#to_s
@@ -221,7 +222,12 @@ public abstract class Op {
             return LocalDateTime.parse(str, DateTimeFormatter.ISO_OFFSET_DATE_TIME).atOffset(defaultOffset);
         }
         catch (DateTimeException e) {
-            return null;
+            try {
+                return LocalDateTime.parse(str, RUBY_DATE_TIME_NOTZ).atOffset(defaultOffset);
+            }
+            catch (DateTimeException e2) {
+                return null;
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ public class TimeZoneOpTest {
         assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01T10:41:06+00:00", null));
         assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01 10:41:06 +0000", null));
         assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01 10:41:06 UTC", null));
+        assertEquals("2016-07-01T19:41:06+09:00", f.applyValue("2016-07-01 10:41:06", null));
 
         // with fractional seconds
         assertEquals("2016-07-01T19:41:06.246+09:00", f.applyValue("2016-07-01T10:41:06.246Z", null));
