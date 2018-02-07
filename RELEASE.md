@@ -1,5 +1,8 @@
 # Release Note
 
+## version 1.6.7
+- [fix] timezone op: support new timestamp format like "2018-02-07 12:34:56"
+
 ## version 1.6.6
 - [fix] sequence op: Allocates the next sequence block when `sequence` op run out the first sequence block.
 
