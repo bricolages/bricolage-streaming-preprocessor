@@ -16,7 +16,7 @@ hs_err_pid*
 
 /data/
 /config/streaming-preprocessor.yml
-/config/application.yml
+/config/application*.yml
 /config.docker/*.yml
 /config.docker/*.properties
 /env.docker
