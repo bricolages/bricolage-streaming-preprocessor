@@ -86,7 +86,10 @@ public class PacketRouterTest {
 
     @Test
     public void route() throws Exception {
-        entityManager.persist(new PacketStream("schema.table"));
+        val s = new PacketStream("schema.table");
+        s.initialized = true;
+        s.columnInitialized = true;
+        entityManager.persist(s);
         val stream = streamRepos.findStream("schema.table");
         entityManager.persist(new StreamBundle(stream, "src-bucket", "0000.schema.table_2", "dest-bucket-2", "dest-prefix-2"));
         val bundle = bundleRepos.findStreamBundle("src-bucket-2", "src-prefix-2");
