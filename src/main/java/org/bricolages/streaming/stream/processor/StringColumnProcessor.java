@@ -6,7 +6,10 @@ import lombok.*;
 
 public class StringColumnProcessor extends SingleColumnProcessor {
     static StringColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        return new StringColumnProcessor(column, column.getLength());
+        if (column.getLength() == null) {
+            throw new ConfigError("length is required for string type: " + column.getName());
+        }
+        return new StringColumnProcessor(column, (int)column.getLength());
     }
 
     final int length;

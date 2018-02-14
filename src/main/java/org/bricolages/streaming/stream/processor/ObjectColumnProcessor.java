@@ -11,7 +11,11 @@ import lombok.*;
 
 public class ObjectColumnProcessor extends SingleColumnProcessor {
     static ObjectColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        val len = column.getLength();
+        val lenObj = column.getLength();
+        if (lenObj == null) {
+            throw new ConfigError("length is required: " + column.getName());
+        }
+        val len = (int)lenObj;
         if (len <= 0) {
             throw new ConfigError("object column requires positive length: " + column.getName());
         }

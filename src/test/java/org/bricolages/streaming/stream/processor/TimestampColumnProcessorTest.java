@@ -1,11 +1,32 @@
 package org.bricolages.streaming.stream.processor;
 import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.FilterException;
+import org.bricolages.streaming.exception.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import lombok.*;
 
 public class TimestampColumnProcessorTest {
+    @Test(expected=ConfigError.class)
+    public void s_build_err1() throws Exception {
+        val params = new StreamColumn.Params();
+        params.name = "x";
+        params.type = "timestamp";
+        params.zoneOffset = null;
+        params.sourceOffset = "+00:00";
+        TimestampColumnProcessor.build(StreamColumn.forParams(params), new NullContext());
+    }
+
+    @Test(expected=ConfigError.class)
+    public void s_build_err2() throws Exception {
+        val params = new StreamColumn.Params();
+        params.name = "x";
+        params.type = "timestamp";
+        params.zoneOffset = "+00:00";
+        params.sourceOffset = null;
+        TimestampColumnProcessor.build(StreamColumn.forParams(params), new NullContext());
+    }
+
     TimestampColumnProcessor defaultProcessor() {
         return new TimestampColumnProcessor(StreamColumn.forName("x"), "+00:00", "+09:00");
     }
