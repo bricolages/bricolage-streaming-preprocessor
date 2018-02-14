@@ -8,7 +8,7 @@ public final class Cleanse {
     private Cleanse() {}
 
     static public boolean isInteger(Object value) {
-        if (value instanceof Integer || value instanceof Long) {
+        if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof Byte) {
             return true;
         }
         else if (value instanceof Float || value instanceof Double) {
@@ -34,6 +34,12 @@ public final class Cleanse {
         }
         else if (value instanceof Long) {
             return ((Long)value).longValue();
+        }
+        else if (value instanceof Short) {
+            return ((Short)value).longValue();
+        }
+        else if (value instanceof Byte) {
+            return ((Byte)value).longValue();
         }
         else if (value instanceof String) {
             try {
@@ -83,6 +89,12 @@ public final class Cleanse {
         }
         else if (value instanceof Long) {
             return ((Long)value).floatValue();
+        }
+        else if (value instanceof Short) {
+            return ((Short)value).floatValue();
+        }
+        else if (value instanceof Byte) {
+            return ((Byte)value).floatValue();
         }
         else if (value instanceof String) {
             try {
