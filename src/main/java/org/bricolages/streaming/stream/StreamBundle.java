@@ -14,7 +14,7 @@ public class StreamBundle {
     @Getter
     long id;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="stream_id")
     @Getter
     PacketStream stream;

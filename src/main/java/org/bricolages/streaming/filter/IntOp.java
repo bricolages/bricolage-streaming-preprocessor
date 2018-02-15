@@ -15,7 +15,7 @@ class IntOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object value, Record record) throws FilterException {
         if (value == null) return null;
-        long i = getInteger(value);
+        long i = Cleanse.getInteger(value);
         if (Integer.MIN_VALUE <= i && i <= Integer.MAX_VALUE) {
             return Integer.valueOf((int)i);
         }

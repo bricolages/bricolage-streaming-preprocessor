@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.locator.*;
 import java.util.List;
 import java.io.IOException;
@@ -9,11 +10,28 @@ import java.io.PrintWriter;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-@RequiredArgsConstructor
 @Slf4j
 public class ObjectFilter {
     final LocatorIOManager ioManager;
     final List<Op> operators;
+    final List<StreamColumnProcessor> processors;
+    final boolean useProcessor;
+
+    /** For column stream */
+    public ObjectFilter(LocatorIOManager ioManager, List<Op> operators, final List<StreamColumnProcessor> processors) {
+        this.ioManager = ioManager;
+        this.operators = operators;
+        this.processors = processors;
+        this.useProcessor = true;
+    }
+
+    /** For non-column stream */
+    public ObjectFilter(LocatorIOManager ioManager, List<Op> operators) {
+        this.ioManager = ioManager;
+        this.operators = operators;
+        this.processors = null;
+        this.useProcessor = false;
+    }
 
     public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result, String sourceName) throws LocatorIOException {
         try {
@@ -56,7 +74,7 @@ public class ObjectFilter {
                 if (line.trim().isEmpty()) return;  // should not count blank line
                 result.inputRows++;
                 try {
-                    String outStr = processRecord(line);
+                    String outStr = processJSON(line);
                     if (outStr != null) {
                         out.println(outStr);
                         result.outputRows++;
@@ -73,13 +91,53 @@ public class ObjectFilter {
         }
     }
 
-    public String processRecord(String json) throws JSONException {
+    public String processJSON(String json) throws JSONException {
         Record record = Record.parse(json);
         if (record == null) return null;
+        Record result = processRecord(record);
+        if (result == null) return null;
+        return result.serialize();
+    }
+
+    public Record processRecord(Record record) {
+        // I apply (old) ops first, because it may includes record-wise operation such as reject op.
+        record = processRecordByOperators(record);
+        if (record == null) return null;
+
+        if (useProcessor) {
+            record = processRecordByProcessors(record);
+        }
+
+        return record;
+    }
+
+    Record processRecordByOperators(Record record) {
         for (Op op : operators) {
             record = op.apply(record);
             if (record == null) return null;
         }
-        return record.serialize();
+        return record;
+    }
+
+    Record processRecordByProcessors(Record src) {
+        Record dest = new Record();
+        for (StreamColumnProcessor proc : processors) {
+            Object val = proc.process(src);
+            if (val != null) {
+                dest.put(proc.getDestName(), val);
+            }
+        }
+        // FIXME: report? error?
+        src.unconsumedEntries().forEach(ent -> {
+            val name = ent.getKey();
+            val value = ent.getValue();
+            if (value != null) {
+                // Do not overwrite
+                if (!dest.hasColumn(name)) {
+                    dest.put(name, value);
+                }
+            }
+        });
+        return dest.isEmpty() ? null : dest;
     }
 }
