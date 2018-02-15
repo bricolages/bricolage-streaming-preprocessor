@@ -1,5 +1,10 @@
 # Release Note
 
+## version 1.7.0
+- [new] Introduces stream columns and column-type-based cleansing.
+  This function is enabled by strload_streams.column_initialized flag.
+  This version requires DB schema change.
+
 ## version 1.6.7
 - [fix] timezone op: support new timestamp format like "2018-02-07 12:34:56"
 
