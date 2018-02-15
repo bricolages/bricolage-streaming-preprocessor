@@ -1,6 +1,6 @@
 # Release Note
 
-## version 1.7.0
+## version 1.7.1
 - [new] Introduces stream columns and column-type-based cleansing.
   This function is enabled by strload_streams.column_initialized flag.
   This version requires DB schema change.
