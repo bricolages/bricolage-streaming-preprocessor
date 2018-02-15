@@ -25,20 +25,16 @@ public class StreamColumn {
     @Getter
     String name;
 
-    @Column(name="column_type", nullable=false)
-    @Getter
-    String type;
-
     @Column(name="source_name", nullable=true)
     String sourceName;
+
+    @Column(name="value_type", nullable=false)
+    @Getter
+    String type;
 
     @Column(name="value_length", nullable=true)
     @Getter
     Integer length;
-
-    @Column(name="value_precision", nullable=true)
-    @Getter
-    Integer precision;
 
     @Column(name="source_offset", nullable=true)
     @Getter
@@ -57,12 +53,12 @@ public class StreamColumn {
 
     /* For tests */
     static public StreamColumn forName(String name) {
-        return new StreamColumn(-1, null, name, "dummy_type", null, 0, 0, null, null, null);
+        return new StreamColumn(-1, null, name, null, "dummy_type", null, null, null, null);
     }
 
     /* For tests */
     static public StreamColumn forNames(String name, String sourceName) {
-        return new StreamColumn(-1, null, name, "dummy_type", sourceName, 0, 0, null, null, null);
+        return new StreamColumn(-1, null, name, sourceName, "dummy_type", null, null, null, null);
     }
 
     /* For tests */
@@ -71,10 +67,9 @@ public class StreamColumn {
             params.id,
             params.stream,
             params.name,
-            params.type,
             params.sourceName,
+            params.type,
             params.length,
-            params.precision,
             params.sourceOffset,
             params.zoneOffset,
             params.createTime
@@ -87,10 +82,9 @@ public class StreamColumn {
         public long id = -1;
         public PacketStream stream = null;
         public String name = null;
-        public String type = null;
         public String sourceName = null;
+        public String type = null;
         public Integer length = null;
-        public Integer precision = null;
         public String sourceOffset = null;
         public String zoneOffset = null;
         public Timestamp createTime = null;
