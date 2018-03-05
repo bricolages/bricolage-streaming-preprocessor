@@ -81,5 +81,10 @@ public class TimestampColumnProcessorTest {
     public void process_timestamp_asis_offset() throws Exception {
         val proc = new TimestampColumnProcessor(StreamColumn.forName("x"), "+00:00", null);
         assertEquals("2016-07-01T10:41:06+07:00", proc.processValue("2016-07-01T10:41:06+07:00"));
+        assertEquals("2016-07-01T10:41:06+07:00", proc.processValue("2016-07-01T10:41:06+0700"));
+        assertEquals("2016-07-01T10:41:06.251+07:00", proc.processValue("2016-07-01T10:41:06.251+07:00"));
+        assertEquals("2016-07-01T10:41:06.251+07:00", proc.processValue("2016-07-01T10:41:06.251+0700"));
+        // fractional '0' disappears
+        assertEquals("2016-07-01T10:41:06.25+07:00", proc.processValue("2016-07-01T10:41:06.250+07:00"));
     }
 }

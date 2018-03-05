@@ -221,6 +221,8 @@ public final class Cleanse {
         throw new FilterException("could not parse a timestamp: " + str);
     }
 
+    static final DateTimeFormatter ISO_INSTANT_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS][ ]xxxx");
+
     /* "2016-07-01T12:34:56Z": Fluentd default.  This representation appears most
      * ISO_INSTANT supports milliseconds
      */
@@ -229,7 +231,12 @@ public final class Cleanse {
             return OffsetDateTime.parse(str, DateTimeFormatter.ISO_INSTANT);
         }
         catch (DateTimeException e) {
-            return null;
+            try {
+                return OffsetDateTime.parse(str, ISO_INSTANT_2);
+            }
+            catch (DateTimeException e2) {
+                return null;
+            }
         }
     }
 
@@ -245,9 +252,9 @@ public final class Cleanse {
         }
     }
 
-    static final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss xxxx");
-    static final DateTimeFormatter RUBY_DATE_TIME_NOTZ = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    static final DateTimeFormatter RUBY_DATE_TIME_FRAC = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS xxxx");
+    static final DateTimeFormatter RUBY_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS][ ]xxx");
+    static final DateTimeFormatter RUBY_DATE_TIME_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS][ ]xxxx");
+    static final DateTimeFormatter RUBY_DATE_TIME_NOTZ = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]");
 
     /* "2016-07-01 12:34:56 +0000": Ruby Time#to_s
      */
@@ -257,7 +264,7 @@ public final class Cleanse {
         }
         catch (DateTimeException e1) {
             try {
-                return OffsetDateTime.parse(str, RUBY_DATE_TIME_FRAC);
+                return OffsetDateTime.parse(str, RUBY_DATE_TIME_2);
             }
             catch (DateTimeException e2) {
                 return null;
