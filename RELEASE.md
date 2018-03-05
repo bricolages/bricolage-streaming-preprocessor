@@ -1,5 +1,8 @@
 # Release Note
 
+## version 1.7.2
+- [new] `timezone` column processor allows to keep source offset as-is
+
 ## version 1.7.1
 - [new] Introduces stream columns and column-type-based cleansing.
   This function is enabled by strload_streams.column_initialized flag.
