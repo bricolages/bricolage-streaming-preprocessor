@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class TimestampColumnProcessorTest {
+    /** zoneOffset may be null now
     @Test(expected=ConfigError.class)
     public void s_build_err1() throws Exception {
         val params = new StreamColumn.Params();
@@ -16,6 +17,7 @@ public class TimestampColumnProcessorTest {
         params.sourceOffset = "+00:00";
         TimestampColumnProcessor.build(StreamColumn.forParams(params), new NullContext());
     }
+    */
 
     @Test(expected=ConfigError.class)
     public void s_build_err2() throws Exception {
@@ -73,5 +75,11 @@ public class TimestampColumnProcessorTest {
     public void process_inval_2() throws Exception {
         val proc = defaultProcessor();
         proc.processValue(new Object());
+    }
+
+    @Test
+    public void process_timestamp_asis_offset() throws Exception {
+        val proc = new TimestampColumnProcessor(StreamColumn.forName("x"), "+00:00", null);
+        assertEquals("2016-07-01T10:41:06+07:00", proc.processValue("2016-07-01T10:41:06+07:00"));
     }
 }

@@ -14,10 +14,7 @@ public class TimestampColumnProcessor extends SingleColumnProcessor {
                 throw new ConfigError("source_offset is null: " + column.getName());
             }
             val src = ZoneOffset.of(column.getSourceOffset());
-            if (column.getZoneOffset() == null) {
-                throw new ConfigError("zone_offset is null: " + column.getName());
-            }
-            val dest = ZoneOffset.of(column.getZoneOffset());
+            val dest = (column.getZoneOffset() != null) ? ZoneOffset.of(column.getZoneOffset()) : null;
             return new TimestampColumnProcessor(column, src, dest);
         }
         catch (DateTimeException ex) {
@@ -36,14 +33,24 @@ public class TimestampColumnProcessor extends SingleColumnProcessor {
 
     // For tests
     public TimestampColumnProcessor(StreamColumn column, String sourceOffset, String zoneOffset) {
-        this(column, ZoneOffset.of(sourceOffset), ZoneOffset.of(zoneOffset));
+        this(column, ZoneOffset.of(sourceOffset), (zoneOffset == null) ? null : ZoneOffset.of(zoneOffset));
     }
 
     @Override
     public Object processValue(Object value) throws FilterException {
         if (value == null) return null;
-        OffsetDateTime tm = Cleanse.getLocalOffsetDateTime(value, sourceOffset, zoneOffset);
+        val tm = getOffsetDateTime(value);
         if (tm == null) return null;
         return Cleanse.formatSqlTimestamp(tm);
+    }
+
+    OffsetDateTime getOffsetDateTime(Object value) throws FilterException {
+        if (zoneOffset == null) {
+            // Use source offset as-is
+            return Cleanse.getOffsetDateTime(value, sourceOffset, true);
+        }
+        else {
+            return Cleanse.getLocalOffsetDateTime(value, sourceOffset, zoneOffset);
+        }
     }
 }
