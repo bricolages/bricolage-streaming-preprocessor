@@ -1,5 +1,8 @@
 # Release Note
 
+## version 1.7.3
+- [new] `timezone` column processor accepts more timestamp formats: "2018-03-05T12:34:56+0700" (ISO instant variant), "2018-03-05 12:34:56+0700" (ruby date time variant)
+
 ## version 1.7.2
 - [new] `timezone` column processor allows to keep source offset as-is
 
