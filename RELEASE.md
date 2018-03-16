@@ -1,5 +1,8 @@
 # Release Note
 
+## version 1.7.4
+- [new] `date` column processor accepts timestamp strings.
+
 ## version 1.7.3
 - [new] `timezone` column processor accepts more timestamp formats: "2018-03-05T12:34:56+0700" (ISO instant variant), "2018-03-05 12:34:56+0700" (ruby date time variant)
 
