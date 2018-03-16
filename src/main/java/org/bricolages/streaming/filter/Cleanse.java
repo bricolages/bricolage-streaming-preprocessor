@@ -309,6 +309,10 @@ public final class Cleanse {
     }
 
     static public LocalDate getLocalDate(Object value) throws FilterException {
+        return getLocalDate(value, ZoneOffset.UTC, null);
+    }
+
+    static public LocalDate getLocalDate(Object value, ZoneOffset defaultOffset, ZoneOffset targetOffset) throws FilterException {
         if (! (value instanceof String)) {
             throw new FilterException("is not a string");
         }
@@ -317,7 +321,8 @@ public final class Cleanse {
             return LocalDate.parse(str, DateTimeFormatter.ISO_DATE);
         }
         catch (DateTimeException e) {
-            throw new FilterException("could not parse a date: " + str);
+            val dt = getOffsetDateTime(str, defaultOffset, true);
+            return (targetOffset != null ? dt.withOffsetSameInstant(targetOffset) : dt).toLocalDate();
         }
     }
 }
