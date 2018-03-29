@@ -46,24 +46,6 @@ public class Runner {
         return StreamDefinitionEntry.load(fileReader, domainCollection, columnCollection);
     }
 
-    private void saveCreateTableStmt(StreamDefinitionFile streamDefFile, StreamDefinitionEntry streamDef, String fullTableName) throws IOException {
-        val createTableStmt = new CreateTableGenerator(streamDef, fullTableName).generate();
-        val path = streamDefFile.getCreateTableFilepath();
-        System.err.printf("generating table def: %s\n", path.toString());
-        try(val writer = new BufferedWriter(new FileWriter(path))) {
-            writer.write(createTableStmt);
-        }
-    }
-
-    private void saveOperatorDefinitions(StreamDefinitionFile streamDefFile, String streamName, List<OperatorDefinition> operators) throws IOException {
-        val path = streamDefFile.getOperatorDefinitionsFilepath();
-        System.err.printf("generating preproc def: %s\n", path.toString());
-        try (val preprocCsvFile = new FileOutputStream(path)) {
-            val serializer = new ObjectFilterSerializer(preprocCsvFile);
-            serializer.serialize(streamName, operators);
-        }
-    }
-
     private void saveLoadJob(StreamDefinitionFile streamDefFile, S3ObjectLocator dest, String fullTableName) throws IOException {
         val path = streamDefFile.getLoadJobFilepath();
         System.err.printf("generating load job: %s\n", path.toString());
@@ -133,8 +115,6 @@ public class Runner {
         val generator = new ObjectFilterGenerator(streamDef);
         val operators = generator.generate();
 
-        saveOperatorDefinitions(streamDefFile, streamName, operators);
-        saveCreateTableStmt(streamDefFile, streamDef, tableSpec);
         saveLoadJob(streamDefFile, dest, tableSpec);
 
         return operators;
