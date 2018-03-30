@@ -1,9 +1,9 @@
 package org.bricolages.streaming.preflight.definition;
-
-import java.util.List;
 import org.bricolages.streaming.preflight.domains.*;
+import org.bricolages.streaming.stream.StreamColumn;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.List;
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -25,4 +25,5 @@ public interface DomainParameters {
     String getType();
     ColumnEncoding getEncoding();
     List<OperatorDefinitionEntry> getOperatorDefinitionEntries();
+    StreamColumn.Params getStreamColumnParams();
 }

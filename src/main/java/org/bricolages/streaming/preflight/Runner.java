@@ -9,7 +9,8 @@ import java.io.FileNotFoundException;
 import org.apache.commons.io.FilenameUtils;
 import org.bricolages.streaming.Config;
 import org.bricolages.streaming.preflight.definition.*;
-import org.bricolages.streaming.stream.PacketRouter;
+import org.bricolages.streaming.stream.*;
+import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.locator.*;
 import org.bricolages.streaming.exception.*;
@@ -71,9 +72,6 @@ public class Runner {
             return this.filepathWithoutExt + ".ct";
         }
 
-        String getOperatorDefinitionsFilepath() {
-            return this.filepathWithoutExt + ".preproc.csv";
-        }
 
         String getLoadJobFilepath() {
             return this.filepathWithoutExt + "_preflight_load_.job";
@@ -88,9 +86,9 @@ public class Runner {
         val streamName = route.getStreamName();
         val dest = route.getDestLocator();
 
-        val operators = generateDefs(streamDefPath, streamName, dest, tableSpec);
+        val processors = generateDefs(streamDefPath, streamName, dest, tableSpec);
 
-        preprocess(operators, streamName, src, dest);
+        preprocess(processors, streamName, src, dest);
     }
 
     public void generateWithRouting(String streamDefPath, S3ObjectLocator src, String tableSpec) throws IOException, LocatorIOException {
@@ -108,20 +106,19 @@ public class Runner {
         generateDefs(streamDefPath, streamName, dummyDest, tableSpec);
     }
 
-    List<OperatorDefinition> generateDefs(String streamDefPath, String streamName, S3ObjectLocator dest, String tableSpec) throws IOException, LocatorIOException {
+    ObjectFilter generateDefs(String streamDefPath, String streamName, S3ObjectLocator dest, String tableSpec) throws IOException, LocatorIOException {
         val streamDefFile = new StreamDefinitionFile(streamDefPath);
         val streamDef = loadStreamDef(streamDefFile);
 
-        val generator = new ObjectFilterGenerator(streamDef);
-        val operators = generator.generate();
+        val generator = new ObjectFilterGenerator(factory, streamDef);
+        val filter = generator.generate();
 
         saveLoadJob(streamDefFile, dest, tableSpec);
 
-        return operators;
+        return filter;
     }
 
-    void preprocess(List<OperatorDefinition> operators, String streamName, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
-        val filter = factory.compose(operators);
+    void preprocess(ObjectFilter filter, String streamName, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
         System.err.printf("*** preproc start");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());

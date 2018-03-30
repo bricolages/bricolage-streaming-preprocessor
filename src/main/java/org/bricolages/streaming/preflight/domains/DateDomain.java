@@ -1,10 +1,8 @@
 package org.bricolages.streaming.preflight.domains;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.bricolages.streaming.preflight.definition.ColumnEncoding;
 import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
+import org.bricolages.streaming.stream.StreamColumn;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
@@ -16,11 +14,21 @@ public class DateDomain extends PrimitiveDomain {
     @Getter private final String type = "date";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
-        val list = new ArrayList<OperatorDefinitionEntry>();
-        return list;
-    }
+    @Getter
+    @MultilineDescription("Source timezone, given by the string like '+00:00'")
+    private String sourceOffset;
+
+    @Getter
+    @MultilineDescription("Target timezone, given by the string like '+09:00'")
+    private String zoneOffset;
 
     // This is necessary to accept empty value
     @JsonCreator public DateDomain(String nil) { /* noop */ }
+
+    public StreamColumn.Params getStreamColumnParams() {
+        val params = super.getStreamColumnParams();
+        params.sourceOffset = sourceOffset;
+        params.zoneOffset = zoneOffset;
+        return params;
+    }
 }

@@ -1,8 +1,8 @@
 package org.bricolages.streaming.preflight.definition;
-
+import org.bricolages.streaming.stream.StreamColumn;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @RequiredArgsConstructor
@@ -46,5 +46,14 @@ public class DomainParametersEntry implements DomainParameters {
         }
 
         return wholeFilter;
+    }
+
+    public StreamColumn.Params getStreamColumnParams() {
+        if (parent != null) {
+            return parent.getStreamColumnParams();
+        }
+        else {
+            return new StreamColumn.Params();
+        }
     }
 }

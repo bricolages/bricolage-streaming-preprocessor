@@ -1,7 +1,6 @@
 package org.bricolages.streaming.preflight.definition;
-
 import org.bricolages.streaming.preflight.definition.WellknownColumnCollection.WellknownColumnResolver;
-
+import org.bricolages.streaming.stream.StreamColumn;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +26,10 @@ public class ColumnDefinitionReference implements ColumnDefinition {
 
     public DomainParameters getDomain() {
         return getColumnDefinition().getDomain();
+    }
+
+    public StreamColumn getStreamColumn() {
+        return getColumnDefinition().getStreamColumn();
     }
 
     @JsonCreator

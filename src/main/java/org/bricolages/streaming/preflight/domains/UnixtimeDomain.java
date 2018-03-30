@@ -1,11 +1,8 @@
 package org.bricolages.streaming.preflight.domains;
-import org.bricolages.streaming.filter.UnixTimeOp;
 import org.bricolages.streaming.preflight.definition.ColumnEncoding;
-import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import org.bricolages.streaming.exception.*;
-import java.util.ArrayList;
-import java.util.List;
+import org.bricolages.streaming.stream.StreamColumn;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
@@ -21,17 +18,14 @@ public class UnixtimeDomain extends PrimitiveDomain {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
-        if (zoneOffset == null) {
-            throw new ConfigError("missing parameter: zoneOffset");
-        }
-        val utParams = new UnixTimeOp.Parameters();
-        utParams.setZoneOffset(zoneOffset);
-        val list = new ArrayList<OperatorDefinitionEntry>();
-        list.add(new OperatorDefinitionEntry("unixtime", utParams));
-        return list;
-    }
-
     // This is necessary to accept empty value
     @JsonCreator public UnixtimeDomain(String nil) { /* noop */ }
+
+    public StreamColumn.Params getStreamColumnParams() {
+        val params = super.getStreamColumnParams();
+        params.type = "timestamp";
+        params.sourceOffset = "+00:00";
+        params.zoneOffset = zoneOffset;
+        return params;
+    }
 }
