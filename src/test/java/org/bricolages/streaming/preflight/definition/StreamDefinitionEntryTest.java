@@ -1,5 +1,4 @@
 package org.bricolages.streaming.preflight.definition;
-
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.io.StringReader;
@@ -12,12 +11,15 @@ public class StreamDefinitionEntryTest {
             "columns:",
             "  - time -> jst_time:",
             "      type: timestamp",
-            "      encoding: zstd",
+            "      encoding: delta",
         }));
         val def = StreamDefinitionEntry.load(reader, DomainCollection.empty(), WellknownColumnCollection.empty());
         assertEquals("jst_time", def.getColumns().get(0).getName());
         assertEquals("time", def.getColumns().get(0).getOriginalName());
-        assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getDomain().getEncoding());
+        assertEquals(ColumnEncoding.DELTA, def.getColumns().get(0).getDomain().getEncoding());
+        assertNull(def.getColumns().get(0).getDomain().getStreamColumnParams().type);
+        assertNull(def.getColumns().get(0).getDomain().getStreamColumnParams().sourceOffset);
+        assertNull(def.getColumns().get(0).getDomain().getStreamColumnParams().zoneOffset);
     }
 
     @Test
@@ -35,9 +37,12 @@ public class StreamDefinitionEntryTest {
         val def = StreamDefinitionEntry.load(reader2, domains, WellknownColumnCollection.empty());
         assertEquals("jst_time", def.getColumns().get(0).getName());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getDomain().getEncoding());
+        val params = def.getColumns().get(0).getDomain().getStreamColumnParams();
+        assertEquals("timestamp", params.type);
+        assertEquals("+00:00", params.sourceOffset);
+        assertEquals("+09:00", params.zoneOffset);
         val filter = def.getColumns().get(0).getDomain().getOperatorDefinitionEntries();
-        assertEquals(1, filter.size());
-        assertEquals("timezone", filter.get(0).getOperatorId());
+        assertEquals(0, filter.size());
     }
 
     @Test
@@ -57,12 +62,11 @@ public class StreamDefinitionEntryTest {
         assertEquals("item_id", def.getColumns().get(0).getName());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getDomain().getEncoding());
         val filter = def.getColumns().get(0).getDomain().getOperatorDefinitionEntries();
-        assertEquals(3, filter.size());
+        assertEquals(2, filter.size());
         assertEquals("reject", filter.get(0).getOperatorId());
         assertEquals("{\"type\":null}", filter.get(0).getParams().toString());
-        assertEquals("int", filter.get(1).getOperatorId());
-        assertEquals("reject", filter.get(2).getOperatorId());
-        assertEquals("{\"type\":\"integer\",\"value\":0}", filter.get(2).getParams().toString());
+        assertEquals("reject", filter.get(1).getOperatorId());
+        assertEquals("{\"type\":\"integer\",\"value\":0}", filter.get(1).getParams().toString());
     }
 
     @Test
@@ -99,34 +103,39 @@ public class StreamDefinitionEntryTest {
         assertEquals(null,                def.getColumns().get(0).getOriginalName());
         assertEquals("integer",           def.getColumns().get(0).getDomain().getType());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(0).getDomain().getEncoding());
-        assertEquals(1,                   def.getColumns().get(0).getDomain().getOperatorDefinitionEntries().size());
-        assertEquals("int",               def.getColumns().get(0).getDomain().getOperatorDefinitionEntries().get(0).getOperatorId());
+        assertEquals(0,                   def.getColumns().get(0).getDomain().getOperatorDefinitionEntries().size());
+        assertEquals("integer",           def.getColumns().get(0).getDomain().getStreamColumnParams().type);
 
         assertEquals("jst_time",          def.getColumns().get(1).getName());
         assertEquals("time",              def.getColumns().get(1).getOriginalName());
         assertEquals("timestamp",         def.getColumns().get(1).getDomain().getType());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(1).getDomain().getEncoding());
-        assertEquals(1,                   def.getColumns().get(1).getDomain().getOperatorDefinitionEntries().size());
-        assertEquals("timezone",          def.getColumns().get(1).getDomain().getOperatorDefinitionEntries().get(0).getOperatorId());
-        assertEquals("{\"sourceOffset\":\"+00:00\",\"targetOffset\":\"+09:00\",\"truncate\":false}", def.getColumns().get(1).getDomain().getOperatorDefinitionEntries().get(0).getParams());
+        assertEquals(0,                   def.getColumns().get(1).getDomain().getOperatorDefinitionEntries().size());
+        assertEquals("timestamp",         def.getColumns().get(1).getDomain().getStreamColumnParams().type);
+        assertEquals("+00:00",            def.getColumns().get(1).getDomain().getStreamColumnParams().sourceOffset);
+        assertEquals("+09:00",            def.getColumns().get(1).getDomain().getStreamColumnParams().zoneOffset);
 
         assertEquals("special_item_id",   def.getColumns().get(2).getName());
         assertEquals(null,                def.getColumns().get(2).getOriginalName());
         assertEquals("integer",           def.getColumns().get(2).getDomain().getType());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(2).getDomain().getEncoding());
-        assertEquals(1,                   def.getColumns().get(2).getDomain().getOperatorDefinitionEntries().size());
-        assertEquals("int",               def.getColumns().get(2).getDomain().getOperatorDefinitionEntries().get(0).getOperatorId());
+        assertEquals(0,                   def.getColumns().get(2).getDomain().getOperatorDefinitionEntries().size());
+        assertEquals("integer",           def.getColumns().get(2).getDomain().getStreamColumnParams().type);
 
         assertEquals("awesome_uuid",      def.getColumns().get(3).getName());
         assertEquals(null,                def.getColumns().get(3).getOriginalName());
         assertEquals("varchar(36)",       def.getColumns().get(3).getDomain().getType());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(3).getDomain().getEncoding());
         assertEquals(0,                   def.getColumns().get(3).getDomain().getOperatorDefinitionEntries().size());
+        assertEquals("string",            def.getColumns().get(3).getDomain().getStreamColumnParams().type);
+        assertEquals(Integer.valueOf(36), def.getColumns().get(3).getDomain().getStreamColumnParams().length);
 
         assertEquals("hyper_strict_uuid", def.getColumns().get(4).getName());
         assertEquals(null,                def.getColumns().get(4).getOriginalName());
         assertEquals("varchar(36)",       def.getColumns().get(4).getDomain().getType());
         assertEquals(ColumnEncoding.ZSTD, def.getColumns().get(4).getDomain().getEncoding());
+        assertEquals("string",            def.getColumns().get(4).getDomain().getStreamColumnParams().type);
+        assertEquals(Integer.valueOf(36), def.getColumns().get(4).getDomain().getStreamColumnParams().length);
         assertEquals(1,                   def.getColumns().get(4).getDomain().getOperatorDefinitionEntries().size());
         assertEquals("text",              def.getColumns().get(4).getDomain().getOperatorDefinitionEntries().get(0).getOperatorId());
         assertEquals("{\"pattern\":\"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}", def.getColumns().get(4).getDomain().getOperatorDefinitionEntries().get(0).getParams());
