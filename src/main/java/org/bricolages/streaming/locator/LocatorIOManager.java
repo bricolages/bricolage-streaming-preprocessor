@@ -125,8 +125,13 @@ public class LocatorIOManager {
         }
     }
 
-    public Buffer openWriteBuffer(S3ObjectLocator dest, String uniqPrefix) throws LocatorIOException {
-        Path tmp = Paths.get(TMPDIR, uniqPrefix + "-" + dest.basename());
+    public Buffer openWriteBuffer(S3ObjectLocator dest) throws LocatorIOException {
+        String base = dest.key().replaceAll("/", "-");
+        // I believe object key does not include multi-byte characters!
+        if (base.length() > 255) {
+            base = base.substring(base.length() - 255);
+        }
+        Path tmp = Paths.get(TMPDIR, base);
         return new Buffer(tmp, dest);
     }
 

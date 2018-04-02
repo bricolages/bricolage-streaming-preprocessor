@@ -50,7 +50,7 @@ public class Runner {
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
         val result = new FilterResult(src.toString(), dest.toString());
-        filter.processLocator(src, dest, result, src.toString());
+        filter.processLocator(src, dest, result);
         System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", result.inputRows, result.outputRows, result.errorRows);
     }
 }

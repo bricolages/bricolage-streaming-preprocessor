@@ -33,11 +33,11 @@ public class ObjectFilter {
         this.useProcessor = false;
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result, String sourceName) throws LocatorIOException {
+    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result) throws LocatorIOException {
         try {
-            try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest, sourceName)) {
+            try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest)) {
                 try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                    processStream(r, buf.getBufferedWriter(), result, sourceName);
+                    processStream(r, buf.getBufferedWriter(), result, src.toString());
                 }
                 return buf.commit();
             }

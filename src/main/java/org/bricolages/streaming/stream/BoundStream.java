@@ -55,6 +55,6 @@ public class BoundStream {
     }
 
     public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result) throws LocatorIOException, ConfigError {
-        return loadFilter().processLocator(src, dest, result, stream.getStreamName());
+        return loadFilter().processLocator(src, dest, result);
     }
 }
