@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
-@JsonTypeName("timestamp")
-@MultilineDescription("Timestamp without zone")
+@JsonTypeName("timestamptz")
+@MultilineDescription("Timestamp with time zone")
 @NoArgsConstructor
-public class TimestampDomain extends PrimitiveDomain {
+public class TimestamptzDomain extends PrimitiveDomain {
     @Getter
     @MultilineDescription("Source timezone, given by the string like '+00:00'")
     private String sourceOffset;
@@ -19,11 +19,11 @@ public class TimestampDomain extends PrimitiveDomain {
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String targetOffset;
 
-    @Getter private final String type = "timestamp";
+    @Getter private final String type = "timestamptz";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     // This is necessary to accept empty value
-    @JsonCreator public TimestampDomain(String nil) { /* noop */ }
+    @JsonCreator public TimestamptzDomain(String nil) { /* noop */ }
 
     public StreamColumn.Params getStreamColumnParams() {
         val params = super.getStreamColumnParams();
