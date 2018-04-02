@@ -46,7 +46,7 @@ public class Runner {
     }
 
     public void preprocess(ObjectFilter filter, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
-        System.err.printf("*** preproc start");
+        System.err.printf("*** preproc start\n");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
         val result = new FilterResult(src.toString(), dest.toString());
