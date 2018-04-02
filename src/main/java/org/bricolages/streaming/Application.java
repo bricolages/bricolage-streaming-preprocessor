@@ -20,6 +20,9 @@ import com.amazonaws.services.sqs.AmazonSQSClient;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Objects;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +45,12 @@ public class Application {
         boolean oneshot = false;
         String mapUrl = null;
         String procUrl = null;
+        String destUrl = null;
         String streamDefFilename = null;
         String schemaName = null;
         String tableName = null;
         String streamName = null;
-        boolean generateOnly = false;
+        boolean checkOnly = false;
         boolean domainsReference = false;
         boolean dumpRoutes = false;
 
@@ -56,6 +60,9 @@ public class Application {
             }
             else if (args[i].startsWith("--preflight=")) {
                 streamDefFilename = getArg(args[i], "--preflight");
+            }
+            else if (args[i].equals("--check-only")) {
+                checkOnly = true;
             }
             else if (args[i].startsWith("--schema-name=")) {
                 schemaName = getArg(args[i], "--schema-name");
@@ -72,8 +79,8 @@ public class Application {
             else if (args[i].startsWith("--process-url=")) {
                 procUrl = getArg(args[i], "--process-url");
             }
-            else if (args[i].equals("--generate-only")) {
-                generateOnly = true;
+            else if (args[i].startsWith("--dest-url=")) {
+                destUrl = getArg(args[i], "--dest-url");
             }
             else if (Objects.equals(args[i], "--types-reference")) {
                 domainsReference = true;
@@ -100,38 +107,20 @@ public class Application {
 
         if (streamDefFilename != null) {   // preflight
             this.appName = "preflight";
-
-            if (schemaName == null) {
-                errorExit("missing option: --schema-name");
-            }
-            if (tableName == null) {
-                errorExit("missing option: --table-name");
-            }
-            val tableSpec = schemaName + "." + tableName;
-
             try {
-                if (generateOnly) {
-                    if (procUrl != null && streamName != null) {
-                        errorExit("--process-url and --stream-name are exclusive");
-                    }
-                    if (procUrl == null && streamName == null) {
-                        errorExit("--process-url or --stream-name is required");
-                    }
-                    if (streamName != null) {
-                        preflightRunner().generateWithoutRouting(streamDefFilename, streamName, tableSpec);
-                    }
-                    else {
-                        val src = S3ObjectLocator.parse(procUrl);
-                        preflightRunner().generateWithRouting(streamDefFilename, src, tableSpec);
-                    }
+                if (checkOnly) {
+                    preflightRunner().loadFilter(streamDefFilename);
                 }
                 else {
-                    if (procUrl == null) {
-                        errorExit("missing option: --process-url");
-                    }
+                    if (procUrl == null) errorExit("--process-url is required");
+                    if (destUrl == null) errorExit("--dest-url is required");
                     val src = S3ObjectLocator.parse(procUrl);
-                    preflightRunner().generateAndPreprocess(streamDefFilename, src, tableSpec);
+                    val dest = S3ObjectLocator.parse(destUrl);
+                    val preflight = preflightRunner();
+                    val filter = preflight.loadFilter(streamDefFilename);
+                    preflight.preprocess(filter, src, dest);
                 }
+                createFlagFile(streamDefFilename);
             }
             catch (ApplicationError ex) {
                 System.err.println("preflight: error: " + ex.getMessage());
@@ -224,12 +213,19 @@ public class Application {
         s.println("\t--help                Prints this message and quit.");
     }
 
+    void createFlagFile(String streamDefFilename) throws IOException {
+        val flagPath = Paths.get(streamDefFilename + ".ok");
+        try (val f = Files.newBufferedWriter(flagPath)) {
+            ;
+        }
+    }
+
     @Autowired
     Config config;
 
     @Bean
     public Runner preflightRunner() {
-        return new Runner(filterFactory(), router(), config);
+        return new Runner(filterFactory());
     }
 
     @Bean
