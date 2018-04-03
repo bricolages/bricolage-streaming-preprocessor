@@ -6,12 +6,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
-@JsonTypeName("boolean")
-@MultilineDescription("Boolean")
-public class BooleanDomain extends PrimitiveDomain {
-    @Getter private final String type = "boolean";
+@JsonTypeName("real")
+@MultilineDescription("32bit floating point number")
+public class RealDomain extends PrimitiveDomain {
+    @Getter private final String type = "real";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     // This is necessary to accept null value
-    @JsonCreator public BooleanDomain(String nil) { /* noop */ }
+    @JsonCreator public RealDomain(String nil) { /* noop */ }
 }

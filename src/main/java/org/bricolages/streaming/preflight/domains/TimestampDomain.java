@@ -1,17 +1,14 @@
 package org.bricolages.streaming.preflight.domains;
-import org.bricolages.streaming.filter.TimeZoneOp;
 import org.bricolages.streaming.preflight.definition.ColumnEncoding;
-import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.ReferenceGenerator.MultilineDescription;
 import org.bricolages.streaming.exception.ConfigError;
-import java.util.ArrayList;
-import java.util.List;
+import org.bricolages.streaming.stream.StreamColumn;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.*;
 
 @JsonTypeName("timestamp")
-@MultilineDescription("Timestamp with zone adjust")
+@MultilineDescription("Timestamp without zone")
 @NoArgsConstructor
 public class TimestampDomain extends PrimitiveDomain {
     @Getter
@@ -25,21 +22,13 @@ public class TimestampDomain extends PrimitiveDomain {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
-    public List<OperatorDefinitionEntry> getOperatorDefinitionEntries() {
-        if (sourceOffset == null) {
-            throw new ConfigError("missing parameter: sourceOffset");
-        }
-        if (targetOffset == null) {
-            throw new ConfigError("missing parameter: targetOffset");
-        }
-        val params = new TimeZoneOp.Parameters();
-        params.setSourceOffset(sourceOffset);
-        params.setTargetOffset(targetOffset);
-        val ops = new ArrayList<OperatorDefinitionEntry>();
-        ops.add(new OperatorDefinitionEntry("timezone", params));
-        return ops;
-    }
-
     // This is necessary to accept empty value
     @JsonCreator public TimestampDomain(String nil) { /* noop */ }
+
+    public StreamColumn.Params getStreamColumnParams() {
+        val params = super.getStreamColumnParams();
+        params.sourceOffset = this.sourceOffset;
+        params.zoneOffset = this.targetOffset;
+        return params;
+    }
 }

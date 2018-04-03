@@ -32,9 +32,9 @@ public class ObjectFilterFactory {
         }
     }
 
-    public ObjectFilter compose(List<OperatorDefinition> defs) {
-        val ops = buildOperators(defs);
-        return new ObjectFilter(ioManager, ops);
+    public ObjectFilter compose(List<OperatorDefinition> opDefs, List<StreamColumnProcessor> procs) {
+        val ops = buildOperators(opDefs);
+        return new ObjectFilter(ioManager, ops, procs);
     }
 
     List<Op> buildOperators(List<OperatorDefinition> defs) {

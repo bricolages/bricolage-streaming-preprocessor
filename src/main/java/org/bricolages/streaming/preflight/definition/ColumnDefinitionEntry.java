@@ -1,4 +1,5 @@
 package org.bricolages.streaming.preflight.definition;
+import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.exception.*;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -43,5 +44,12 @@ public class ColumnDefinitionEntry implements ColumnDefinition {
         BadColumnKeyException(String columnKey) {
             super(String.format("bad column name: %s", columnKey));
         }
+    }
+
+    public StreamColumn getStreamColumn() {
+        val params = getDomain().getStreamColumnParams();
+        params.name = this.name;
+        params.sourceName = this.originalName;
+        return StreamColumn.forParams(params);
     }
 }
