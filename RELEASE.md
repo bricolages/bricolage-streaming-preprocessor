@@ -1,5 +1,8 @@
 # Release Note
 
+## version 1.8.0
+- Preflight now handles only preprocessing, it no longer generates .ct or .job files.
+
 ## version 1.7.4
 - [new] `date` column processor accepts timestamp strings.
 
