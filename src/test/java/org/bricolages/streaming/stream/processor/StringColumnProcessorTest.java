@@ -24,8 +24,7 @@ public class StringColumnProcessorTest {
         params.name = "x";
         params.type = "string";
         params.length = 20;
-        val col = StreamColumn.forParams(params);
-        val proc = StreamColumnProcessor.forColumn(col, null);
+        val proc = StreamColumn.forParams(params).buildProcessor(null);
 
         val rec = new Record();
         rec.put("x", "a\0");

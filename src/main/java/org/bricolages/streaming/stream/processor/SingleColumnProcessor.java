@@ -1,17 +1,16 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.Record;
 import org.bricolages.streaming.filter.FilterException;
 import lombok.*;
 
 public abstract class SingleColumnProcessor extends StreamColumnProcessor {
-    protected SingleColumnProcessor(StreamColumn column) {
-        super(column);
+    protected SingleColumnProcessor(ProcessorParams params) {
+        super(params);
     }
 
     @Override
     public Object process(Record record) {
-        val name = column.getSourceName();
+        val name = params.getSourceName();
         val value = record.get(name);
         record.consume(name);
         try {
@@ -23,7 +22,7 @@ public abstract class SingleColumnProcessor extends StreamColumnProcessor {
     }
 
     public String getSourceName() {
-        return column.getSourceName();
+        return params.getSourceName();
     }
 
     protected abstract Object processValue(Object value) throws FilterException;

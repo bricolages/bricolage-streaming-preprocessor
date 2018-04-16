@@ -27,7 +27,6 @@ public interface StreamBundleRepository extends JpaRepository<StreamBundle, Long
         }
         val bundle = list.get(0);
         Hibernate.initialize(bundle.getStream());
-        Hibernate.initialize(bundle.getStream().getColumns());
         return bundle;
     }
 }

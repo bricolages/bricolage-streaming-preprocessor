@@ -27,11 +27,6 @@ public class PacketStream {
     List<OperatorDefinition> operatorDefinitions;
 
     @OneToMany(mappedBy="stream", fetch=FetchType.LAZY)
-    @OrderBy("column_id asc")
-    @Getter
-    List<StreamColumn> columns;
-
-    @OneToMany(mappedBy="stream", fetch=FetchType.LAZY)
     @Getter
     List<StreamBundle> bundles;
 

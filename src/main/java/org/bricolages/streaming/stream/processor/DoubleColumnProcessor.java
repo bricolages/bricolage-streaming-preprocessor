@@ -1,15 +1,14 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class DoubleColumnProcessor extends SingleColumnProcessor {
-    static DoubleColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        return new DoubleColumnProcessor(column);
+    static public DoubleColumnProcessor build(ProcessorParams params, ProcessorContext ctx) {
+        return new DoubleColumnProcessor(params);
     }
 
-    public DoubleColumnProcessor(StreamColumn column) {
-        super(column);
+    public DoubleColumnProcessor(ProcessorParams params) {
+        super(params);
     }
 
     @Override

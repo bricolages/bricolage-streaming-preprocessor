@@ -1,6 +1,5 @@
 package org.bricolages.streaming.filter;
-import org.bricolages.streaming.stream.PacketStream;
-import org.bricolages.streaming.stream.StreamColumn;
+import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.stream.processor.ProcessorContext;
 import org.bricolages.streaming.locator.LocatorIOManager;
@@ -19,6 +18,9 @@ public class ObjectFilterFactory {
 
     @Autowired
     LocatorIOManager ioManager;
+
+    @Autowired
+    StreamColumnRepository columnRepos;
 
     public ObjectFilter load(PacketStream stream) {
         val ops = buildOperators(stream.getOperatorDefinitions());
@@ -42,16 +44,18 @@ public class ObjectFilterFactory {
     }
 
     List<StreamColumnProcessor> buildProcessors(PacketStream stream) {
-        val ctx = new Context(stream);
-        return stream.getColumns().stream().map(col -> StreamColumnProcessor.forColumn(col, ctx)).collect(Collectors.toList());
+        val columns = columnRepos.findColumns(stream);
+        val ctx = new Context(stream, columns);
+        return columns.stream().map(col -> col.buildProcessor(ctx)).collect(Collectors.toList());
     }
 
     @RequiredArgsConstructor
     static class Context implements ProcessorContext {
         final PacketStream stream;
+        final List<StreamColumn> columns;
 
         public Set<String> getStreamColumns() {
-            return stream.getColumns().stream().map(col -> col.getSourceName()).collect(Collectors.toSet());
+            return columns.stream().map(col -> col.getSourceName()).collect(Collectors.toSet());
         }
     }
 }
