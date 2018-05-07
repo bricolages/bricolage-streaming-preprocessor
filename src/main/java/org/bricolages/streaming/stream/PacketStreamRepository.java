@@ -14,10 +14,6 @@ public interface PacketStreamRepository extends JpaRepository<PacketStream, Long
         if (list.size() > 1) {
             throw new ApplicationError("FATAL: multiple table parameters matched: " + streamName);
         }
-        val stream = list.get(0);
-        if (stream.doesUseColumn()) {
-            Hibernate.initialize(stream.getColumns());
-        }
-        return stream;
+        return list.get(0);
     }
 }

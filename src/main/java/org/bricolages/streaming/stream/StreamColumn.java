@@ -1,4 +1,8 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
+import org.bricolages.streaming.stream.processor.ProcessorParams;
+import org.bricolages.streaming.stream.processor.ProcessorContext;
+import org.bricolages.streaming.exception.*;
 import java.sql.Timestamp;
 import javax.persistence.*;
 import lombok.*;
@@ -8,18 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 @Entity
-@Table(name="strload_columns")
-public class StreamColumn {
+@Table(name="strload_columns", uniqueConstraints=@UniqueConstraint(columnNames={"stream_id", "column_name"}))
+public class StreamColumn implements ProcessorParams {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="column_id")
+    @Column(name="column_id", nullable=false)
     @Getter
     long id;
 
-    @ManyToOne
-    @JoinColumn(name="stream_id", nullable=false)
-    @Getter
-    PacketStream stream;
+    @Column(name="stream_id", nullable=false)
+    long streamId;
 
     @Column(name="column_name", nullable=false)
     @Getter
@@ -53,19 +55,18 @@ public class StreamColumn {
 
     /* For tests */
     static public StreamColumn forName(String name) {
-        return new StreamColumn(-1, null, name, null, "dummy_type", null, null, null, null);
+        return new StreamColumn(-1, -1, name, null, "dummy_type", null, null, null, null);
     }
 
     /* For tests */
     static public StreamColumn forNames(String name, String sourceName) {
-        return new StreamColumn(-1, null, name, sourceName, "dummy_type", null, null, null, null);
+        return new StreamColumn(-1, -1, name, sourceName, "dummy_type", null, null, null, null);
     }
 
-    /* For tests */
     static public StreamColumn forParams(Params params) {
         return new StreamColumn(
             params.id,
-            params.stream,
+            params.streamId,
             params.name,
             params.sourceName,
             params.type,
@@ -76,11 +77,10 @@ public class StreamColumn {
         );
     }
 
-    /* For tests */
     @NoArgsConstructor
     static public final class Params {
         public long id = -1;
-        public PacketStream stream = null;
+        public long streamId = -1;
         public String name = null;
         public String sourceName = null;
         public String type = null;
@@ -88,5 +88,18 @@ public class StreamColumn {
         public String sourceOffset = null;
         public String zoneOffset = null;
         public Timestamp createTime = null;
+    }
+
+    public StreamColumnProcessor buildProcessor(ProcessorContext ctx) {
+        return materializedType().getProcessorBuilder().apply(this, ctx);
+    }
+
+    StreamColumnType materializedType() {
+        try {
+            return StreamColumnType.intern(type);
+        }
+        catch(IllegalArgumentException ex) {
+            throw new ConfigError("could not intern type name: " + type);
+        }
     }
 }

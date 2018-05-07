@@ -1,15 +1,14 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class BigintColumnProcessor extends SingleColumnProcessor {
-    static BigintColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        return new BigintColumnProcessor(column);
+    static public BigintColumnProcessor build(ProcessorParams params, ProcessorContext ctx) {
+        return new BigintColumnProcessor(params);
     }
 
-    public BigintColumnProcessor(StreamColumn column) {
-        super(column);
+    public BigintColumnProcessor(ProcessorParams params) {
+        super(params);
     }
 
     @Override

@@ -1,23 +1,22 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.exception.*;
 import lombok.*;
 
 public class StringColumnProcessor extends SingleColumnProcessor {
-    static StringColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        if (column.getLength() == null) {
-            throw new ConfigError("length is required for string type: " + column.getName());
+    static public StringColumnProcessor build(ProcessorParams params, ProcessorContext ctx) {
+        if (params.getLength() == null) {
+            throw new ConfigError("length is required for string type: " + params.getName());
         }
-        return new StringColumnProcessor(column, (int)column.getLength());
+        return new StringColumnProcessor(params, (int)params.getLength());
     }
 
     final int length;
 
-    public StringColumnProcessor(StreamColumn column, int length) {
-        super(column);
+    public StringColumnProcessor(ProcessorParams params, int length) {
+        super(params);
         if (length <= 0) {
-            throw new ConfigError("string column requires positive length parameter: " + column.getName());
+            throw new ConfigError("string column requires positive length parameter: " + params.getName());
         }
         this.length = length;
     }

@@ -2,6 +2,8 @@ package org.bricolages.streaming.filter;
 import javax.persistence.*;
 import java.util.Date;
 import java.sql.Timestamp;
+import java.util.Set;
+import java.util.HashSet;
 import lombok.*;
 
 @NoArgsConstructor
@@ -71,5 +73,16 @@ public class FilterResult {
 
     public void dispatched() {
         this.dispatched = true;
+    }
+
+    @Transient
+    final Set<String> unknownColumns = new HashSet<String>();
+
+    public void addUnknownColumn(String name) {
+        this.unknownColumns.add(name);
+    }
+
+    public Set<String> getUnknownColumns() {
+        return this.unknownColumns;
     }
 }

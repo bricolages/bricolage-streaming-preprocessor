@@ -158,6 +158,9 @@ public class Preprocessor implements EventHandlers {
     @Autowired
     FilterResultRepository logRepos;
 
+    @Autowired
+    StreamColumnRepository columnRepos;
+
     public void logNotMappedObject(String src) {
         log.warn("S3 object could not mapped: {}", src);
     }
@@ -218,6 +221,8 @@ public class Preprocessor implements EventHandlers {
             }
 
             eventQueue.deleteAsync(event);
+
+            columnRepos.saveUnknownColumns(stream.getStream(), result.getUnknownColumns());
         }
         catch (LocatorIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());

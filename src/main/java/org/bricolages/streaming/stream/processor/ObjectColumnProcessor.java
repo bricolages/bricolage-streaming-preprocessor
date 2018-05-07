@@ -2,7 +2,6 @@ package org.bricolages.streaming.stream.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.exception.*;
 import java.util.Map;
@@ -10,22 +9,22 @@ import java.io.IOException;
 import lombok.*;
 
 public class ObjectColumnProcessor extends SingleColumnProcessor {
-    static ObjectColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        val lenObj = column.getLength();
+    static public ObjectColumnProcessor build(ProcessorParams params, ProcessorContext ctx) {
+        val lenObj = params.getLength();
         if (lenObj == null) {
-            throw new ConfigError("length is required: " + column.getName());
+            throw new ConfigError("length is required: " + params.getName());
         }
         val len = (int)lenObj;
         if (len <= 0) {
-            throw new ConfigError("object column requires positive length: " + column.getName());
+            throw new ConfigError("object params requires positive length: " + params.getName());
         }
-        return new ObjectColumnProcessor(column, len);
+        return new ObjectColumnProcessor(params, len);
     }
 
     final int length;
 
-    public ObjectColumnProcessor(StreamColumn column, int length) {
-        super(column);
+    public ObjectColumnProcessor(ProcessorParams params, int length) {
+        super(params);
         this.length = length;
     }
 

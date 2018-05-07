@@ -48,23 +48,23 @@ public class ObjectFilterTest {
     @Test
     public void processRecord() throws Exception {
         val f = newFilter();
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}"));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new FilterResult()));
 
-        val rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"));
+        val rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"), new FilterResult());
         assertEquals(2, rec.size());
         assertEquals(1, rec.get("int_col"));
         assertEquals(2L, rec.get("bigint_col"));
 
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"b\"}"));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"b\"}", new FilterResult()));
 
-        assertNull(f.processJSON("{}"));
-        assertNull(f.processJSON("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}"));
+        assertNull(f.processJSON("{}", new FilterResult()));
+        assertNull(f.processJSON("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}", new FilterResult()));
     }
 
     @Test(expected=JSONException.class)
     public void processRecord_ParseError() throws Exception {
         val f = newFilter();
-        f.processJSON("{");
+        f.processJSON("{", new FilterResult());
     }
 
     @Test
@@ -75,20 +75,20 @@ public class ObjectFilterTest {
         ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
 
         assertTrue(f.useProcessor);
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}"));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new FilterResult()));
 
         Record rec;
-        rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"));
+        rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"), new FilterResult());
         assertEquals(2, rec.size());
         assertEquals(1, rec.get("int_col"));
         assertEquals(2L, rec.get("bigint_col"));
 
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"xxx\"}"));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"xxx\"}", new FilterResult()));
 
-        assertNull(f.processJSON("{}"));
-        assertNull(f.processJSON("{\"int_col\":\"str\"}"));
+        assertNull(f.processJSON("{}", new FilterResult()));
+        assertNull(f.processJSON("{\"int_col\":\"str\"}", new FilterResult()));
 
-        rec = f.processRecord(Record.parse("{\"int_col\":1,\"unconsumed\":9}"));
+        rec = f.processRecord(Record.parse("{\"int_col\":1,\"unconsumed\":9}"), new FilterResult());
         assertEquals(2, rec.size());
         assertEquals(1, rec.get("int_col"));
         assertEquals(9, rec.get("unconsumed"));
@@ -100,10 +100,10 @@ public class ObjectFilterTest {
         procs.add(new IntegerColumnProcessor(StreamColumn.forNames("dest", "src")));
         ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
 
-        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1}"));
+        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1}", new FilterResult()));
 
         // Do not overwrite
-        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1,\"dest\":2}"));
+        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1,\"dest\":2}", new FilterResult()));
     }
 
     @Test
@@ -115,7 +115,77 @@ public class ObjectFilterTest {
         ObjectFilter f = new ObjectFilter(null, ops, procs);
 
         assertTrue(f.useProcessor);
-        assertEquals("{\"x\":{\"a\":1,\"b\":2}}", f.processJSON("{\"q_a\":1,\"q_b\":2}"));
-        assertEquals("{\"y\":1}", f.processJSON("{\"y\":1,\"q_a\":\"tooooooooooooooooooooooooooooooooo long\"}"));
+        assertEquals("{\"x\":{\"a\":1,\"b\":2}}", f.processJSON("{\"q_a\":1,\"q_b\":2}", new FilterResult()));
+        assertEquals("{\"y\":1}", f.processJSON("{\"y\":1,\"q_a\":\"tooooooooooooooooooooooooooooooooo long\"}", new FilterResult()));
+    }
+
+    @Test
+    public void processRecord_unknownColumns() throws Exception {
+        val procs = new ArrayList<StreamColumnProcessor>();
+        procs.add(new IntegerColumnProcessor(StreamColumn.forName("int_col")));
+        procs.add(new BigintColumnProcessor(StreamColumn.forName("bigint_col")));
+        procs.add(new UnknownColumnProcessor(StreamColumn.forName("unknown_col")));
+        ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
+
+        val record = new Record();
+        record.put("int_col", 1);
+        record.put("bigint_col", "XXX");   // wrong type
+        record.put("unknown_col", 1);
+        record.put("a", 1);
+        record.put("bbb_bbb", 1);
+        record.put("CCC", 1);
+        record.put("dddDDD", 1);
+        record.put("EE_EE", 1);
+        record.put("fff[0]", 1);
+        record.put("ggg-ggg", 1);
+        record.put("h01", 1);
+        record.put("i[a0]", 1);
+        record.put("j[3x3]", 1);
+
+        val log = new FilterResult();
+        f.processRecord(record, log);
+
+        assertFalse(log.getUnknownColumns().contains("int_col"));
+        assertFalse(log.getUnknownColumns().contains("bigint_col"));
+        assertFalse(log.getUnknownColumns().contains("unknown_col"));
+        assertTrue(log.getUnknownColumns().contains("a"));
+        assertTrue(log.getUnknownColumns().contains("bbb_bbb"));
+        assertTrue(log.getUnknownColumns().contains("CCC"));
+        assertTrue(log.getUnknownColumns().contains("dddDDD"));
+        assertTrue(log.getUnknownColumns().contains("EE_EE"));
+        assertFalse(log.getUnknownColumns().contains("fff[0]"));
+        assertTrue(log.getUnknownColumns().contains("h01"));
+        assertFalse(log.getUnknownColumns().contains("i[a0]"));
+        assertFalse(log.getUnknownColumns().contains("j[3x3]"));
+    }
+
+    @Test
+    public void processRecord_unknownColumns_multi() throws Exception {
+        val procs = new ArrayList<StreamColumnProcessor>();
+        procs.add(new IntegerColumnProcessor(StreamColumn.forName("int_col")));
+        procs.add(new BigintColumnProcessor(StreamColumn.forName("bigint_col")));
+        ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
+
+        val record1 = new Record();
+        record1.put("a", 1);
+        record1.put("b", 1);
+        record1.put("c", 1);
+        val record2 = new Record();
+        record2.put("a", 1);
+        record2.put("d", 1);
+        record2.put("e", 1);
+        record2.put("f", 1);
+
+        val log = new FilterResult();
+        f.processRecord(record1, log);
+        f.processRecord(record2, log);
+
+        assertEquals(6, log.getUnknownColumns().size());
+        assertTrue(log.getUnknownColumns().contains("a"));
+        assertTrue(log.getUnknownColumns().contains("b"));
+        assertTrue(log.getUnknownColumns().contains("c"));
+        assertTrue(log.getUnknownColumns().contains("d"));
+        assertTrue(log.getUnknownColumns().contains("e"));
+        assertTrue(log.getUnknownColumns().contains("f"));
     }
 }

@@ -7,6 +7,7 @@ import java.io.UncheckedIOException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
+import java.util.regex.Pattern;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,11 +34,11 @@ public class ObjectFilter {
         this.useProcessor = false;
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result) throws LocatorIOException {
+    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult filterLog) throws LocatorIOException {
         try {
             try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest)) {
                 try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                    processStream(r, buf.getBufferedWriter(), result, src.toString());
+                    processStream(r, buf.getBufferedWriter(), filterLog, src.toString());
                 }
                 return buf.commit();
             }
@@ -53,11 +54,11 @@ public class ObjectFilter {
 
     public FilterResult processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws LocatorIOException {
         try {
-            val result = new FilterResult(src.toString(), null);
+            val filterLog = new FilterResult(src.toString(), null);
             try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                processStream(r, out, result, src.toString());
+                processStream(r, out, filterLog, src.toString());
             }
-            return result;
+            return filterLog;
         }
         catch (UncheckedIOException ex) {
             throw new LocatorIOException(ex.getCause());
@@ -67,22 +68,22 @@ public class ObjectFilter {
         }
     }
 
-    public void processStream(BufferedReader r, BufferedWriter w, FilterResult result, String sourceName) throws LocatorIOException {
+    public void processStream(BufferedReader r, BufferedWriter w, FilterResult filterLog, String sourceName) throws LocatorIOException {
         try {
             final PrintWriter out = new PrintWriter(w);
             r.lines().forEach((line) -> {
                 if (line.trim().isEmpty()) return;  // should not count blank line
-                result.inputRows++;
+                filterLog.inputRows++;
                 try {
-                    String outStr = processJSON(line);
+                    String outStr = processJSON(line, filterLog);
                     if (outStr != null) {
                         out.println(outStr);
-                        result.outputRows++;
+                        filterLog.outputRows++;
                     }
                 }
                 catch (JSONException ex) {
-                    log.debug("JSON parse error: {}:{}: {}", sourceName, result.inputRows, ex.getMessage());
-                    result.errorRows++;
+                    log.debug("JSON parse error: {}:{}: {}", sourceName, filterLog.inputRows, ex.getMessage());
+                    filterLog.errorRows++;
                 }
             });
         }
@@ -91,21 +92,21 @@ public class ObjectFilter {
         }
     }
 
-    public String processJSON(String json) throws JSONException {
+    public String processJSON(String json, FilterResult filterLog) throws JSONException {
         Record record = Record.parse(json);
         if (record == null) return null;
-        Record result = processRecord(record);
+        Record result = processRecord(record, filterLog);
         if (result == null) return null;
         return result.serialize();
     }
 
-    public Record processRecord(Record record) {
+    public Record processRecord(Record record, FilterResult filterLog) {
         // I apply (old) ops first, because it may includes record-wise operation such as reject op.
         record = processRecordByOperators(record);
         if (record == null) return null;
 
         if (useProcessor) {
-            record = processRecordByProcessors(record);
+            record = processRecordByProcessors(record, filterLog);
         }
 
         return record;
@@ -119,7 +120,7 @@ public class ObjectFilter {
         return record;
     }
 
-    Record processRecordByProcessors(Record src) {
+    Record processRecordByProcessors(Record src, FilterResult filterLog) {
         Record dest = new Record();
         for (StreamColumnProcessor proc : processors) {
             Object val = proc.process(src);
@@ -127,7 +128,6 @@ public class ObjectFilter {
                 dest.put(proc.getDestName(), val);
             }
         }
-        // FIXME: report? error?
         src.unconsumedEntries().forEach(ent -> {
             val name = ent.getKey();
             val value = ent.getValue();
@@ -137,7 +137,16 @@ public class ObjectFilter {
                     dest.put(name, value);
                 }
             }
+            if (name instanceof String && isIdentifier((String)name) && value != null) {
+                filterLog.addUnknownColumn((String)name);
+            }
         });
         return dest.isEmpty() ? null : dest;
+    }
+
+    Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
+
+    boolean isIdentifier(String name) {
+        return IDENTIFIER_PATTERN.matcher(name).matches();
     }
 }

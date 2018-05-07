@@ -1,16 +1,15 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.filter.*;
 import java.util.Objects;
 import lombok.*;
 
 public class BooleanColumnProcessor extends SingleColumnProcessor {
-    static BooleanColumnProcessor build(StreamColumn column, ProcessorContext ctx) {
-        return new BooleanColumnProcessor(column);
+    static public BooleanColumnProcessor build(ProcessorParams params, ProcessorContext ctx) {
+        return new BooleanColumnProcessor(params);
     }
 
-    public BooleanColumnProcessor(StreamColumn column) {
-        super(column);
+    public BooleanColumnProcessor(ProcessorParams params) {
+        super(params);
     }
 
     @Override

@@ -53,8 +53,7 @@ class ObjectFilterGenerator implements ProcessorContext {
         val procs = new ArrayList<StreamColumnProcessor>();
         for (val column : streamDef.getColumns()) {
             try {
-                val col = column.getStreamColumn();
-                val proc = StreamColumnProcessor.forColumn(col, ctx);
+                StreamColumnProcessor proc = column.getStreamColumn().buildProcessor(ctx);
                 procs.add(proc);
             }
             catch (ConfigError ex) {
