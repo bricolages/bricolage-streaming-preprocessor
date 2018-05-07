@@ -1,5 +1,10 @@
 # Release Note
 
+## version 1.9.0
+- Records unknown, incoming columns to strload_columns as "unknown" column type.
+  Preprocessor just ignores "unknown" columns.  In next version, preprocessor disables
+  a stream which includes "unknown" columns.
+
 ## version 1.8.0
 - Preflight now handles only preprocessing, it no longer generates .ct or .job files.
 
