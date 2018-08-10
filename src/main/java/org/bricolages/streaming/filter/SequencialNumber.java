@@ -9,16 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 @Entity
 @Table(name="strload_sequence")
 public class SequencialNumber {
-    // HACK: JPA Repository needs PK
-    @Id
-    @GeneratedValue
-    @Column(name="sequence_name")
-    String name;
-
     @Column(name="last_value")
     @Getter
     long lastValue;
 
+    @Id
+    @GeneratedValue
     @Column(name="nextval")
     @Getter
     long nextValue;
