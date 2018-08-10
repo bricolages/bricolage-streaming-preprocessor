@@ -64,7 +64,7 @@ public class SequenceOpTest {
             long curr = this.last;
             this.last += BLOCK_SIZE;
             long last = this.last;
-            return new SequencialNumber("dummy", curr, last);
+            return new SequencialNumber(curr, last);
         }
     }
 }
