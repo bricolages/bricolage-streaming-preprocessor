@@ -1,7 +1,9 @@
-package org.bricolages.streaming.filter;
-import org.bricolages.streaming.stream.*;
+package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.stream.processor.ProcessorContext;
+import org.bricolages.streaming.filter.OperatorDefinition;
+import org.bricolages.streaming.filter.Op;
+import org.bricolages.streaming.filter.OpBuilder;
 import org.bricolages.streaming.locator.LocatorIOManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.*;
 
 @Slf4j
-public class ObjectFilterFactory {
+public class PacketFilterFactory {
     @Autowired
     OpBuilder builder;
 
@@ -22,21 +24,21 @@ public class ObjectFilterFactory {
     @Autowired
     StreamColumnRepository columnRepos;
 
-    public ObjectFilter load(PacketStream stream) {
+    public PacketFilter load(PacketStream stream) {
         val ops = buildOperators(stream.getOperatorDefinitions());
         if (stream.doesUseColumn()) {
             log.debug("enables column processor: {}", stream.getStreamName());
             val procs = buildProcessors(stream);
-            return new ObjectFilter(ioManager, ops, procs);
+            return new PacketFilter(ioManager, ops, procs);
         }
         else {
-            return new ObjectFilter(ioManager, ops);
+            return new PacketFilter(ioManager, ops);
         }
     }
 
-    public ObjectFilter compose(List<OperatorDefinition> opDefs, List<StreamColumnProcessor> procs) {
+    public PacketFilter compose(List<OperatorDefinition> opDefs, List<StreamColumnProcessor> procs) {
         val ops = buildOperators(opDefs);
-        return new ObjectFilter(ioManager, ops, procs);
+        return new PacketFilter(ioManager, ops, procs);
     }
 
     List<Op> buildOperators(List<OperatorDefinition> defs) {

@@ -2,9 +2,9 @@ package org.bricolages.streaming.preflight;
 import org.bricolages.streaming.preflight.definition.ColumnDefinition;
 import org.bricolages.streaming.preflight.definition.OperatorDefinitionEntry;
 import org.bricolages.streaming.preflight.definition.StreamDefinitionEntry;
-import org.bricolages.streaming.filter.ObjectFilterFactory;
-import org.bricolages.streaming.filter.ObjectFilter;
 import org.bricolages.streaming.filter.OperatorDefinition;
+import org.bricolages.streaming.stream.PacketFilterFactory;
+import org.bricolages.streaming.stream.PacketFilter;
 import org.bricolages.streaming.stream.StreamColumn;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.stream.processor.ProcessorContext;
@@ -16,16 +16,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.*;
 
-class ObjectFilterGenerator implements ProcessorContext {
-    final ObjectFilterFactory factory;
+class PacketFilterGenerator implements ProcessorContext {
+    final PacketFilterFactory factory;
     final StreamDefinitionEntry streamDef;
 
-    ObjectFilterGenerator(ObjectFilterFactory factory, StreamDefinitionEntry streamDef) {
+    PacketFilterGenerator(PacketFilterFactory factory, StreamDefinitionEntry streamDef) {
         this.factory = factory;
         this.streamDef = streamDef;
     }
 
-    public ObjectFilter generate() {
+    public PacketFilter generate() {
         val ops = generateOperators();
         val procs = generateProcessors();
         return factory.compose(ops, procs);

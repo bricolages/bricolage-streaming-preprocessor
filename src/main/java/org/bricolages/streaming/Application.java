@@ -261,8 +261,8 @@ public class Application {
     }
 
     @Bean
-    public ObjectFilterFactory filterFactory() {
-        return new ObjectFilterFactory();
+    public PacketFilterFactory filterFactory() {
+        return new PacketFilterFactory();
     }
 
     @Autowired

@@ -45,7 +45,7 @@ public class OperatorDefinition {
     Timestamp updatedTime;
 
     // For tests
-    OperatorDefinition(String operatorId, String targetTable, String targetColumn, String params) {
+    public OperatorDefinition(String operatorId, String targetTable, String targetColumn, String params) {
         this(0, operatorId, null, targetColumn, 0, params, null, null);
     }
 

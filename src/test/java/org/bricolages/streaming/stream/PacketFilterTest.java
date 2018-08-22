@@ -1,21 +1,21 @@
-package org.bricolages.streaming.filter;
-import org.bricolages.streaming.stream.*;
+package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.*;
+import org.bricolages.streaming.filter.*;
 import java.util.*;
 import java.io.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import lombok.*;
 
-public class ObjectFilterTest {
+public class PacketFilterTest {
     OpBuilder builder = new OpBuilder();
 
-    ObjectFilter newFilter() {
+    PacketFilter newFilter() {
         val ops = new ArrayList<Op>();
         ops.add(builder.build(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
         ops.add(builder.build(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
         ops.add(builder.build(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
-        return new ObjectFilter(null, ops);
+        return new PacketFilter(null, ops);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class ObjectFilterTest {
         val procs = new ArrayList<StreamColumnProcessor>();
         procs.add(new IntegerColumnProcessor(StreamColumn.forName("int_col")));
         procs.add(new BigintColumnProcessor(StreamColumn.forName("bigint_col")));
-        ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
+        PacketFilter f = new PacketFilter(null, new ArrayList<Op>(), procs);
 
         assertTrue(f.useProcessor);
         assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new FilterResult()));
@@ -98,7 +98,7 @@ public class ObjectFilterTest {
     public void processRecord_processors_rename() throws Exception {
         val procs = new ArrayList<StreamColumnProcessor>();
         procs.add(new IntegerColumnProcessor(StreamColumn.forNames("dest", "src")));
-        ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
+        PacketFilter f = new PacketFilter(null, new ArrayList<Op>(), procs);
 
         assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1}", new FilterResult()));
 
@@ -112,7 +112,7 @@ public class ObjectFilterTest {
         procs.add(new ObjectColumnProcessor(StreamColumn.forName("x"), 20));
         val ops = new ArrayList<Op>();
         ops.add(builder.build(new OperatorDefinition("aggregate", "schema.table", "x", "{\"targetColumns\":\"^q_\", \"aggregatedColumn\":\"x\"}")));
-        ObjectFilter f = new ObjectFilter(null, ops, procs);
+        PacketFilter f = new PacketFilter(null, ops, procs);
 
         assertTrue(f.useProcessor);
         assertEquals("{\"x\":{\"a\":1,\"b\":2}}", f.processJSON("{\"q_a\":1,\"q_b\":2}", new FilterResult()));
@@ -125,7 +125,7 @@ public class ObjectFilterTest {
         procs.add(new IntegerColumnProcessor(StreamColumn.forName("int_col")));
         procs.add(new BigintColumnProcessor(StreamColumn.forName("bigint_col")));
         procs.add(new UnknownColumnProcessor(StreamColumn.forName("unknown_col")));
-        ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
+        PacketFilter f = new PacketFilter(null, new ArrayList<Op>(), procs);
 
         val record = new Record();
         record.put("int_col", 1);
@@ -164,7 +164,7 @@ public class ObjectFilterTest {
         val procs = new ArrayList<StreamColumnProcessor>();
         procs.add(new IntegerColumnProcessor(StreamColumn.forName("int_col")));
         procs.add(new BigintColumnProcessor(StreamColumn.forName("bigint_col")));
-        ObjectFilter f = new ObjectFilter(null, new ArrayList<Op>(), procs);
+        PacketFilter f = new PacketFilter(null, new ArrayList<Op>(), procs);
 
         val record1 = new Record();
         record1.put("a", 1);

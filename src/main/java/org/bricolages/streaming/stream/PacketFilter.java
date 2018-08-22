@@ -1,5 +1,9 @@
-package org.bricolages.streaming.filter;
+package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
+import org.bricolages.streaming.filter.Op;
+import org.bricolages.streaming.filter.Record;
+import org.bricolages.streaming.filter.FilterResult;
+import org.bricolages.streaming.filter.JSONException;
 import org.bricolages.streaming.locator.*;
 import java.util.List;
 import java.io.IOException;
@@ -12,14 +16,14 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ObjectFilter {
+public class PacketFilter {
     final LocatorIOManager ioManager;
     final List<Op> operators;
     final List<StreamColumnProcessor> processors;
     final boolean useProcessor;
 
     /** For column stream */
-    public ObjectFilter(LocatorIOManager ioManager, List<Op> operators, final List<StreamColumnProcessor> processors) {
+    public PacketFilter(LocatorIOManager ioManager, List<Op> operators, final List<StreamColumnProcessor> processors) {
         this.ioManager = ioManager;
         this.operators = operators;
         this.processors = processors;
@@ -27,7 +31,7 @@ public class ObjectFilter {
     }
 
     /** For non-column stream */
-    public ObjectFilter(LocatorIOManager ioManager, List<Op> operators) {
+    public PacketFilter(LocatorIOManager ioManager, List<Op> operators) {
         this.ioManager = ioManager;
         this.operators = operators;
         this.processors = null;

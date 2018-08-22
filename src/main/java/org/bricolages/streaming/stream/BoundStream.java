@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class BoundStream {
-    final ObjectFilterFactory filterFactory;
+    final PacketFilterFactory filterFactory;
     @Getter final PacketStream stream;
     @Getter final StreamBundle bundle;
     @Getter final String objectPrefix;
@@ -50,7 +50,7 @@ public class BoundStream {
         return stream.doesNotDispatch();
     }
 
-    public ObjectFilter loadFilter() {
+    public PacketFilter loadFilter() {
         return filterFactory.load(stream);
     }
 

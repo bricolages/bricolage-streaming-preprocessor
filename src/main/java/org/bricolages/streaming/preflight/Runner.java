@@ -1,7 +1,7 @@
 package org.bricolages.streaming.preflight;
 import org.bricolages.streaming.preflight.definition.*;
-import org.bricolages.streaming.filter.ObjectFilterFactory;
-import org.bricolages.streaming.filter.ObjectFilter;
+import org.bricolages.streaming.stream.PacketFilterFactory;
+import org.bricolages.streaming.stream.PacketFilter;
 import org.bricolages.streaming.filter.FilterResult;
 import org.bricolages.streaming.locator.*;
 import org.bricolages.streaming.exception.*;
@@ -12,11 +12,11 @@ import lombok.*;
 
 @RequiredArgsConstructor
 public class Runner {
-    final ObjectFilterFactory factory;
+    final PacketFilterFactory factory;
 
-    public ObjectFilter loadFilter(String streamDefPath) throws IOException, LocatorIOException {
+    public PacketFilter loadFilter(String streamDefPath) throws IOException, LocatorIOException {
         val streamDef = loadStreamDef(streamDefPath);
-        val generator = new ObjectFilterGenerator(factory, streamDef);
+        val generator = new PacketFilterGenerator(factory, streamDef);
         return generator.generate();
     }
 
@@ -45,7 +45,7 @@ public class Runner {
         }
     }
 
-    public void preprocess(ObjectFilter filter, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
+    public void preprocess(PacketFilter filter, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
         System.err.printf("*** preproc start\n");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
