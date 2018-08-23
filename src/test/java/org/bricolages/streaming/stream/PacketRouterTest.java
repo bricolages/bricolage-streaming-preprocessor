@@ -1,5 +1,5 @@
 package org.bricolages.streaming.stream;
-import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;

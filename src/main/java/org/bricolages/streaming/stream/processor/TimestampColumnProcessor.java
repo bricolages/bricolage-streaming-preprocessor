@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.exception.*;
 import java.time.ZoneOffset;
 import java.time.OffsetDateTime;
@@ -36,14 +35,14 @@ public class TimestampColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         val tm = getOffsetDateTime(value);
         if (tm == null) return null;
         return Cleanse.formatSqlTimestamp(tm);
     }
 
-    OffsetDateTime getOffsetDateTime(Object value) throws FilterException {
+    OffsetDateTime getOffsetDateTime(Object value) throws ProcessorException {
         if (zoneOffset == null) {
             // Use source offset as-is
             return Cleanse.getOffsetDateTime(value, sourceOffset, true);

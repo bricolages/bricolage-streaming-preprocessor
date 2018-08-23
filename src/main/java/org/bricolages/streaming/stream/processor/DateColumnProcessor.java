@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.exception.*;
 import java.time.ZoneOffset;
 import java.time.OffsetDateTime;
@@ -33,7 +32,7 @@ public class DateColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         return Cleanse.formatSqlDate(Cleanse.getLocalDate(value, sourceOffset, zoneOffset));
     }

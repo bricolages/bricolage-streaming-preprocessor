@@ -1,7 +1,6 @@
 package org.bricolages.streaming.stream.processor;
 import org.bricolages.streaming.stream.StreamColumn;
-import org.bricolages.streaming.filter.Record;
-import org.bricolages.streaming.filter.FilterException;
+import org.bricolages.streaming.object.Record;
 import org.bricolages.streaming.exception.*;
 import java.util.List;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class ObjectColumnProcessorTest {
         assertEquals(object("x", "aaaa|aaaa|12"), proc.processValue(object("x", "aaaa|aaaa|12")));
     }
 
-    @Test(expected=FilterException.class)
+    @Test(expected=ProcessorException.class)
     public void process_too_long() throws Exception {
         val proc = defaultProcessor();
         assertNull(proc.processValue(object("x", "aaaa|aaaa|123")));

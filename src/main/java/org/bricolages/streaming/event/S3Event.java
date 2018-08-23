@@ -1,5 +1,5 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.locator.S3ObjectLocator;
+import org.bricolages.streaming.object.S3ObjectLocator;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.sqs.model.Message;
 import com.fasterxml.jackson.core.type.TypeReference;

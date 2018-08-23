@@ -1,9 +1,10 @@
 package org.bricolages.streaming.preflight;
 import org.bricolages.streaming.preflight.definition.*;
-import org.bricolages.streaming.filter.ObjectFilterFactory;
-import org.bricolages.streaming.filter.ObjectFilter;
-import org.bricolages.streaming.filter.FilterResult;
-import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.stream.PacketFilterFactory;
+import org.bricolages.streaming.stream.PacketFilter;
+import org.bricolages.streaming.stream.PacketFilterLog;
+import org.bricolages.streaming.object.S3ObjectLocator;
+import org.bricolages.streaming.object.ObjectIOException;
 import org.bricolages.streaming.exception.*;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,11 +13,11 @@ import lombok.*;
 
 @RequiredArgsConstructor
 public class Runner {
-    final ObjectFilterFactory factory;
+    final PacketFilterFactory factory;
 
-    public ObjectFilter loadFilter(String streamDefPath) throws IOException, LocatorIOException {
+    public PacketFilter loadFilter(String streamDefPath) throws IOException, ObjectIOException {
         val streamDef = loadStreamDef(streamDefPath);
-        val generator = new ObjectFilterGenerator(factory, streamDef);
+        val generator = new PacketFilterGenerator(factory, streamDef);
         return generator.generate();
     }
 
@@ -45,12 +46,12 @@ public class Runner {
         }
     }
 
-    public void preprocess(ObjectFilter filter, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, LocatorIOException {
+    public void preprocess(PacketFilter filter, S3ObjectLocator src, S3ObjectLocator dest) throws IOException, ObjectIOException {
         System.err.printf("*** preproc start\n");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
-        val result = new FilterResult(src.toString(), dest.toString());
-        filter.processLocator(src, dest, result);
-        System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", result.inputRows, result.outputRows, result.errorRows);
+        val filterLog = new PacketFilterLog(src.toString(), dest.toString());
+        filter.processLocator(src, dest, filterLog);
+        System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", filterLog.inputRows, filterLog.outputRows, filterLog.errorRows);
     }
 }

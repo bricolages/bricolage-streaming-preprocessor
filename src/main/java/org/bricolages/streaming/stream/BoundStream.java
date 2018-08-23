@@ -1,6 +1,7 @@
 package org.bricolages.streaming.stream;
-import org.bricolages.streaming.filter.*;
-import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.object.S3ObjectLocator;
+import org.bricolages.streaming.object.S3ObjectMetadata;
+import org.bricolages.streaming.object.ObjectIOException;
 import org.bricolages.streaming.exception.*;
 import java.nio.file.Paths;
 import lombok.*;
@@ -9,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class BoundStream {
-    final ObjectFilterFactory filterFactory;
+    final PacketFilterFactory filterFactory;
     @Getter final PacketStream stream;
     @Getter final StreamBundle bundle;
     @Getter final String objectPrefix;
@@ -50,11 +51,11 @@ public class BoundStream {
         return stream.doesNotDispatch();
     }
 
-    public ObjectFilter loadFilter() {
+    public PacketFilter loadFilter() {
         return filterFactory.load(stream);
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult result) throws LocatorIOException, ConfigError {
-        return loadFilter().processLocator(src, dest, result);
+    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, PacketFilterLog filterLog) throws ObjectIOException, ConfigError {
+        return loadFilter().processLocator(src, dest, filterLog);
     }
 }

@@ -1,6 +1,5 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.Record;
-import org.bricolages.streaming.filter.FilterException;
+import org.bricolages.streaming.object.Record;
 import lombok.*;
 
 public abstract class SingleColumnProcessor extends StreamColumnProcessor {
@@ -16,7 +15,7 @@ public abstract class SingleColumnProcessor extends StreamColumnProcessor {
         try {
             return processValue(value);
         }
-        catch (FilterException ex) {
+        catch (ProcessorException ex) {
             return null;
         }
     }
@@ -25,5 +24,5 @@ public abstract class SingleColumnProcessor extends StreamColumnProcessor {
         return params.getSourceName();
     }
 
-    protected abstract Object processValue(Object value) throws FilterException;
+    protected abstract Object processValue(Object value) throws ProcessorException;
 }

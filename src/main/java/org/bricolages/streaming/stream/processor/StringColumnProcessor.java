@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.exception.*;
 import lombok.*;
 
@@ -22,7 +21,7 @@ public class StringColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         if (value instanceof String) {
             return processString((String)value);

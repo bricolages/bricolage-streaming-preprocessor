@@ -1,8 +1,7 @@
 package org.bricolages.streaming;
-import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
-import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.io.BufferedReader;
@@ -62,11 +61,11 @@ public class Preprocessor implements EventHandlers {
         }
         val filter = route.loadFilter();
         try {
-            val result = filter.processLocatorAndPrint(src, out);
-            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), result.inputRows, result.outputRows);
+            val filterLog = filter.processLocatorAndPrint(src, out);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), filterLog.inputRows, filterLog.outputRows);
             return true;
         }
-        catch (LocatorIOException ex) {
+        catch (ObjectIOException ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             return false;
         }
@@ -156,7 +155,7 @@ public class Preprocessor implements EventHandlers {
     }
 
     @Autowired
-    FilterResultRepository logRepos;
+    PacketFilterLogRepository logRepos;
 
     @Autowired
     StreamColumnRepository columnRepos;
@@ -205,29 +204,29 @@ public class Preprocessor implements EventHandlers {
             return;
         }
 
-        FilterResult result = new FilterResult(src.toString(), dest.toString());
+        PacketFilterLog filterLog = new PacketFilterLog(src.toString(), dest.toString());
         try {
-            logRepos.save(result);
+            logRepos.save(filterLog);
 
-            S3ObjectMetadata meta = stream.processLocator(src, dest, result);
-            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.toString(), result.inputRows, result.outputRows);
-            result.succeeded();
-            logRepos.save(result);
+            S3ObjectMetadata meta = stream.processLocator(src, dest, filterLog);
+            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.toString(), filterLog.inputRows, filterLog.outputRows);
+            filterLog.succeeded();
+            logRepos.save(filterLog);
 
             if (!event.doesNotDispatch() && !stream.doesNotDispatch()) {
                 logQueue.send(new FakeS3Event(meta));
-                result.dispatched();
-                logRepos.save(result);
+                filterLog.dispatched();
+                logRepos.save(filterLog);
             }
 
             eventQueue.deleteAsync(event);
 
-            columnRepos.saveUnknownColumns(stream.getStream(), result.getUnknownColumns());
+            columnRepos.saveUnknownColumns(stream.getStream(), filterLog.getUnknownColumns());
         }
-        catch (LocatorIOException | ConfigError ex) {
+        catch (ObjectIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
-            result.failed(ex.getMessage());
-            logRepos.save(result);
+            filterLog.failed(ex.getMessage());
+            logRepos.save(filterLog);
         }
     }
 }

@@ -1,6 +1,5 @@
 package org.bricolages.streaming.stream.processor;
 import org.bricolages.streaming.stream.StreamColumn;
-import org.bricolages.streaming.filter.FilterException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import lombok.*;
@@ -17,13 +16,13 @@ public class IntegerColumnProcessorTest {
         assertEquals(Integer.valueOf(1), proc.processValue("1"));
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = ProcessorException.class)
     public void process_inval_1() throws Exception {
         val proc = defaultProcessor();
         proc.processValue("junk value");
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = ProcessorException.class)
     public void process_inval_2() throws Exception {
         val proc = defaultProcessor();
         proc.processValue(new Object());

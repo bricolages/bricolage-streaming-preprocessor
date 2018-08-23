@@ -1,6 +1,5 @@
 package org.bricolages.streaming.stream;
-import org.bricolages.streaming.filter.ObjectFilterFactory;
-import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.object.S3ObjectLocator;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -59,7 +58,7 @@ public class PacketRouter {
     @Getter final List<Entry> entries;
 
     @Autowired
-    ObjectFilterFactory filterFactory;
+    PacketFilterFactory filterFactory;
 
     public PacketRouter(List<Entry> entries) {
         this.entries = entries;

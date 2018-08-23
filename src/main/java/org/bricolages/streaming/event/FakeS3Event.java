@@ -1,5 +1,5 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.locator.S3ObjectMetadata;
+import org.bricolages.streaming.object.S3ObjectMetadata;
 import lombok.*;
 
 @RequiredArgsConstructor

@@ -1,8 +1,9 @@
 package org.bricolages.streaming;
-import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
-import org.bricolages.streaming.locator.*;
+import org.bricolages.streaming.stream.op.OpBuilder;
+import org.bricolages.streaming.stream.op.SequencialNumberRepository;
+import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.bricolages.streaming.preflight.ReferenceGenerator;
 import org.bricolages.streaming.preflight.Runner;
@@ -251,8 +252,8 @@ public class Application {
     }
 
     @Bean
-    public LocatorIOManager ioManager() {
-        return new LocatorIOManager(AmazonS3ClientBuilder.defaultClient());
+    public ObjectIOManager ioManager() {
+        return new ObjectIOManager(AmazonS3ClientBuilder.defaultClient());
     }
 
     @Bean
@@ -261,8 +262,8 @@ public class Application {
     }
 
     @Bean
-    public ObjectFilterFactory filterFactory() {
-        return new ObjectFilterFactory();
+    public PacketFilterFactory filterFactory() {
+        return new PacketFilterFactory();
     }
 
     @Autowired

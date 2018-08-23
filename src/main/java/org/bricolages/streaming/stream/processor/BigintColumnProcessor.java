@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.*;
 import lombok.*;
 
 public class BigintColumnProcessor extends SingleColumnProcessor {
@@ -12,7 +11,7 @@ public class BigintColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         long i = Cleanse.getInteger(value);
         return Long.valueOf(i);
