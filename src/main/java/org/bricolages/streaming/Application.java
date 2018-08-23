@@ -252,8 +252,8 @@ public class Application {
     }
 
     @Bean
-    public LocatorIOManager ioManager() {
-        return new LocatorIOManager(AmazonS3ClientBuilder.defaultClient());
+    public ObjectIOManager ioManager() {
+        return new ObjectIOManager(AmazonS3ClientBuilder.defaultClient());
     }
 
     @Bean

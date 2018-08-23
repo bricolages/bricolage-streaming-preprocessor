@@ -4,7 +4,7 @@ import org.bricolages.streaming.stream.processor.ProcessorContext;
 import org.bricolages.streaming.stream.op.OperatorDefinition;
 import org.bricolages.streaming.stream.op.OpBuilder;
 import org.bricolages.streaming.stream.op.Op;
-import org.bricolages.streaming.object.LocatorIOManager;
+import org.bricolages.streaming.object.ObjectIOManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class PacketFilterFactory {
     OpBuilder builder;
 
     @Autowired
-    LocatorIOManager ioManager;
+    ObjectIOManager ioManager;
 
     @Autowired
     StreamColumnRepository columnRepos;

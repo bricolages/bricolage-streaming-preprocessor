@@ -14,13 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PacketFilter {
-    final LocatorIOManager ioManager;
+    final ObjectIOManager ioManager;
     final List<Op> operators;
     final List<StreamColumnProcessor> processors;
     final boolean useProcessor;
 
     /** For column stream */
-    public PacketFilter(LocatorIOManager ioManager, List<Op> operators, final List<StreamColumnProcessor> processors) {
+    public PacketFilter(ObjectIOManager ioManager, List<Op> operators, final List<StreamColumnProcessor> processors) {
         this.ioManager = ioManager;
         this.operators = operators;
         this.processors = processors;
@@ -28,16 +28,16 @@ public class PacketFilter {
     }
 
     /** For non-column stream */
-    public PacketFilter(LocatorIOManager ioManager, List<Op> operators) {
+    public PacketFilter(ObjectIOManager ioManager, List<Op> operators) {
         this.ioManager = ioManager;
         this.operators = operators;
         this.processors = null;
         this.useProcessor = false;
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, PacketFilterLog filterLog) throws LocatorIOException {
+    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, PacketFilterLog filterLog) throws ObjectIOException {
         try {
-            try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest)) {
+            try (ObjectIOManager.Buffer buf = ioManager.openWriteBuffer(dest)) {
                 try (BufferedReader r = ioManager.openBufferedReader(src)) {
                     processStream(r, buf.getBufferedWriter(), filterLog, src.toString());
                 }
@@ -45,15 +45,15 @@ public class PacketFilter {
             }
         }
         catch (UncheckedIOException ex) {
-            throw new LocatorIOException(ex.getCause());
+            throw new ObjectIOException(ex.getCause());
         }
         catch (IOException ex) {
-            throw new LocatorIOException(ex);
+            throw new ObjectIOException(ex);
         }
     }
 
 
-    public PacketFilterLog processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws LocatorIOException {
+    public PacketFilterLog processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws ObjectIOException {
         try {
             val filterLog = new PacketFilterLog(src.toString(), null);
             try (BufferedReader r = ioManager.openBufferedReader(src)) {
@@ -62,14 +62,14 @@ public class PacketFilter {
             return filterLog;
         }
         catch (UncheckedIOException ex) {
-            throw new LocatorIOException(ex.getCause());
+            throw new ObjectIOException(ex.getCause());
         }
         catch (IOException ex) {
-            throw new LocatorIOException(ex);
+            throw new ObjectIOException(ex);
         }
     }
 
-    public void processStream(BufferedReader r, BufferedWriter w, PacketFilterLog filterLog, String sourceName) throws LocatorIOException {
+    public void processStream(BufferedReader r, BufferedWriter w, PacketFilterLog filterLog, String sourceName) throws ObjectIOException {
         try {
             final PrintWriter out = new PrintWriter(w);
             r.lines().forEach((line) -> {
@@ -89,7 +89,7 @@ public class PacketFilter {
             });
         }
         catch (UncheckedIOException ex) {
-            throw new LocatorIOException(ex.getCause());
+            throw new ObjectIOException(ex.getCause());
         }
     }
 

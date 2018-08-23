@@ -29,24 +29,24 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Slf4j
-public class LocatorIOManager {
+public class ObjectIOManager {
     static final Charset DATA_FILE_CHARSET = StandardCharsets.UTF_8;
     static final String TMPDIR = "/tmp";   // FIXME: parameterize
 
     final AmazonS3 s3client;
 
-    public void download(S3ObjectLocator src, Path dest) throws LocatorIOException {
+    public void download(S3ObjectLocator src, Path dest) throws ObjectIOException {
         try {
             try (InputStream in = openInputStream(src)) {
                 Files.copy(in, dest);
             }
         }
         catch (UncheckedIOException | IOException ex) {
-            throw new LocatorIOException("I/O error: " + ex.getMessage());
+            throw new ObjectIOException("I/O error: " + ex.getMessage());
         }
     }
 
-    public BufferedReader openBufferedReader(S3ObjectLocator loc) throws LocatorIOException {
+    public BufferedReader openBufferedReader(S3ObjectLocator loc) throws ObjectIOException {
         InputStream in = openInputStreamAuto(loc);
         // CharsetDecoder is not multi-threads safe, create new instance always.
         val decoder = DATA_FILE_CHARSET.newDecoder();
@@ -55,7 +55,7 @@ public class LocatorIOManager {
         return new BufferedReader(new InputStreamReader(in, decoder));
     }
 
-    InputStream openInputStreamAuto(S3ObjectLocator loc) throws LocatorIOException {
+    InputStream openInputStreamAuto(S3ObjectLocator loc) throws ObjectIOException {
         try {
             InputStream in = openInputStream(loc);
             if (loc.isGzip()) {
@@ -68,11 +68,11 @@ public class LocatorIOManager {
             }
         }
         catch (UncheckedIOException | IOException ex) {
-            throw new LocatorIOException("I/O error: " + ex.getMessage());
+            throw new ObjectIOException("I/O error: " + ex.getMessage());
         }
     }
 
-    public InputStream openInputStream(S3ObjectLocator loc) throws LocatorIOException {
+    public InputStream openInputStream(S3ObjectLocator loc) throws ObjectIOException {
         try {
             val req = new GetObjectRequest(loc.bucket(), loc.key());
             val obj = getObjectWithRetry(req);
@@ -80,7 +80,7 @@ public class LocatorIOManager {
         }
         catch (AmazonClientException ex) {
             log.error(ex.getMessage());
-            throw new LocatorIOException("S3 error in GetObject: " + ex.getMessage());
+            throw new ObjectIOException("S3 error in GetObject: " + ex.getMessage());
         }
     }
 
@@ -115,17 +115,17 @@ public class LocatorIOManager {
         }
     }
 
-    public PutObjectResult upload(Path src, S3ObjectLocator dest) throws LocatorIOException {
+    public PutObjectResult upload(Path src, S3ObjectLocator dest) throws ObjectIOException {
         try {
             val req = new PutObjectRequest(dest.bucket(), dest.key(), src.toFile());
             return s3client.putObject(req);
         }
         catch (AmazonClientException ex) {
-            throw new LocatorIOException("S3 error in PutObject: " + ex.getMessage());
+            throw new ObjectIOException("S3 error in PutObject: " + ex.getMessage());
         }
     }
 
-    public Buffer openWriteBuffer(S3ObjectLocator dest) throws LocatorIOException {
+    public Buffer openWriteBuffer(S3ObjectLocator dest) throws ObjectIOException {
         String base = dest.key().replaceAll("/", "-");
         // I believe object key does not include multi-byte characters!
         if (base.length() > 255) {
@@ -141,7 +141,7 @@ public class LocatorIOManager {
         final S3ObjectLocator dest;
         final BufferedWriter bufferedWriter;
 
-        Buffer(Path path, S3ObjectLocator dest) throws LocatorIOException {
+        Buffer(Path path, S3ObjectLocator dest) throws ObjectIOException {
             this.path = path;
             this.dest = dest;
 
@@ -151,18 +151,18 @@ public class LocatorIOManager {
                 this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(out, DATA_FILE_CHARSET));
             }
             catch (UncheckedIOException | IOException ex) {
-                throw new LocatorIOException("I/O error: " + ex.getMessage());
+                throw new ObjectIOException("I/O error: " + ex.getMessage());
             }
         }
 
-        public S3ObjectMetadata commit() throws LocatorIOException {
+        public S3ObjectMetadata commit() throws ObjectIOException {
             try {
                 bufferedWriter.close();   // flush() does not work
                 val result = upload(path, dest);
                 return new S3ObjectMetadata(dest, Instant.now(), Files.size(path), result.getETag());
             }
             catch (UncheckedIOException | IOException ex) {
-                throw new LocatorIOException("I/O error: " + ex.getMessage());
+                throw new ObjectIOException("I/O error: " + ex.getMessage());
             }
         }
 

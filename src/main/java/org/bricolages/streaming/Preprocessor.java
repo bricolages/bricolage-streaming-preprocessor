@@ -65,7 +65,7 @@ public class Preprocessor implements EventHandlers {
             log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), filterLog.inputRows, filterLog.outputRows);
             return true;
         }
-        catch (LocatorIOException ex) {
+        catch (ObjectIOException ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             return false;
         }
@@ -223,7 +223,7 @@ public class Preprocessor implements EventHandlers {
 
             columnRepos.saveUnknownColumns(stream.getStream(), filterLog.getUnknownColumns());
         }
-        catch (LocatorIOException | ConfigError ex) {
+        catch (ObjectIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
             filterLog.failed(ex.getMessage());
             logRepos.save(filterLog);

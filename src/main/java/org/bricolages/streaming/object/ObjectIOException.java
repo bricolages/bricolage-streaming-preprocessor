@@ -1,12 +1,12 @@
 package org.bricolages.streaming.object;
 import org.bricolages.streaming.exception.ApplicationException;
 
-public class LocatorIOException extends ApplicationException {
-    public LocatorIOException(String message) {
+public class ObjectIOException extends ApplicationException {
+    public ObjectIOException(String message) {
         super(message);
     }
 
-    public LocatorIOException(Exception cause) {
+    public ObjectIOException(Exception cause) {
         super(cause);
     }
 }
