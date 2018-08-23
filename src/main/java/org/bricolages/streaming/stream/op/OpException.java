@@ -1,12 +1,12 @@
 package org.bricolages.streaming.stream.op;
 import org.bricolages.streaming.exception.ApplicationException;
 
-public class FilterException extends ApplicationException {
-    public FilterException(String message) {
+public class OpException extends ApplicationException {
+    public OpException(String message) {
         super(message);
     }
 
-    public FilterException(Exception cause) {
+    public OpException(Exception cause) {
         super(cause);
     }
 }

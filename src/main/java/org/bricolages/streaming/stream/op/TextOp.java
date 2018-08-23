@@ -41,7 +41,7 @@ public class TextOp extends SingleColumnOp {
     static final Charset DATA_FILE_CHARSET = StandardCharsets.UTF_8;
 
     @Override
-    protected Object applyValue(Object value, Record record) throws FilterException {
+    protected Object applyValue(Object value, Record record) throws OpException {
         String str = removeAfterNullChar(castStringForce(value));
         if (str == null) return null;
         if (maxByteLength > 0) {

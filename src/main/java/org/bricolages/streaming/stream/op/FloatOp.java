@@ -16,7 +16,7 @@ public class FloatOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object rawValue, Record record) throws FilterException, CleanseException {
+    public Object applyValue(Object rawValue, Record record) throws OpException, CleanseException {
         if (rawValue == null) return null;
         float value = Cleanse.getFloat(rawValue);
         // getFloat returns Inf/-Inf for too big/small value

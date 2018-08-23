@@ -26,7 +26,7 @@ public class DupOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object value, Record record) throws FilterException {
+    public Object applyValue(Object value, Record record) throws OpException {
         Object originalValue = record.get(originalName);
         return originalValue;
     }

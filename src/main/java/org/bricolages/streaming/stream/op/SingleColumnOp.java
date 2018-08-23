@@ -18,7 +18,7 @@ public abstract class SingleColumnOp extends Op {
         try {
             result = applyValue(record.get(targetColumnName()), record);
         }
-        catch (FilterException | CleanseException ex) {
+        catch (OpException | CleanseException ex) {
             result = null;
         }
         if (result == null) {
@@ -31,5 +31,5 @@ public abstract class SingleColumnOp extends Op {
         }
     }
 
-    protected abstract Object applyValue(Object value, Record record) throws FilterException, CleanseException;
+    protected abstract Object applyValue(Object value, Record record) throws OpException, CleanseException;
 }

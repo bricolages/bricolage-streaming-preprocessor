@@ -14,7 +14,7 @@ public class DeleteOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object value, Record record) throws FilterException {
+    public Object applyValue(Object value, Record record) throws OpException {
         return null;
     }
 }

@@ -16,7 +16,7 @@ public class BigIntOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object value, Record record) throws FilterException, CleanseException {
+    public Object applyValue(Object value, Record record) throws OpException, CleanseException {
         if (value == null) return null;
         long i = Cleanse.getInteger(value);
         return Long.valueOf(i);
