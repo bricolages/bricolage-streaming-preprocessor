@@ -1,9 +1,9 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.stream.processor.ProcessorContext;
-import org.bricolages.streaming.filter.OperatorDefinition;
-import org.bricolages.streaming.filter.Op;
-import org.bricolages.streaming.filter.OpBuilder;
+import org.bricolages.streaming.stream.op.OperatorDefinition;
+import org.bricolages.streaming.stream.op.OpBuilder;
+import org.bricolages.streaming.stream.op.Op;
 import org.bricolages.streaming.object.LocatorIOManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;

@@ -1,7 +1,8 @@
 package org.bricolages.streaming;
-import org.bricolages.streaming.filter.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
+import org.bricolages.streaming.stream.op.OpBuilder;
+import org.bricolages.streaming.stream.op.SequencialNumberRepository;
 import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.bricolages.streaming.preflight.ReferenceGenerator;

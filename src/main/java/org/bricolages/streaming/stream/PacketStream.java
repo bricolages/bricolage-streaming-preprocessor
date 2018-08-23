@@ -1,8 +1,8 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.stream.op.OperatorDefinition;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.*;
-import org.bricolages.streaming.filter.OperatorDefinition;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 

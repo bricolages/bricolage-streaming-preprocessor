@@ -1,6 +1,6 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
-import org.bricolages.streaming.filter.Op;
+import org.bricolages.streaming.stream.op.Op;
 import org.bricolages.streaming.object.*;
 import java.util.List;
 import java.io.IOException;

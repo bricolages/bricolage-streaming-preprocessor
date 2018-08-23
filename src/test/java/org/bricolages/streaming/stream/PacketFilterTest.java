@@ -1,7 +1,7 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.*;
+import org.bricolages.streaming.stream.op.*;
 import org.bricolages.streaming.object.*;
-import org.bricolages.streaming.filter.*;
 import java.util.*;
 import java.io.*;
 import org.junit.Test;
