@@ -1,4 +1,4 @@
-package org.bricolages.streaming.filter;
+package org.bricolages.streaming.object;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,16 +16,16 @@ import lombok.*;
 public class Record {
     static final ObjectMapper MAPPER = new ObjectMapper();
 
-    static public Record parse(String json) throws JSONException {
+    static public Record parse(String json) throws JSONParseException {
         try {
             Map<Object, Object> obj = MAPPER.readValue(json, new TypeReference<Map<Object, Object>>() {});
             return new Record(obj);
         }
         catch (ClassCastException ex) {
-            throw new JSONException("record is not a map: " + json);
+            throw new JSONParseException("record is not a map: " + json);
         }
         catch (JsonProcessingException ex) {
-            throw new JSONException(ex.getMessage());
+            throw new JSONParseException(ex.getMessage());
         }
         catch (IOException ex) {
             log.error("IO exception while processing JSON???", ex);
@@ -43,12 +43,12 @@ public class Record {
         this.object = object;
     }
 
-    public String serialize() throws JSONException {
+    public String serialize() throws JSONParseException {
         try {
             return MAPPER.writeValueAsString(object);
         }
         catch (JsonProcessingException ex) {
-            throw new JSONException(ex.getMessage());
+            throw new JSONParseException(ex.getMessage());
         }
     }
 

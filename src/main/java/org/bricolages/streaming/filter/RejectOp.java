@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.object.Record;
 import java.util.function.Function;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

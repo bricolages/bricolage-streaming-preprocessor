@@ -1,12 +1,7 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.filter.Op;
-import org.bricolages.streaming.filter.Record;
-import org.bricolages.streaming.filter.JSONException;
-import org.bricolages.streaming.object.LocatorIOManager;
-import org.bricolages.streaming.object.S3ObjectLocator;
-import org.bricolages.streaming.object.S3ObjectMetadata;
-import org.bricolages.streaming.object.LocatorIOException;
+import org.bricolages.streaming.object.*;
 import java.util.List;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -87,7 +82,7 @@ public class PacketFilter {
                         filterLog.outputRows++;
                     }
                 }
-                catch (JSONException ex) {
+                catch (JSONParseException ex) {
                     log.debug("JSON parse error: {}:{}: {}", sourceName, filterLog.inputRows, ex.getMessage());
                     filterLog.errorRows++;
                 }
@@ -98,7 +93,7 @@ public class PacketFilter {
         }
     }
 
-    public String processJSON(String json, PacketFilterLog filterLog) throws JSONException {
+    public String processJSON(String json, PacketFilterLog filterLog) throws JSONParseException {
         Record record = Record.parse(json);
         if (record == null) return null;
         Record result = processRecord(record, filterLog);

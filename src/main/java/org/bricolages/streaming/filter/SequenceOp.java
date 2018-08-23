@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.object.Record;
 import org.bricolages.streaming.exception.ApplicationError;
 import lombok.*;
 

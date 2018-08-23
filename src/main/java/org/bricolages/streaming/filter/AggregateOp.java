@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.object.Record;
 import java.util.regex.Pattern;
 import java.util.Map;
 import lombok.*;

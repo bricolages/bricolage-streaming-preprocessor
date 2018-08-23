@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.object.Record;
 import java.time.*;
 import java.util.regex.Pattern;
 import java.time.format.DateTimeFormatter;

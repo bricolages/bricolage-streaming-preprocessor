@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.object.Record;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;

@@ -1,5 +1,5 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.Record;
+import org.bricolages.streaming.object.Record;
 import org.bricolages.streaming.filter.FilterException;
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package org.bricolages.streaming.filter;
+package org.bricolages.streaming.object;
 import java.util.*;
 import java.io.*;
 import org.junit.Test;
@@ -14,7 +14,7 @@ public class RecordTest {
         assertEquals("str", rec.get("b"));
     }
 
-    @Test(expected=JSONException.class)
+    @Test(expected=JSONParseException.class)
     public void parse_parse_error() throws Exception {
         Record.parse("{");
     }

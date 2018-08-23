@@ -1,5 +1,6 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.*;
+import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.filter.*;
 import java.util.*;
 import java.io.*;
@@ -61,7 +62,7 @@ public class PacketFilterTest {
         assertNull(f.processJSON("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}", new PacketFilterLog()));
     }
 
-    @Test(expected=JSONException.class)
+    @Test(expected=JSONParseException.class)
     public void processRecord_ParseError() throws Exception {
         val f = newFilter();
         f.processJSON("{", new PacketFilterLog());

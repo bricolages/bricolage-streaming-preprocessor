@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.object.Record;
 import java.time.ZoneOffset;
 import org.junit.Test;
 import static org.junit.Assert.*;
