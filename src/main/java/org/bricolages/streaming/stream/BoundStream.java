@@ -1,7 +1,7 @@
 package org.bricolages.streaming.stream;
-import org.bricolages.streaming.locator.S3ObjectLocator;
-import org.bricolages.streaming.locator.S3ObjectMetadata;
-import org.bricolages.streaming.locator.LocatorIOException;
+import org.bricolages.streaming.object.S3ObjectLocator;
+import org.bricolages.streaming.object.S3ObjectMetadata;
+import org.bricolages.streaming.object.LocatorIOException;
 import org.bricolages.streaming.exception.*;
 import java.nio.file.Paths;
 import lombok.*;

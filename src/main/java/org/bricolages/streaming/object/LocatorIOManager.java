@@ -1,4 +1,4 @@
-package org.bricolages.streaming.locator;
+package org.bricolages.streaming.object;
 import org.bricolages.streaming.exception.ApplicationAbort;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;

@@ -1,4 +1,4 @@
-package org.bricolages.streaming.locator;
+package org.bricolages.streaming.object;
 import java.net.URI;
 import java.io.File;
 import java.io.IOException;

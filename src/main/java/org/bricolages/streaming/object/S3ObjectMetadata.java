@@ -1,4 +1,4 @@
-package org.bricolages.streaming.locator;
+package org.bricolages.streaming.object;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import java.util.Date;
 import java.time.Instant;

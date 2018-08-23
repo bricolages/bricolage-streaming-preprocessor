@@ -4,7 +4,7 @@ import org.bricolages.streaming.stream.processor.ProcessorContext;
 import org.bricolages.streaming.filter.OperatorDefinition;
 import org.bricolages.streaming.filter.Op;
 import org.bricolages.streaming.filter.OpBuilder;
-import org.bricolages.streaming.locator.LocatorIOManager;
+import org.bricolages.streaming.object.LocatorIOManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;

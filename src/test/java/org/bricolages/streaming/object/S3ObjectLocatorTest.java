@@ -1,4 +1,4 @@
-package org.bricolages.streaming.locator;
+package org.bricolages.streaming.object;
 import java.util.Arrays;
 import org.junit.Test;
 import static org.junit.Assert.*;
