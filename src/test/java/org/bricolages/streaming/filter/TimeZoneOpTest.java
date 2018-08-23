@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import org.bricolages.streaming.object.Record;
 import java.time.ZoneOffset;
 import org.junit.Test;
@@ -39,13 +40,13 @@ public class TimeZoneOpTest {
         assertEquals("2012-09-11T04:34:11+09:00", f.applyValue("2012-09-10T12:34:11-07:00[America/Los_Angeles]", null));
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = CleanseException.class)
     public void apply_invalid() throws Exception {
         val f = new TimeZoneOp(null, "+0000", "+0900", false);
         f.applyValue("junk value", null);
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = CleanseException.class)
     public void apply_unsupported() throws Exception {
         val f = new TimeZoneOp(null, "+0000", "+0900", false);
         f.applyValue(new Object(), null);

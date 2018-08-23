@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.stream.processor.Cleanse;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import org.bricolages.streaming.object.Record;
 import java.time.*;
 import lombok.*;
@@ -29,7 +30,7 @@ public class UnixTimeOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object value, Record record) throws FilterException {
+    public Object applyValue(Object value, Record record) throws FilterException, CleanseException {
         if (value == null) return null;
         if (Cleanse.isFloat(value)) {
             return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getDouble(value), zoneOffset));

@@ -1,9 +1,8 @@
 package org.bricolages.streaming.stream.processor;
+import org.bricolages.streaming.exception.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.bricolages.streaming.filter.FilterException;
-import org.bricolages.streaming.exception.*;
 import java.util.Map;
 import java.io.IOException;
 import lombok.*;
@@ -31,29 +30,29 @@ public class ObjectColumnProcessor extends SingleColumnProcessor {
     static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         if (value instanceof String && ((String)value).startsWith("{")) {
             try {
                 value = MAPPER.readValue((String)value, new TypeReference<Map<Object, Object>>() {});
             }
             catch (IOException ex) {
-                throw new FilterException("JSON parse error: " + ex.getMessage());
+                throw new ProcessorException("JSON parse error: " + ex.getMessage());
             }
         }
         checkJSONObject(value);
         return value;
     }
 
-    void checkJSONObject(Object obj) throws FilterException {
+    void checkJSONObject(Object obj) throws ProcessorException {
         try {
             val json = MAPPER.writeValueAsString(obj);
             if (json.length() > this.length) {
-                throw new FilterException("object too long: length=" + json.length());
+                throw new ProcessorException("object too long: length=" + json.length());
             }
         }
         catch (JsonProcessingException ex) {
-            throw new FilterException("JSON serialize error: " + ex.getMessage());
+            throw new ProcessorException("JSON serialize error: " + ex.getMessage());
         }
     }
 }

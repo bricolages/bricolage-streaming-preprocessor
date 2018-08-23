@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.stream.processor.Cleanse;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import org.bricolages.streaming.object.Record;
 import lombok.*;
 
@@ -15,7 +16,7 @@ class IntOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object value, Record record) throws FilterException {
+    public Object applyValue(Object value, Record record) throws FilterException, CleanseException {
         if (value == null) return null;
         long i = Cleanse.getInteger(value);
         if (Integer.MIN_VALUE <= i && i <= Integer.MAX_VALUE) {

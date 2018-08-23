@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.stream.processor.Cleanse;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import org.bricolages.streaming.object.Record;
 import lombok.*;
 
@@ -15,7 +16,7 @@ public class FloatOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object rawValue, Record record) throws FilterException {
+    public Object applyValue(Object rawValue, Record record) throws FilterException, CleanseException {
         if (rawValue == null) return null;
         float value = Cleanse.getFloat(rawValue);
         // getFloat returns Inf/-Inf for too big/small value

@@ -1,4 +1,5 @@
 package org.bricolages.streaming.filter;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import lombok.*;
@@ -13,13 +14,13 @@ public class BigIntOpTest {
         assertNull(f.applyValue(null, null));
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = CleanseException.class)
     public void apply_invalid() throws Exception {
         val f = new BigIntOp(null);
         f.applyValue("junk value", null);
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = CleanseException.class)
     public void apply_unsupported() throws Exception {
         val f = new BigIntOp(null);
         f.applyValue(new Object(), null);

@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.FilterException;
 import lombok.*;
 
 public class RealColumnProcessor extends SingleColumnProcessor {
@@ -12,7 +11,7 @@ public class RealColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         float n = Cleanse.getFloat(value);
         if (! Float.isFinite(n)) return null;

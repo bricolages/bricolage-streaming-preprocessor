@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.FilterException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -29,7 +28,7 @@ public final class Cleanse {
         }
     }
 
-    static public long getInteger(Object value) throws FilterException {
+    static public long getInteger(Object value) throws CleanseException {
         if (value instanceof Integer) {
             return ((Integer)value).longValue();
         }
@@ -47,7 +46,7 @@ public final class Cleanse {
                 return Long.valueOf((String)value);
             }
             catch (NumberFormatException ex) {
-                throw new FilterException(ex);
+                throw new CleanseException(ex);
             }
         }
         else if (value instanceof Float) {
@@ -57,7 +56,7 @@ public final class Cleanse {
             return ((Double)value).longValue();
         }
         else {
-            throw new FilterException("unexpected value for integer");
+            throw new CleanseException("unexpected value for integer");
         }
     }
 
@@ -84,7 +83,7 @@ public final class Cleanse {
         }
     }
 
-    static public float getFloat(Object value) throws FilterException {
+    static public float getFloat(Object value) throws CleanseException {
         if (value instanceof Integer) {
             return ((Integer)value).floatValue();
         }
@@ -102,7 +101,7 @@ public final class Cleanse {
                 return Float.valueOf((String)value);
             }
             catch (NumberFormatException ex) {
-                throw new FilterException(ex);
+                throw new CleanseException(ex);
             }
         }
         else if (value instanceof Float) {
@@ -112,11 +111,11 @@ public final class Cleanse {
             return ((Double)value).floatValue();
         }
         else {
-            throw new FilterException("unexpected value for float");
+            throw new CleanseException("unexpected value for float");
         }
     }
 
-    static public double getDouble(Object value) throws FilterException {
+    static public double getDouble(Object value) throws CleanseException {
         if (value instanceof Integer) {
             return ((Integer)value).doubleValue();
         }
@@ -128,7 +127,7 @@ public final class Cleanse {
                 return Double.valueOf((String)value);
             }
             catch (NumberFormatException ex) {
-                throw new FilterException(ex);
+                throw new CleanseException(ex);
             }
         }
         else if (value instanceof Float) {
@@ -138,11 +137,11 @@ public final class Cleanse {
             return ((Double)value).doubleValue();
         }
         else {
-            throw new FilterException("unexpected value for double");
+            throw new CleanseException("unexpected value for double");
         }
     }
 
-    static public OffsetDateTime getLocalOffsetDateTime(Object value, ZoneOffset sourceOffset, ZoneOffset zoneOffset) throws FilterException {
+    static public OffsetDateTime getLocalOffsetDateTime(Object value, ZoneOffset sourceOffset, ZoneOffset zoneOffset) throws CleanseException {
         if (isFloat(value)) {
             return unixTimeToOffsetDateTime(getDouble(value), zoneOffset);
         }
@@ -154,32 +153,32 @@ public final class Cleanse {
         }
     }
 
-    static public OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset) throws FilterException {
+    static public OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset) throws CleanseException {
         try {
             return Instant.ofEpochSecond(t).atOffset(offset);
         }
         catch (DateTimeException ex) {
-            throw new FilterException(ex);
+            throw new CleanseException(ex);
         }
     }
 
-    static public OffsetDateTime unixTimeToOffsetDateTime(double t, ZoneOffset offset) throws FilterException {
+    static public OffsetDateTime unixTimeToOffsetDateTime(double t, ZoneOffset offset) throws CleanseException {
         try {
             return Instant.ofEpochMilli((long)(t * 1000)).atOffset(offset);
         }
         catch (DateTimeException ex) {
-            throw new FilterException(ex);
+            throw new CleanseException(ex);
         }
     }
 
     static final DateTimeFormatter SQL_DATE_FORMAT = DateTimeFormatter.ISO_DATE;
 
-    static public String formatSqlDate(LocalDate dt) throws FilterException {
+    static public String formatSqlDate(LocalDate dt) throws CleanseException {
         try {
             return dt.format(SQL_DATE_FORMAT);
         }
         catch (DateTimeException ex) {
-            throw new FilterException(ex);
+            throw new CleanseException(ex);
         }
     }
 
@@ -187,25 +186,25 @@ public final class Cleanse {
     // So keeping timezone information in the JSON data file does not hurt loading task and is a good thing.
     static final DateTimeFormatter SQL_TIMESTAMP_FORMAT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-    static public String formatSqlTimestamp(OffsetDateTime dt) throws FilterException {
+    static public String formatSqlTimestamp(OffsetDateTime dt) throws CleanseException {
         try {
             return dt.format(SQL_TIMESTAMP_FORMAT);
         }
         catch (DateTimeException ex) {
-            throw new FilterException(ex);
+            throw new CleanseException(ex);
         }
     }
 
     static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|\\w{1,5}|[+-]\\d{2}:?\\d{2})?");
 
-    static public OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset, boolean truncate) throws FilterException {
+    static public OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset, boolean truncate) throws CleanseException {
         if (! (value instanceof String)) {
-            throw new FilterException("is not a string: " + value);
+            throw new CleanseException("is not a string: " + value);
         }
         String strValue = ((String)value).trim();
         val m = TIMESTAMP_PATTERN.matcher(strValue);
         if (!m.find()) {
-            throw new FilterException("is not a timestamp: " + strValue);
+            throw new CleanseException("is not a timestamp: " + strValue);
         }
         String str = m.group();
         // Order DOES matter
@@ -219,7 +218,7 @@ public final class Cleanse {
         if (t4 != null) return t4;
         val t5 = tryParsingIsoDateTime(str, defaultOffset);
         if (t5 != null) return t5;
-        throw new FilterException("could not parse a timestamp: " + str);
+        throw new CleanseException("could not parse a timestamp: " + str);
     }
 
     static final DateTimeFormatter ISO_INSTANT_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS][ ]xxxx");
@@ -309,13 +308,13 @@ public final class Cleanse {
         }
     }
 
-    static public LocalDate getLocalDate(Object value) throws FilterException {
+    static public LocalDate getLocalDate(Object value) throws CleanseException {
         return getLocalDate(value, ZoneOffset.UTC, null);
     }
 
-    static public LocalDate getLocalDate(Object value, ZoneOffset defaultOffset, ZoneOffset targetOffset) throws FilterException {
+    static public LocalDate getLocalDate(Object value, ZoneOffset defaultOffset, ZoneOffset targetOffset) throws CleanseException {
         if (! (value instanceof String)) {
-            throw new FilterException("is not a string");
+            throw new CleanseException("is not a string");
         }
         val str = (String)value;
         try {

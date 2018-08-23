@@ -1,5 +1,4 @@
 package org.bricolages.streaming.stream.processor;
-import org.bricolages.streaming.filter.FilterException;
 import java.util.Objects;
 import lombok.*;
 
@@ -13,7 +12,7 @@ public class BooleanColumnProcessor extends SingleColumnProcessor {
     }
 
     @Override
-    public Object processValue(Object value) throws FilterException {
+    public Object processValue(Object value) throws ProcessorException {
         if (value == null) return null;
         if (value instanceof Boolean) {
             return value;
@@ -26,11 +25,11 @@ public class BooleanColumnProcessor extends SingleColumnProcessor {
                 return false;
             }
             else {
-                throw new FilterException("not a boolean: " + value);
+                throw new ProcessorException("not a boolean: " + value);
             }
         }
         else {
-            throw new FilterException("not a boolean: " + value);
+            throw new ProcessorException("not a boolean: " + value);
         }
     }
 }

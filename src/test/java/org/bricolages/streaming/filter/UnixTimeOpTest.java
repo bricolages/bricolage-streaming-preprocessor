@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.object.Record;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import java.time.ZoneOffset;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -27,13 +28,13 @@ public class UnixTimeOpTest {
         assertEquals("2016-07-01T16:41:06.246+09:00", f.applyValue("1467358866.246", null));
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = CleanseException.class)
     public void apply_invalid() throws Exception {
         val f = new UnixTimeOp(null, "+0900");
         f.applyValue("junk value", null);
     }
 
-    @Test(expected = FilterException.class)
+    @Test(expected = CleanseException.class)
     public void apply_unsupported() throws Exception {
         val f = new UnixTimeOp(null, "+0900");
         f.applyValue(new Object(), null);

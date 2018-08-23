@@ -1,5 +1,6 @@
 package org.bricolages.streaming.filter;
 import org.bricolages.streaming.stream.processor.Cleanse;
+import org.bricolages.streaming.stream.processor.CleanseException;
 import org.bricolages.streaming.object.Record;
 import java.time.ZoneOffset;
 import lombok.*;
@@ -35,7 +36,7 @@ public class TimeZoneOp extends SingleColumnOp {
     }
 
     @Override
-    public Object applyValue(Object value, Record record) throws FilterException {
+    public Object applyValue(Object value, Record record) throws FilterException, CleanseException {
         if (value == null) return null;
         return Cleanse.formatSqlTimestamp(Cleanse.getOffsetDateTime(value, sourceOffset, true).withOffsetSameInstant(targetOffset));
     }
