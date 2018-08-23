@@ -2,7 +2,6 @@ package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.processor.StreamColumnProcessor;
 import org.bricolages.streaming.filter.Op;
 import org.bricolages.streaming.filter.Record;
-import org.bricolages.streaming.filter.FilterResult;
 import org.bricolages.streaming.filter.JSONException;
 import org.bricolages.streaming.locator.*;
 import java.util.List;
@@ -38,7 +37,7 @@ public class PacketFilter {
         this.useProcessor = false;
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, FilterResult filterLog) throws LocatorIOException {
+    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, PacketFilterLog filterLog) throws LocatorIOException {
         try {
             try (LocatorIOManager.Buffer buf = ioManager.openWriteBuffer(dest)) {
                 try (BufferedReader r = ioManager.openBufferedReader(src)) {
@@ -56,9 +55,9 @@ public class PacketFilter {
     }
 
 
-    public FilterResult processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws LocatorIOException {
+    public PacketFilterLog processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws LocatorIOException {
         try {
-            val filterLog = new FilterResult(src.toString(), null);
+            val filterLog = new PacketFilterLog(src.toString(), null);
             try (BufferedReader r = ioManager.openBufferedReader(src)) {
                 processStream(r, out, filterLog, src.toString());
             }
@@ -72,7 +71,7 @@ public class PacketFilter {
         }
     }
 
-    public void processStream(BufferedReader r, BufferedWriter w, FilterResult filterLog, String sourceName) throws LocatorIOException {
+    public void processStream(BufferedReader r, BufferedWriter w, PacketFilterLog filterLog, String sourceName) throws LocatorIOException {
         try {
             final PrintWriter out = new PrintWriter(w);
             r.lines().forEach((line) -> {
@@ -96,7 +95,7 @@ public class PacketFilter {
         }
     }
 
-    public String processJSON(String json, FilterResult filterLog) throws JSONException {
+    public String processJSON(String json, PacketFilterLog filterLog) throws JSONException {
         Record record = Record.parse(json);
         if (record == null) return null;
         Record result = processRecord(record, filterLog);
@@ -104,7 +103,7 @@ public class PacketFilter {
         return result.serialize();
     }
 
-    public Record processRecord(Record record, FilterResult filterLog) {
+    public Record processRecord(Record record, PacketFilterLog filterLog) {
         // I apply (old) ops first, because it may includes record-wise operation such as reject op.
         record = processRecordByOperators(record);
         if (record == null) return null;
@@ -124,7 +123,7 @@ public class PacketFilter {
         return record;
     }
 
-    Record processRecordByProcessors(Record src, FilterResult filterLog) {
+    Record processRecordByProcessors(Record src, PacketFilterLog filterLog) {
         Record dest = new Record();
         for (StreamColumnProcessor proc : processors) {
             Object val = proc.process(src);

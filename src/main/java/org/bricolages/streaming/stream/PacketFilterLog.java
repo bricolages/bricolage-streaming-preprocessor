@@ -1,4 +1,4 @@
-package org.bricolages.streaming.filter;
+package org.bricolages.streaming.stream;
 import javax.persistence.*;
 import java.util.Date;
 import java.sql.Timestamp;
@@ -11,7 +11,7 @@ import lombok.*;
 @ToString
 @Entity
 @Table(name="preproc_log")
-public class FilterResult {
+public class PacketFilterLog {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     long id;
@@ -50,7 +50,7 @@ public class FilterResult {
     @Column(name="dispatched")
     boolean dispatched;
 
-    public FilterResult(String src, String dest) {
+    public PacketFilterLog(String src, String dest) {
         this.srcDataFile = src;
         this.destDataFile = dest;
         this.startTime = currentTimestamp();

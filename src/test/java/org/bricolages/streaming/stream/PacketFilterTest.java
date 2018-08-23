@@ -35,7 +35,7 @@ public class PacketFilterTest {
 
         val out = new StringWriter();
         val bufOut = new BufferedWriter(out);
-        val r = new FilterResult();
+        val r = new PacketFilterLog();
         f.processStream(in, bufOut, r, "in");
         bufOut.close();
 
@@ -48,23 +48,23 @@ public class PacketFilterTest {
     @Test
     public void processRecord() throws Exception {
         val f = newFilter();
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new FilterResult()));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new PacketFilterLog()));
 
-        val rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"), new FilterResult());
+        val rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"), new PacketFilterLog());
         assertEquals(2, rec.size());
         assertEquals(1, rec.get("int_col"));
         assertEquals(2L, rec.get("bigint_col"));
 
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"b\"}", new FilterResult()));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"b\"}", new PacketFilterLog()));
 
-        assertNull(f.processJSON("{}", new FilterResult()));
-        assertNull(f.processJSON("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}", new FilterResult()));
+        assertNull(f.processJSON("{}", new PacketFilterLog()));
+        assertNull(f.processJSON("{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}", new PacketFilterLog()));
     }
 
     @Test(expected=JSONException.class)
     public void processRecord_ParseError() throws Exception {
         val f = newFilter();
-        f.processJSON("{", new FilterResult());
+        f.processJSON("{", new PacketFilterLog());
     }
 
     @Test
@@ -75,20 +75,20 @@ public class PacketFilterTest {
         PacketFilter f = new PacketFilter(null, new ArrayList<Op>(), procs);
 
         assertTrue(f.useProcessor);
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new FilterResult()));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1}", new PacketFilterLog()));
 
         Record rec;
-        rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"), new FilterResult());
+        rec = f.processRecord(Record.parse("{\"int_col\":1,\"bigint_col\":2}"), new PacketFilterLog());
         assertEquals(2, rec.size());
         assertEquals(1, rec.get("int_col"));
         assertEquals(2L, rec.get("bigint_col"));
 
-        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"xxx\"}", new FilterResult()));
+        assertEquals("{\"int_col\":1}", f.processJSON("{\"int_col\":1,\"bigint_col\":\"xxx\"}", new PacketFilterLog()));
 
-        assertNull(f.processJSON("{}", new FilterResult()));
-        assertNull(f.processJSON("{\"int_col\":\"str\"}", new FilterResult()));
+        assertNull(f.processJSON("{}", new PacketFilterLog()));
+        assertNull(f.processJSON("{\"int_col\":\"str\"}", new PacketFilterLog()));
 
-        rec = f.processRecord(Record.parse("{\"int_col\":1,\"unconsumed\":9}"), new FilterResult());
+        rec = f.processRecord(Record.parse("{\"int_col\":1,\"unconsumed\":9}"), new PacketFilterLog());
         assertEquals(2, rec.size());
         assertEquals(1, rec.get("int_col"));
         assertEquals(9, rec.get("unconsumed"));
@@ -100,10 +100,10 @@ public class PacketFilterTest {
         procs.add(new IntegerColumnProcessor(StreamColumn.forNames("dest", "src")));
         PacketFilter f = new PacketFilter(null, new ArrayList<Op>(), procs);
 
-        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1}", new FilterResult()));
+        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1}", new PacketFilterLog()));
 
         // Do not overwrite
-        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1,\"dest\":2}", new FilterResult()));
+        assertEquals("{\"dest\":1}", f.processJSON("{\"src\":1,\"dest\":2}", new PacketFilterLog()));
     }
 
     @Test
@@ -115,8 +115,8 @@ public class PacketFilterTest {
         PacketFilter f = new PacketFilter(null, ops, procs);
 
         assertTrue(f.useProcessor);
-        assertEquals("{\"x\":{\"a\":1,\"b\":2}}", f.processJSON("{\"q_a\":1,\"q_b\":2}", new FilterResult()));
-        assertEquals("{\"y\":1}", f.processJSON("{\"y\":1,\"q_a\":\"tooooooooooooooooooooooooooooooooo long\"}", new FilterResult()));
+        assertEquals("{\"x\":{\"a\":1,\"b\":2}}", f.processJSON("{\"q_a\":1,\"q_b\":2}", new PacketFilterLog()));
+        assertEquals("{\"y\":1}", f.processJSON("{\"y\":1,\"q_a\":\"tooooooooooooooooooooooooooooooooo long\"}", new PacketFilterLog()));
     }
 
     @Test
@@ -142,7 +142,7 @@ public class PacketFilterTest {
         record.put("i[a0]", 1);
         record.put("j[3x3]", 1);
 
-        val log = new FilterResult();
+        val log = new PacketFilterLog();
         f.processRecord(record, log);
 
         assertFalse(log.getUnknownColumns().contains("int_col"));
@@ -176,7 +176,7 @@ public class PacketFilterTest {
         record2.put("e", 1);
         record2.put("f", 1);
 
-        val log = new FilterResult();
+        val log = new PacketFilterLog();
         f.processRecord(record1, log);
         f.processRecord(record2, log);
 
