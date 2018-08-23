@@ -2,7 +2,7 @@ package org.bricolages.streaming.stream.processor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.bricolages.streaming.filter.*;
+import org.bricolages.streaming.filter.FilterException;
 import org.bricolages.streaming.exception.*;
 import java.util.Map;
 import java.io.IOException;

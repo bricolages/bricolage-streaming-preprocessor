@@ -1,9 +1,7 @@
 package org.bricolages.streaming.filter;
-
 import java.util.function.Function;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import lombok.*;
 
 public class RejectOp extends Op {
