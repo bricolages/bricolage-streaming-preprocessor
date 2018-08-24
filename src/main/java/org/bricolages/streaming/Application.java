@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableJpaRepositories
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass=true)
 @Slf4j
 @EnableConfigurationProperties(Config.class)
 public class Application {
