@@ -1,4 +1,4 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.preproc;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.object.*;

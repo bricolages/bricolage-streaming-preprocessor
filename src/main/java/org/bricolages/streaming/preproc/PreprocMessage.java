@@ -1,4 +1,5 @@
-package org.bricolages.streaming.stream;
+package org.bricolages.streaming.preproc;
+import org.bricolages.streaming.stream.Packet;
 import org.bricolages.streaming.object.S3ObjectMetadata;
 import org.bricolages.streaming.util.SQLUtils;
 import javax.persistence.*;

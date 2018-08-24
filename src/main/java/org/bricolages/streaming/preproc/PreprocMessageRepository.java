@@ -1,4 +1,4 @@
-package org.bricolages.streaming.stream;
+package org.bricolages.streaming.preproc;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PreprocMessageRepository extends JpaRepository<PreprocMessage, Long> {
