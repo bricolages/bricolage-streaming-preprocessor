@@ -35,14 +35,16 @@ public class PacketFilter {
         this.useProcessor = false;
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, PacketFilterLog filterLog) throws ObjectIOException {
+    public PacketFilterResult processLocator(S3ObjectLocator src, S3ObjectLocator dest) throws ObjectIOException {
         try {
+            PacketFilterResult result = null;
             try (ObjectIOManager.Buffer buf = ioManager.openWriteBuffer(dest)) {
                 try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                    processStream(r, buf.getBufferedWriter(), filterLog, src.toString());
+                    result = processStream(r, buf.getBufferedWriter(), src.toString());
                 }
-                return buf.commit();
+                result.setObjectMetadata(buf.commit());
             }
+            return result;
         }
         catch (UncheckedIOException ex) {
             throw new ObjectIOException(ex.getCause());
@@ -53,13 +55,11 @@ public class PacketFilter {
     }
 
 
-    public PacketFilterLog processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws ObjectIOException {
+    public PacketFilterResult processLocatorAndPrint(S3ObjectLocator src, BufferedWriter out) throws ObjectIOException {
         try {
-            val filterLog = new PacketFilterLog(src.toString(), null);
             try (BufferedReader r = ioManager.openBufferedReader(src)) {
-                processStream(r, out, filterLog, src.toString());
+                return processStream(r, out, src.toString());
             }
-            return filterLog;
         }
         catch (UncheckedIOException ex) {
             throw new ObjectIOException(ex.getCause());
@@ -69,45 +69,47 @@ public class PacketFilter {
         }
     }
 
-    public void processStream(BufferedReader r, BufferedWriter w, PacketFilterLog filterLog, String sourceName) throws ObjectIOException {
+    public PacketFilterResult processStream(BufferedReader r, BufferedWriter w, String sourceName) throws ObjectIOException {
         try {
+            val result = new PacketFilterResult();
             final PrintWriter out = new PrintWriter(w);
             r.lines().forEach((line) -> {
                 if (line.trim().isEmpty()) return;  // should not count blank line
-                filterLog.inputRows++;
+                result.inputRows++;
                 try {
-                    String outStr = processJSON(line, filterLog);
+                    String outStr = processJSON(line, result);
                     if (outStr != null) {
                         out.println(outStr);
-                        filterLog.outputRows++;
+                        result.outputRows++;
                     }
                 }
                 catch (JSONParseException ex) {
-                    log.debug("JSON parse error: {}:{}: {}", sourceName, filterLog.inputRows, ex.getMessage());
-                    filterLog.errorRows++;
+                    log.debug("JSON parse error: {}:{}: {}", sourceName, result.inputRows, ex.getMessage());
+                    result.errorRows++;
                 }
             });
+            return result;
         }
         catch (UncheckedIOException ex) {
             throw new ObjectIOException(ex.getCause());
         }
     }
 
-    public String processJSON(String json, PacketFilterLog filterLog) throws JSONParseException {
+    public String processJSON(String json, PacketFilterResult result) throws JSONParseException {
         Record record = Record.parse(json);
         if (record == null) return null;
-        Record result = processRecord(record, filterLog);
-        if (result == null) return null;
-        return result.serialize();
+        Record outRecord = processRecord(record, result);
+        if (outRecord == null) return null;
+        return outRecord.serialize();
     }
 
-    public Record processRecord(Record record, PacketFilterLog filterLog) {
+    public Record processRecord(Record record, PacketFilterResult result) {
         // I apply (old) ops first, because it may includes record-wise operation such as reject op.
         record = processRecordByOperators(record);
         if (record == null) return null;
 
         if (useProcessor) {
-            record = processRecordByProcessors(record, filterLog);
+            record = processRecordByProcessors(record, result);
         }
 
         return record;
@@ -121,7 +123,7 @@ public class PacketFilter {
         return record;
     }
 
-    Record processRecordByProcessors(Record src, PacketFilterLog filterLog) {
+    Record processRecordByProcessors(Record src, PacketFilterResult result) {
         Record dest = new Record();
         for (StreamColumnProcessor proc : processors) {
             Object val = proc.process(src);
@@ -139,7 +141,7 @@ public class PacketFilter {
                 }
             }
             if (name instanceof String && isIdentifier((String)name) && value != null) {
-                filterLog.addUnknownColumn((String)name);
+                result.addUnknownColumn((String)name);
             }
         });
         return dest.isEmpty() ? null : dest;

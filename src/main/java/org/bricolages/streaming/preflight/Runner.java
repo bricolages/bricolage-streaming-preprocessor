@@ -2,7 +2,7 @@ package org.bricolages.streaming.preflight;
 import org.bricolages.streaming.preflight.definition.*;
 import org.bricolages.streaming.stream.PacketFilterFactory;
 import org.bricolages.streaming.stream.PacketFilter;
-import org.bricolages.streaming.stream.PacketFilterLog;
+import org.bricolages.streaming.stream.PacketFilterResult;
 import org.bricolages.streaming.object.S3ObjectLocator;
 import org.bricolages.streaming.object.ObjectIOException;
 import org.bricolages.streaming.exception.*;
@@ -50,8 +50,7 @@ public class Runner {
         System.err.printf("*** preproc start\n");
         System.err.printf("preproc source     : %s\n", src.toString());
         System.err.printf("preproc destination: %s\n", dest.toString());
-        val filterLog = new PacketFilterLog(src.toString(), dest.toString());
-        filter.processLocator(src, dest, filterLog);
-        System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", filterLog.inputRows, filterLog.outputRows, filterLog.errorRows);
+        val result = filter.processLocator(src, dest);
+        System.err.printf("*** preproc succeeded: in=%d, out=%d, error=%d\n", result.getInputRows(), result.getOutputRows(), result.getErrorRows());
     }
 }
