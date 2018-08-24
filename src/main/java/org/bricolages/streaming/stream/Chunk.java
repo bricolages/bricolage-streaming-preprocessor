@@ -16,18 +16,23 @@ public class Chunk {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     long id;
 
+    @Getter
     @Column(name="object_url")
     String objectUrl;
 
+    @Getter
     @Column(name="object_size")
     long objectSize;
 
+    @Getter
     @Column(name="object_rows")
     int objectRows;
 
+    @Getter
     @Column(name="error_rows")
     int errorRows;
 
+    @Getter
     @Column(name="object_created_time")
     Timestamp objectCreatedTime = null;
 

@@ -4,6 +4,8 @@ import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.Objects;
@@ -182,8 +184,7 @@ public class Preprocessor implements EventHandlers {
             return;
         }
 
-        PreprocMessage msg = new PreprocMessage(event.getMessageId(), event.getObjectMetadata());
-        msgRepos.save(msg);
+        PreprocMessage msg = acceptMessage(event);
 
         S3ObjectLocator src = event.getLocator();
         BoundStream stream = router.route(src);
@@ -236,49 +237,64 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    void deleteMessage(PreprocMessage msg, S3Event event) {
+    @Transactional
+    public PreprocMessage acceptMessage(S3Event event) {
+        PreprocMessage msg = new PreprocMessage(event.getMessageId(), event.getObjectMetadata());
+        try {
+            return msgRepos.save(msg);
+        }
+        catch (DataIntegrityViolationException ex) {
+            return msg;
+        }
+    }
+
+    @Transactional
+    public void deleteMessage(PreprocMessage msg, S3Event event) {
         eventQueue.deleteAsync(event);
 
         msg.changeStateToHandled();
-        msgRepos.save(msg);
     }
 
-    PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
+    @Transactional
+    public PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
         Packet packet = new Packet(event.getObjectMetadata(), stream);
-        packetRepos.save(packet);
-
+        try {
+            packet = packetRepos.save(packet);
+        }
+        catch (DataIntegrityViolationException ex) {
+            packet = packetRepos.findByObjectUrl(packet.getObjectUrl());
+        }
         msg.setPacket(packet);
-        msgRepos.save(msg);
 
         PreprocJob job = new PreprocJob(msg, packet);
-        jobRepos.save(job);
-
-        return job;
+        return jobRepos.save(job);
     }
 
-    Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
+    @Transactional
+    public Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
         Chunk chunk = new Chunk(stream.getTableId(), result);
-        chunkRepos.save(chunk);
+        try {
+            chunk = chunkRepos.save(chunk);
+        }
+        catch (DataIntegrityViolationException ex) {
+            chunk = chunkRepos.findByObjectUrl(chunk.getObjectUrl());
+        }
 
-        Packet packet = job.getPacket();
-        packet.changeStateToProcessed(chunk);
-        packetRepos.save(packet);
-
+        job.getPacket().changeStateToProcessed(chunk);
         job.changeStateToSucceeded();
-        jobRepos.save(job);
 
         return chunk;
     }
 
-    void jobFailed(PreprocJob job, String message) {
+    @Transactional
+    public void jobFailed(PreprocJob job, String message) {
         job.changeStateToFailed(message);
-        jobRepos.save(job);
     }
 
-    void dispatch(PacketFilterResult result, Chunk chunk) {
+    @Transactional
+    public void dispatch(PacketFilterResult result, Chunk chunk) {
         logQueue.send(new FakeS3Event(result.getObjectMetadata()));
 
         chunk.changeStateToDispatched();
-        chunkRepos.save(chunk);
     }
 }
