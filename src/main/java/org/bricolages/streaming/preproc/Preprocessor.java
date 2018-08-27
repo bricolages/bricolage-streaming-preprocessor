@@ -237,57 +237,25 @@ public class Preprocessor implements EventHandlers {
         }
     }
 
-    @Transactional
-    public PreprocMessage acceptMessage(S3Event event) {
-        PreprocMessage msg = new PreprocMessage(event.getMessageId(), event.getObjectMetadata());
-        try {
-            return msgRepos.save(msg);
-        }
-        catch (DataIntegrityViolationException ex) {
-            // no need to update
-            msg = msgRepos.findByMessageId(event.getMessageId());
-            return msg;
-        }
+    PreprocMessage acceptMessage(S3Event event) {
+        return msgRepos.upsert(new PreprocMessage(event.getMessageId(), event.getObjectMetadata()));
     }
 
-    @Transactional
-    public void deleteMessage(PreprocMessage msg, S3Event event) {
+    void deleteMessage(PreprocMessage msg, S3Event event) {
         eventQueue.deleteAsync(event);
 
         msg.changeStateToHandled();
         msgRepos.save(msg);
     }
 
-    @Transactional
-    public PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
-        Packet packet = new Packet(event.getObjectMetadata(), stream);
-        try {
-            packet = packetRepos.save(packet);
-        }
-        catch (DataIntegrityViolationException ex) {
-            val newPacket = packet;
-            packet = packetRepos.findByObjectUrl(packet.getObjectUrl());
-            packet.merge(newPacket);
-            packetRepos.save(packet);
-        }
-        msg.setPacket(packet);
-
-        PreprocJob job = new PreprocJob(msg, packet);
-        return jobRepos.save(job);
+    PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
+        Packet packet = packetRepos.upsert(new Packet(event.getObjectMetadata(), stream));
+        msg.setPacket(packet);  // defer to save
+        return jobRepos.save(new PreprocJob(msg, packet));
     }
 
-    @Transactional
-    public Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
-        Chunk chunk = new Chunk(stream.getTableId(), result);
-        try {
-            chunk = chunkRepos.save(chunk);
-        }
-        catch (DataIntegrityViolationException ex) {
-            val newChunk = chunk;
-            chunk = chunkRepos.findByObjectUrl(chunk.getObjectUrl());
-            chunk.merge(newChunk);
-            chunkRepos.save(chunk);
-        }
+    Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
+        Chunk chunk = chunkRepos.upsert(new Chunk(stream.getTableId(), result));
 
         Packet packet = job.getPacket();
         packet.changeStateToProcessed(chunk);
@@ -299,14 +267,12 @@ public class Preprocessor implements EventHandlers {
         return chunk;
     }
 
-    @Transactional
-    public void jobFailed(PreprocJob job, String message) {
+    void jobFailed(PreprocJob job, String message) {
         job.changeStateToFailed(message);
         jobRepos.save(job);
     }
 
-    @Transactional
-    public void dispatch(PacketFilterResult result, Chunk chunk) {
+    void dispatch(PacketFilterResult result, Chunk chunk) {
         logQueue.send(new FakeS3Event(result.getObjectMetadata()));
 
         chunk.changeStateToDispatched();
