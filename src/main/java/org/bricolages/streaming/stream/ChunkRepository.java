@@ -7,14 +7,18 @@ public interface ChunkRepository extends JpaRepository<Chunk, Long> {
     Chunk findByObjectUrl(String url);
 
     default public Chunk upsert(Chunk chunk) {
+        val curr = findByObjectUrl(chunk.getObjectUrl());
+        if (curr != null) {
+            curr.merge(chunk);
+            return save(curr);
+        }
         try {
             return save(chunk);
         }
         catch (DataIntegrityViolationException ex) {
-            val newChunk = chunk;
-            val oldChunk = findByObjectUrl(newChunk.getObjectUrl());
-            oldChunk.merge(newChunk);
-            return save(oldChunk);
+            val curr2 = findByObjectUrl(chunk.getObjectUrl());
+            curr2.merge(chunk);
+            return save(curr2);
         }
     }
 }
