@@ -253,6 +253,7 @@ public class Preprocessor implements EventHandlers {
         eventQueue.deleteAsync(event);
 
         msg.changeStateToHandled();
+        msgRepos.save(msg);
     }
 
     @Transactional
@@ -280,8 +281,12 @@ public class Preprocessor implements EventHandlers {
             chunk = chunkRepos.findByObjectUrl(chunk.getObjectUrl());
         }
 
-        job.getPacket().changeStateToProcessed(chunk);
+        Packet packet = job.getPacket();
+        packet.changeStateToProcessed(chunk);
+        packetRepos.save(packet);
+
         job.changeStateToSucceeded();
+        jobRepos.save(job);
 
         return chunk;
     }
@@ -289,6 +294,7 @@ public class Preprocessor implements EventHandlers {
     @Transactional
     public void jobFailed(PreprocJob job, String message) {
         job.changeStateToFailed(message);
+        jobRepos.save(job);
     }
 
     @Transactional
@@ -296,5 +302,6 @@ public class Preprocessor implements EventHandlers {
         logQueue.send(new FakeS3Event(result.getObjectMetadata()));
 
         chunk.changeStateToDispatched();
+        chunkRepos.save(chunk);
     }
 }
