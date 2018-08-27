@@ -2,7 +2,6 @@ package org.bricolages.streaming.stream;
 import org.bricolages.streaming.exception.*;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.hibernate.Hibernate;
 import lombok.*;
 
 public interface StreamBundleRepository extends JpaRepository<StreamBundle, Long> {
@@ -25,8 +24,6 @@ public interface StreamBundleRepository extends JpaRepository<StreamBundle, Long
         if (list.size() > 1) {
             throw new ApplicationError("FATAL: multiple stream bundle matched: bucket=" + bucket + ", prefix=" + prefix);
         }
-        val bundle = list.get(0);
-        Hibernate.initialize(bundle.getStream());
-        return bundle;
+        return list.get(0);
     }
 }
