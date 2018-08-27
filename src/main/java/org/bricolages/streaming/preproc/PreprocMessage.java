@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @Entity
-@Table(name="strload_preproc_message")
+@Table(name="strload_preproc_messages")
 public class PreprocMessage {
     @Getter
     @Id
