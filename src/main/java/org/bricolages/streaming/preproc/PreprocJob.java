@@ -50,6 +50,7 @@ public class PreprocJob {
     public void changeStateToSucceeded() {
         this.status = STATUS_SUCCESS;
         this.endTime = SQLUtils.currentTimestamp();
+        this.message = "";
     }
 
     public void changeStateToFailed(String msg) {
