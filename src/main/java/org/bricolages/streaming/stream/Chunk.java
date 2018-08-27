@@ -61,4 +61,12 @@ public class Chunk {
     public void changeStateToDispatched() {
         this.dispatched = true;
     }
+
+    public void merge(Chunk other) {
+        this.objectSize = other.objectSize;
+        this.objectRows = other.objectRows;
+        this.errorRows = other.errorRows;
+        this.objectCreatedTime = other.objectCreatedTime;
+        this.tableId = other.tableId;
+    }
 }

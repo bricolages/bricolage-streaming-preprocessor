@@ -244,6 +244,8 @@ public class Preprocessor implements EventHandlers {
             return msgRepos.save(msg);
         }
         catch (DataIntegrityViolationException ex) {
+            // no need to update
+            msg = msgRepos.findByMessageId(event.getMessageId());
             return msg;
         }
     }
@@ -263,7 +265,10 @@ public class Preprocessor implements EventHandlers {
             packet = packetRepos.save(packet);
         }
         catch (DataIntegrityViolationException ex) {
+            val newPacket = packet;
             packet = packetRepos.findByObjectUrl(packet.getObjectUrl());
+            packet.merge(newPacket);
+            packetRepos.save(packet);
         }
         msg.setPacket(packet);
 
@@ -278,7 +283,10 @@ public class Preprocessor implements EventHandlers {
             chunk = chunkRepos.save(chunk);
         }
         catch (DataIntegrityViolationException ex) {
+            val newChunk = chunk;
             chunk = chunkRepos.findByObjectUrl(chunk.getObjectUrl());
+            chunk.merge(newChunk);
+            chunkRepos.save(chunk);
         }
 
         Packet packet = job.getPacket();

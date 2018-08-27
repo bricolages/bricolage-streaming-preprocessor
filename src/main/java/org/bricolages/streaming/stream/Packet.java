@@ -33,7 +33,7 @@ public class Packet {
     long streamId;
 
     @Column(name="chunk_id")
-    long chunkId;
+    Long chunkId;
 
     @Column(name="processed")
     boolean processed = false;
@@ -52,5 +52,16 @@ public class Packet {
     public void changeStateToProcessed(Chunk chunk) {
         this.chunkId = chunk.getId();
         this.processed = true;
+    }
+
+    // other -> this
+    public void merge(Packet other) {
+        this.objectSize = other.objectSize;
+        this.objectCreatedTime = other.objectCreatedTime;
+        this.streamId = other.streamId;
+        if (this.chunkId == null) {
+            this.chunkId = other.chunkId;
+        }
+        this.processed = other.processed;
     }
 }
