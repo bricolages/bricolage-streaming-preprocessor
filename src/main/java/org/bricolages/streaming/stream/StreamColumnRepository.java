@@ -1,4 +1,5 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.util.SQLUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.util.Date;
@@ -26,7 +27,7 @@ public interface StreamColumnRepository extends JpaRepository<StreamColumn, Long
         params.name = name;
         params.sourceName = null;
         params.type = "unknown";
-        params.createTime = new Timestamp(new Date().getTime());
+        params.createTime = SQLUtils.currentTimestamp();
         val column = StreamColumn.forParams(params);
         try {
             return save(column);

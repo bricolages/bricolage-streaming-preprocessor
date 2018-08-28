@@ -39,6 +39,10 @@ public class BoundStream {
         return stream.getStreamName();
     }
 
+    public long getTableId() {
+        return stream.getTableId();
+    }
+
     public boolean doesDefer() {
         return stream.doesDefer();
     }
@@ -55,7 +59,7 @@ public class BoundStream {
         return filterFactory.load(stream);
     }
 
-    public S3ObjectMetadata processLocator(S3ObjectLocator src, S3ObjectLocator dest, PacketFilterLog filterLog) throws ObjectIOException, ConfigError {
-        return loadFilter().processLocator(src, dest, filterLog);
+    public PacketFilterResult processLocator(S3ObjectLocator src, S3ObjectLocator dest) throws ObjectIOException, ConfigError {
+        return loadFilter().processLocator(src, dest);
     }
 }

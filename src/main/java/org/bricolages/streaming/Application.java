@@ -1,4 +1,5 @@
 package org.bricolages.streaming;
+import org.bricolages.streaming.preproc.*;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.stream.op.OpBuilder;
@@ -30,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 @EnableJpaRepositories
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass=true)
 @Slf4j
 @EnableConfigurationProperties(Config.class)
 public class Application {

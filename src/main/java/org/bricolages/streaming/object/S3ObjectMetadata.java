@@ -26,6 +26,10 @@ public class S3ObjectMetadata {
         return meta;
     }
 
+    public String url() {
+        return locator.toString();
+    }
+
     public String bucket() {
         return locator.bucket();
     }

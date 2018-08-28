@@ -1,13 +1,15 @@
 package org.bricolages.streaming.event;
-import org.bricolages.streaming.object.S3ObjectLocator;
+import org.bricolages.streaming.object.*;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import com.amazonaws.services.sqs.model.Message;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.amazonaws.AmazonClientException;
+import org.joda.time.DateTime;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Objects;
 import lombok.*;
@@ -84,6 +86,18 @@ public class S3Event extends Event {
         this.objectSize = objectSize;
         this.record = record;
         this.noDispatch = noDispatch;
+    }
+
+    public S3ObjectMetadata getObjectMetadata() {
+        return new S3ObjectMetadata(locator, getEventTime(), objectSize, getETag());
+    }
+
+    public Instant getEventTime() {
+        return Instant.ofEpochMilli(record.getEventTime().getMillis());
+    }
+
+    public String getETag() {
+        return record.getS3().getObject().geteTag();
     }
 
     public void callHandler(EventHandlers h) {

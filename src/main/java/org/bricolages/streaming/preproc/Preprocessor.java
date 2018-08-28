@@ -1,9 +1,11 @@
-package org.bricolages.streaming;
+package org.bricolages.streaming.preproc;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
 import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.Objects;
@@ -61,8 +63,8 @@ public class Preprocessor implements EventHandlers {
         }
         val filter = route.loadFilter();
         try {
-            val filterLog = filter.processLocatorAndPrint(src, out);
-            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), route.getDestLocator().toString(), filterLog.inputRows, filterLog.outputRows);
+            val result = filter.processLocatorAndPrint(src, out);
+            log.debug("src: {}, dest: {}, in: {}, out: {}, err: {}", src.toString(), route.getDestLocator().toString(), result.getInputRows(), result.getOutputRows(), result.getErrorRows());
             return true;
         }
         catch (ObjectIOException ex) {
@@ -155,7 +157,16 @@ public class Preprocessor implements EventHandlers {
     }
 
     @Autowired
-    PacketFilterLogRepository logRepos;
+    PreprocMessageRepository msgRepos;
+
+    @Autowired
+    PreprocJobRepository jobRepos;
+
+    @Autowired
+    PacketRepository packetRepos;
+
+    @Autowired
+    ChunkRepository chunkRepos;
 
     @Autowired
     StreamColumnRepository columnRepos;
@@ -173,6 +184,8 @@ public class Preprocessor implements EventHandlers {
             return;
         }
 
+        PreprocMessage msg = acceptMessage(event);
+
         S3ObjectLocator src = event.getLocator();
         BoundStream stream = router.route(src);
         if (stream == null) {
@@ -182,17 +195,18 @@ public class Preprocessor implements EventHandlers {
             // We cannot resolve latter case automatically, optimize for former case.
             //logNotMappedObject(src.toString());
             log.info("remove unmapped S3 object: {}", src.toString());
-            eventQueue.deleteAsync(event);
+            deleteMessage(msg, event);
             return;
         }
         if (stream.isBlackhole()) {
             // Should be removed by explicit configuration
             log.info("ignore event: {}", src.toString());
-            eventQueue.deleteAsync(event);
+            deleteMessage(msg, event);
             return;
         }
-        val dest = stream.getDestLocator();
 
+        streamDetected(msg, stream);
+        val dest = stream.getDestLocator();
         if (stream.doesDefer()) {
             // Processing is temporary disabled; process objects later
             return;
@@ -200,33 +214,74 @@ public class Preprocessor implements EventHandlers {
         if (stream.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
             log.info("discard event: {}", event.getLocator().toString());
-            eventQueue.deleteAsync(event);
+            deleteMessage(msg, event);
             return;
         }
 
-        PacketFilterLog filterLog = new PacketFilterLog(src.toString(), dest.toString());
+        PreprocJob job = jobStarted(msg, event, stream);
         try {
-            logRepos.save(filterLog);
-
-            S3ObjectMetadata meta = stream.processLocator(src, dest, filterLog);
-            log.debug("src: {}, dest: {}, in: {}, out: {}", src.toString(), dest.toString(), filterLog.inputRows, filterLog.outputRows);
-            filterLog.succeeded();
-            logRepos.save(filterLog);
+            PacketFilterResult result = stream.processLocator(src, dest);
+            log.debug("src: {}, dest: {}, in: {}, out: {}, err: {}", src.toString(), dest.toString(), result.getInputRows(), result.getOutputRows(), result.getErrorRows());
+            Chunk chunk = jobSucceeded(job, stream, result);
 
             if (!event.doesNotDispatch() && !stream.doesNotDispatch()) {
-                logQueue.send(new FakeS3Event(meta));
-                filterLog.dispatched();
-                logRepos.save(filterLog);
+                dispatch(result, chunk);
             }
 
-            eventQueue.deleteAsync(event);
+            deleteMessage(msg, event);
 
-            columnRepos.saveUnknownColumns(stream.getStream(), filterLog.getUnknownColumns());
+            columnRepos.saveUnknownColumns(stream.getStream(), result.getUnknownColumns());
         }
         catch (ObjectIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
-            filterLog.failed(ex.getMessage());
-            logRepos.save(filterLog);
+            jobFailed(job, ex.getMessage());
         }
+    }
+
+    PreprocMessage acceptMessage(S3Event event) {
+        return msgRepos.upsert(new PreprocMessage(event.getMessageId(), event.getObjectMetadata()));
+    }
+
+    void streamDetected(PreprocMessage msg, BoundStream stream) {
+        msg.changeStateToStreamDetected(stream.getStream());
+        msgRepos.save(msg);
+    }
+
+    void deleteMessage(PreprocMessage msg, S3Event event) {
+        eventQueue.deleteAsync(event);
+
+        msg.changeStateToHandled();
+        msgRepos.save(msg);
+    }
+
+    PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
+        Packet packet = packetRepos.upsert(new Packet(event.getObjectMetadata(), stream));
+        msg.changeStateToJobStarted(packet);   // defer to save
+        return jobRepos.save(new PreprocJob(msg, packet));
+    }
+
+    Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
+        Chunk chunk = chunkRepos.upsert(new Chunk(stream.getTableId(), result));
+
+        Packet packet = job.getPacket();
+        packet.changeStateToProcessed(chunk);
+        packetRepos.save(packet);
+
+        job.changeStateToSucceeded();
+        jobRepos.save(job);
+
+        return chunk;
+    }
+
+    void jobFailed(PreprocJob job, String message) {
+        job.changeStateToFailed(message);
+        jobRepos.save(job);
+    }
+
+    void dispatch(PacketFilterResult result, Chunk chunk) {
+        logQueue.send(new FakeS3Event(result.getObjectMetadata()));
+
+        chunk.changeStateToDispatched();
+        chunkRepos.save(chunk);
     }
 }

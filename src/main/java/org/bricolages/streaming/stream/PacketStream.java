@@ -1,5 +1,6 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.op.OperatorDefinition;
+import org.bricolages.streaming.util.SQLUtils;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.*;
@@ -29,6 +30,10 @@ public class PacketStream {
     @OneToMany(mappedBy="stream", fetch=FetchType.LAZY)
     @Getter
     List<StreamBundle> bundles;
+
+    @Getter
+    @Column(name="table_id")
+    long tableId;
 
     @Column(name="disabled")
     boolean disabled;
@@ -62,7 +67,7 @@ public class PacketStream {
 
     public PacketStream(String streamName) {
         this.streamName = streamName;
-        this.createTime = new Timestamp(System.currentTimeMillis());
+        this.createTime = SQLUtils.currentTimestamp();
     }
 
     public boolean doesUseColumn() {
