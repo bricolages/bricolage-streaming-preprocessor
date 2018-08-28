@@ -204,8 +204,9 @@ public class Preprocessor implements EventHandlers {
             deleteMessage(msg, event);
             return;
         }
-        val dest = stream.getDestLocator();
 
+        streamDetected(msg, stream);
+        val dest = stream.getDestLocator();
         if (stream.doesDefer()) {
             // Processing is temporary disabled; process objects later
             return;
@@ -241,6 +242,11 @@ public class Preprocessor implements EventHandlers {
         return msgRepos.upsert(new PreprocMessage(event.getMessageId(), event.getObjectMetadata()));
     }
 
+    void streamDetected(PreprocMessage msg, BoundStream stream) {
+        msg.changeStateToStreamDetected(stream.getStream());
+        msgRepos.save(msg);
+    }
+
     void deleteMessage(PreprocMessage msg, S3Event event) {
         eventQueue.deleteAsync(event);
 
@@ -250,7 +256,7 @@ public class Preprocessor implements EventHandlers {
 
     PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
         Packet packet = packetRepos.upsert(new Packet(event.getObjectMetadata(), stream));
-        msg.setPacket(packet);  // defer to save
+        msg.changeStateToJobStarted(packet);   // defer to save
         return jobRepos.save(new PreprocJob(msg, packet));
     }
 

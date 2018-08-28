@@ -1,4 +1,5 @@
 package org.bricolages.streaming.preproc;
+import org.bricolages.streaming.stream.PacketStream;
 import org.bricolages.streaming.stream.Packet;
 import org.bricolages.streaming.object.S3ObjectMetadata;
 import org.bricolages.streaming.util.SQLUtils;
@@ -34,26 +35,33 @@ public class PreprocMessage {
     @Column(name="object_url")
     String objectUrl;
 
-    @Getter
-    @Setter
-    @ManyToOne(optional=true, fetch=FetchType.LAZY)
-    @JoinColumn(name="packet_id")
-    Packet packet;
+    @Column(name="stream_id")
+    Long streamId = null;
+
+    @Column(name="packet_id")
+    Long packetId = null;
 
     @Getter
     @Column(name="handled")
     boolean handled = false;
 
     public PreprocMessage(String messageId, S3ObjectMetadata obj) {
-        this(messageId, SQLUtils.getTimestamp(obj.createdTime()), SQLUtils.currentTimestamp(), obj.url(), null);
+        this(messageId, SQLUtils.getTimestamp(obj.createdTime()), SQLUtils.currentTimestamp(), obj.url());
     }
 
-    public PreprocMessage(String messageId, Timestamp eventTime, Timestamp receivedTime, String objectUrl, Packet packet) {
+    public PreprocMessage(String messageId, Timestamp eventTime, Timestamp receivedTime, String objectUrl) {
         this.messageId = messageId;
         this.eventTime = eventTime;
         this.receivedTime = receivedTime;
         this.objectUrl = objectUrl;
-        this.packet = packet;
+    }
+
+    public void changeStateToStreamDetected(PacketStream stream) {
+        this.streamId = stream.getId();
+    }
+
+    public void changeStateToJobStarted(Packet packet) {
+        this.packetId = packet.getId();
     }
 
     public void changeStateToHandled() {
