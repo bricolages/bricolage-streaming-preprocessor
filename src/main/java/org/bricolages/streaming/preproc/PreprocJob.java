@@ -20,11 +20,6 @@ public class PreprocJob {
     @Column(name="preproc_message_id")
     long preprocMessageId;
 
-    @Getter
-    @ManyToOne(optional=false)
-    @JoinColumn(name="packet_id", nullable=false, updatable=false)
-    Packet packet;
-
     @Column(name="start_time")
     Timestamp startTime = null;
 
@@ -40,6 +35,10 @@ public class PreprocJob {
 
     @Column(name="message")
     String message = "";
+
+    @Getter
+    @Transient
+    Packet packet;
 
     public PreprocJob(PreprocMessage msg, Packet packet) {
         this.preprocMessageId = msg.getId();
