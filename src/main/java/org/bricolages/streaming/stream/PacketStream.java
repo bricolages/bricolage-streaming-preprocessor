@@ -33,7 +33,7 @@ public class PacketStream {
 
     @Getter
     @Column(name="table_id")
-    long tableId;
+    Long tableId;
 
     @Column(name="disabled")
     boolean disabled;

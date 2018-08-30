@@ -37,7 +37,7 @@ public class Chunk {
     Timestamp objectCreatedTime = null;
 
     @Column(name="table_id")
-    long tableId;
+    Long tableId;
 
     @Column(name="dispatched")
     boolean dispatched;
@@ -45,11 +45,11 @@ public class Chunk {
     @Column(name="loaded")
     boolean loaded;
 
-    public Chunk(long tableId, PacketFilterResult result) {
+    public Chunk(Long tableId, PacketFilterResult result) {
         this(result.getObjectUrl(), result.getObjectSize(), result.getOutputRows(), result.getErrorRows(), SQLUtils.getTimestamp(result.getObjectCreatedTime()), tableId);
     }
 
-    public Chunk(String objectUrl, long objectSize, int objectRows, int errorRows, Timestamp objectCreatedTime, long tableId) {
+    public Chunk(String objectUrl, long objectSize, int objectRows, int errorRows, Timestamp objectCreatedTime, Long tableId) {
         this.objectUrl = objectUrl;
         this.objectSize = objectSize;
         this.objectRows = objectRows;
