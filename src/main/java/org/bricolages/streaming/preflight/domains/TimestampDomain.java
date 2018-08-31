@@ -22,6 +22,8 @@ public class TimestampDomain extends PrimitiveDomain {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
+    @Getter private final boolean partitionSource = false;
+
     // This is necessary to accept empty value
     @JsonCreator public TimestampDomain(String nil) { /* noop */ }
 
