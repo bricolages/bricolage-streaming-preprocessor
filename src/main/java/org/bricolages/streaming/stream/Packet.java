@@ -56,7 +56,7 @@ public class Packet {
 
     // other -> this
     public void merge(Packet other) {
-        if (other.objectSize >= 0) {
+        if (other.objectSize > 0) {
             this.objectSize = other.objectSize;
         }
         if (other.objectCreatedTime != null) {
