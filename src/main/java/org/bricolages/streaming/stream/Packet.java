@@ -56,8 +56,12 @@ public class Packet {
 
     // other -> this
     public void merge(Packet other) {
-        this.objectSize = other.objectSize;
-        this.objectCreatedTime = other.objectCreatedTime;
+        if (other.objectSize >= 0) {
+            this.objectSize = other.objectSize;
+        }
+        if (other.objectCreatedTime != null) {
+            this.objectCreatedTime = other.objectCreatedTime;
+        }
         this.streamId = other.streamId;
         if (this.chunkId == null) {
             this.chunkId = other.chunkId;
