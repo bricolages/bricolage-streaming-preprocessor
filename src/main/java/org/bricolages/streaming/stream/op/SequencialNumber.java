@@ -14,7 +14,6 @@ public class SequencialNumber {
     long lastValue;
 
     @Id
-    @GeneratedValue
     @Column(name="nextval")
     @Getter
     long nextValue;
