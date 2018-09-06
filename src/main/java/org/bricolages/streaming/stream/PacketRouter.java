@@ -3,7 +3,6 @@ import org.bricolages.streaming.object.S3ObjectLocator;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.transaction.annotation.*;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Arrays;
@@ -76,7 +75,6 @@ public class PacketRouter {
         }
     }
 
-    @Transactional
     public BoundStream route(S3ObjectLocator src) throws ConfigError {
         val r1 = routeBySavedRoutes(src);
         if (r1 != null) return r1;
