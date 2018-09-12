@@ -39,8 +39,8 @@ public class Packet {
     @Column(name="processed")
     boolean processed = false;
 
-    public Packet(S3ObjectMetadata obj, BoundStream stream) {
-        this(obj.url(), obj.size(), SQLUtils.getTimestamp(obj.createdTime()), stream.getStream().getId());
+    public Packet(S3ObjectMetadata obj, PacketStream stream) {
+        this(obj.url(), obj.size(), SQLUtils.getTimestamp(obj.createdTime()), stream.getId());
     }
 
     public Packet(String objectUrl, long objectSize, Timestamp objectCreatedTime, long streamId) {

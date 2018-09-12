@@ -76,7 +76,7 @@ public class PacketRouter {
         }
     }
 
-    public BoundStream route(S3ObjectLocator src) throws ConfigError {
+    public Route route(S3ObjectLocator src) throws ConfigError {
         val r1 = routeBySavedRoutes(src);
         if (r1 != null) return r1;
         val r2 = routeByPatterns(src);
@@ -101,7 +101,7 @@ public class PacketRouter {
      * objectPrefix: "YYYY/MM/DD"
      * objectName: "objectName.gz"
      */
-    BoundStream routeBySavedRoutes(S3ObjectLocator src) {
+    Route routeBySavedRoutes(S3ObjectLocator src) {
         val components = src.key().split("/");
         if (components.length < 5) {
             log.info("could not apply routeBySavedRoutes: {}", src);
@@ -119,28 +119,28 @@ public class PacketRouter {
         val stream = bundle.getStream();
         if (stream == null) throw new ApplicationError("FATAL: could not get stream for stream_bundle: stream_bundle_id=" + bundle.getId());
 
-        return new BoundStream(filterFactory, stream, bundle, objPrefix, objName);
+        return new Route(filterFactory, stream, bundle, objPrefix, objName);
     }
 
-    BoundStream routeByPatterns(S3ObjectLocator src) throws ConfigError {
+    Route routeByPatterns(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
-        if (components.isEmpty()) return BoundStream.makeBlackhole();
+        if (components.isEmpty()) return Route.makeBlackhole();
         val stream = findOrCreateStream(components.streamName);
         val bundle = findOrCreateStreamBundle(stream, components);
         val table = findOrCreateTable(stream, components.destBucket, components.destPrefix);
-        return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
+        return new Route(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
     // For preflight
-    public BoundStream routeWithoutDB(S3ObjectLocator src) throws ConfigError {
+    public Route routeWithoutDB(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
         val names = components.streamName.split("\\.");
         val table = new TargetTable(names[0], names[1], components.destBucket, components.destPrefix);
         val stream = new PacketStream(components.streamName, table);
         val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix);
-        return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
+        return new Route(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
     RouteComponents matchRoutes(S3ObjectLocator src) throws ConfigError {
