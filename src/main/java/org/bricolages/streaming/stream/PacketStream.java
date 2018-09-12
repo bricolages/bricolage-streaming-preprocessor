@@ -1,14 +1,13 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.stream.op.OperatorDefinition;
+import org.bricolages.streaming.table.TargetTable;
 import org.bricolages.streaming.util.SQLUtils;
 import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor
-@Slf4j
 @Entity
 @Table(name="strload_streams")
 public class PacketStream {
@@ -31,9 +30,11 @@ public class PacketStream {
     @Getter
     List<StreamBundle> bundles;
 
+    @OneToOne(optional=true, fetch=FetchType.EAGER)
+    @JoinColumn(name="table_id", nullable=true, unique=true)
     @Getter
-    @Column(name="table_id")
-    Long tableId;
+    @Setter
+    TargetTable table;
 
     @Column(name="disabled")
     boolean disabled;
@@ -72,6 +73,12 @@ public class PacketStream {
     public PacketStream(String streamName) {
         this.streamName = streamName;
         this.createTime = SQLUtils.currentTimestamp();
+    }
+
+    public PacketStream(String streamName, TargetTable table) {
+        this.streamName = streamName;
+        this.createTime = SQLUtils.currentTimestamp();
+        this.table = table;
     }
 
     public boolean doesUseColumn() {

@@ -1,4 +1,5 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.table.TargetTable;
 import org.bricolages.streaming.util.SQLUtils;
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -36,8 +37,9 @@ public class Chunk {
     @Column(name="object_created_time")
     Timestamp objectCreatedTime = null;
 
-    @Column(name="table_id")
-    Long tableId;
+    @OneToOne
+    @JoinColumn(name="table_id", unique=false, nullable=true)
+    TargetTable table;
 
     @Column(name="dispatched")
     boolean dispatched;
@@ -45,17 +47,17 @@ public class Chunk {
     @Column(name="loaded")
     boolean loaded;
 
-    public Chunk(Long tableId, PacketFilterResult result) {
-        this(result.getObjectUrl(), result.getObjectSize(), result.getOutputRows(), result.getErrorRows(), SQLUtils.getTimestamp(result.getObjectCreatedTime()), tableId);
+    public Chunk(TargetTable table, PacketFilterResult result) {
+        this(result.getObjectUrl(), result.getObjectSize(), result.getOutputRows(), result.getErrorRows(), SQLUtils.getTimestamp(result.getObjectCreatedTime()), table);
     }
 
-    public Chunk(String objectUrl, long objectSize, int objectRows, int errorRows, Timestamp objectCreatedTime, Long tableId) {
+    public Chunk(String objectUrl, long objectSize, int objectRows, int errorRows, Timestamp objectCreatedTime, TargetTable table) {
         this.objectUrl = objectUrl;
         this.objectSize = objectSize;
         this.objectRows = objectRows;
         this.errorRows = errorRows;
         this.objectCreatedTime = objectCreatedTime;
-        this.tableId = tableId;
+        this.table = table;
     }
 
     public void changeStateToDispatched() {
@@ -67,6 +69,6 @@ public class Chunk {
         this.objectRows = other.objectRows;
         this.errorRows = other.errorRows;
         this.objectCreatedTime = other.objectCreatedTime;
-        this.tableId = other.tableId;
+        this.table = other.table;
     }
 }
