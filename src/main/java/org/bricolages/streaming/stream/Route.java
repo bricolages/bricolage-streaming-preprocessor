@@ -8,19 +8,19 @@ import java.nio.file.Paths;
 import lombok.*;
 
 @AllArgsConstructor
-public class BoundStream {
+public class Route {
     final PacketFilterFactory filterFactory;
     @Getter final PacketStream stream;
     final StreamBundle bundle;
     @Getter final String objectPrefix;
     @Getter final String objectName;
 
-    public BoundStream(PacketStream stream, StreamBundle bundle, String objectPrefix, String objectName) {
+    public Route(PacketStream stream, StreamBundle bundle, String objectPrefix, String objectName) {
         this(null, stream, bundle, objectPrefix, objectName);
     }
 
-    static public BoundStream makeBlackhole() {
-        return new BoundStream(null, null, null, null, null);
+    static public Route makeBlackhole() {
+        return new Route(null, null, null, null, null);
     }
 
     public boolean isBlackhole() {
@@ -68,6 +68,11 @@ public class BoundStream {
         return stream.getTable().getPrefix();
     }
 
+    public S3ObjectLocator getLocator() {
+        if (bundle == null) return null;
+        return new S3ObjectLocator(bundle.getBucket(), Paths.get(bundle.getPrefix(), objectPrefix, objectName).toString());
+    }
+
     public S3ObjectLocator getDestLocator() {
         if (stream == null) return null;
         if (bundle == null) return null;
@@ -79,7 +84,7 @@ public class BoundStream {
         return filterFactory.load(this);
     }
 
-    public PacketFilterResult processLocator(S3ObjectLocator src, S3ObjectLocator dest) throws ObjectIOException, ConfigError {
-        return loadFilter().processLocator(src, dest);
+    public PacketFilterResult applyFilter() throws ObjectIOException, ConfigError {
+        return loadFilter().processLocator(getLocator(), getDestLocator());
     }
 }
