@@ -1,5 +1,4 @@
-package org.bricolages.streaming.stream;
-import org.bricolages.streaming.table.TargetTable;
+package org.bricolages.streaming.table;
 import org.bricolages.streaming.util.SQLUtils;
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -47,8 +46,8 @@ public class Chunk {
     @Column(name="loaded")
     boolean loaded;
 
-    public Chunk(TargetTable table, PacketFilterResult result) {
-        this(result.getObjectUrl(), result.getObjectSize(), result.getOutputRows(), result.getErrorRows(), SQLUtils.getTimestamp(result.getObjectCreatedTime()), table);
+    public Chunk(TargetTable table, ChunkProperties props) {
+        this(props.getObjectUrl(), props.getObjectSize(), props.getObjectRows(), props.getErrorRows(), SQLUtils.getTimestamp(props.getObjectCreatedTime()), table);
     }
 
     public Chunk(String objectUrl, long objectSize, int objectRows, int errorRows, Timestamp objectCreatedTime, TargetTable table) {
