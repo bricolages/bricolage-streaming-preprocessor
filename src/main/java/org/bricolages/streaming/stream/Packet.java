@@ -1,4 +1,5 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.table.Chunk;
 import org.bricolages.streaming.object.S3ObjectMetadata;
 import org.bricolages.streaming.util.SQLUtils;
 import javax.persistence.*;
