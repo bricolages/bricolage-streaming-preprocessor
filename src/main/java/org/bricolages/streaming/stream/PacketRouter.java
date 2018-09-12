@@ -1,5 +1,6 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.object.S3ObjectLocator;
+import org.bricolages.streaming.table.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -86,6 +87,9 @@ public class PacketRouter {
     }
 
     @Autowired
+    TargetTableRepository tableRepos;
+
+    @Autowired
     PacketStreamRepository streamRepos;
 
     @Autowired
@@ -124,6 +128,7 @@ public class PacketRouter {
         if (components.isEmpty()) return BoundStream.makeBlackhole();
         val stream = findOrCreateStream(components.streamName);
         val bundle = findOrCreateStreamBundle(stream, components);
+        val table = findOrCreateTable(stream, components.destBucket, components.destPrefix);
         return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
@@ -131,8 +136,10 @@ public class PacketRouter {
     public BoundStream routeWithoutDB(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
-        val stream = new PacketStream(components.streamName);
-        val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix, components.destBucket, components.destPrefix);
+        val names = components.streamName.split("\\.");
+        val table = new TargetTable(names[0], names[1], components.destBucket, components.destPrefix);
+        val stream = new PacketStream(components.streamName, table);
+        val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix);
         return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
@@ -185,6 +192,23 @@ public class PacketRouter {
         }
     }
 
+    TargetTable findOrCreateTable(PacketStream stream, String bucket, String prefix) {
+        val names = stream.getStreamName().split("\\.");
+        val schemaName = names[0];
+        val tableName = names[1];
+        TargetTable table = new TargetTable(schemaName, tableName, bucket, prefix);
+        try {
+            tableRepos.save(table);
+            log.info("new table: table_id={}, table_name={}.{}", table.getId(), schemaName, tableName);
+        }
+        catch (DataIntegrityViolationException ex) {
+            table = tableRepos.findTable(schemaName, tableName);
+        }
+        stream.setTable(table);
+        streamRepos.save(stream);
+        return table;
+    }
+
     PacketStream findOrCreateStream(String streamName) {
         PacketStream stream = streamRepos.findStream(streamName);
         if (stream == null) {
@@ -205,25 +229,17 @@ public class PacketRouter {
     StreamBundle findOrCreateStreamBundle(PacketStream stream, RouteComponents components) {
         val srcBucket = components.srcBucket;
         val srcPrefix = components.srcPrefix;
-        val destBucket = components.destBucket;
-        val destPrefix = components.destPrefix;
 
         StreamBundle bundle = streamBundleRepos.findStreamBundle(stream, srcBucket, srcPrefix);
         if (bundle == null) {
             try {
-                bundle = new StreamBundle(stream, srcBucket, srcPrefix, destBucket, destPrefix);
+                bundle = new StreamBundle(stream, srcBucket, srcPrefix);
                 streamBundleRepos.save(bundle);
                 logNewStreamBundle(stream.getId(), srcPrefix);
             }
             catch (DataIntegrityViolationException ex) {
                 bundle = streamBundleRepos.findStreamBundle(stream, srcBucket, srcPrefix);
             }
-        }
-        if (! Objects.equals(bundle.getDestBucket(), destBucket)) {
-            throw new ApplicationError("FATAL: assertion failed: dest_bucket is different: bundle=" + bundle.getDestBucket() + ", incoming=" + destBucket);
-        }
-        if (! Objects.equals(bundle.getDestPrefix(), destPrefix)) {
-            throw new ApplicationError("FATAL: assertion failed: dest_prefix is different: bundle=" + bundle.getDestPrefix() + ", incoming=" + destPrefix);
         }
         return bundle;
     }

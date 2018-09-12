@@ -151,11 +151,10 @@ public class Application {
                 else {
                     System.out.println("streamName: " + route.getStreamName());
 
-                    val bundle = route.getBundle();
-                    System.out.println("streamBucket: " + bundle.getBucket());
-                    System.out.println("streamPrefix: " + bundle.getPrefix());
-                    System.out.println("destBucket: " + bundle.getDestBucket());
-                    System.out.println("destPrefix: " + bundle.getDestPrefix());
+                    System.out.println("streamBucket: " + route.getBucket());
+                    System.out.println("streamPrefix: " + route.getPrefix());
+                    System.out.println("destBucket: " + route.getDestBucket());
+                    System.out.println("destPrefix: " + route.getDestPrefix());
 
                     System.out.println("objectPrefix: " + route.getObjectPrefix());
                     System.out.println("objectName: " + route.getObjectName());

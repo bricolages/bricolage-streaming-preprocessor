@@ -261,7 +261,7 @@ public class Preprocessor implements EventHandlers {
     }
 
     Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
-        Chunk chunk = chunkRepos.upsert(new Chunk(stream.getTableId(), result));
+        Chunk chunk = chunkRepos.upsert(new Chunk(stream.getTable(), result));
 
         Packet packet = job.getPacket();
         packet.changeStateToProcessed(chunk);
