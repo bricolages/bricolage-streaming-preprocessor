@@ -20,6 +20,10 @@ public class TargetTable {
     @Getter
     String tableName;
 
+    @Column(name="data_source_id")
+    @Getter
+    String dataSourceId;
+
     @Column(name="load_batch_size")
     @Getter
     int loadBatchSize;
@@ -39,13 +43,15 @@ public class TargetTable {
     @Column(name="disabled")
     boolean disabled = false;
 
-    public TargetTable(String schemaName, String tableName, String bucket, String prefix) {
+    public TargetTable(String schemaName, String tableName, String dataSourceId, String bucket, String prefix) {
         this.schemaName = schemaName;
         this.tableName = tableName;
+        this.dataSourceId = dataSourceId;
         this.bucket = bucket;
         this.prefix = prefix;
         this.loadBatchSize = DEFAULT_LOAD_BATCH_SIZE;
         this.loadInterval = randomInitialLoadInterval();
+        this.disabled = true;
     }
 
     static final int DEFAULT_LOAD_BATCH_SIZE = 2400;

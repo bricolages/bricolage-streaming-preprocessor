@@ -16,7 +16,7 @@ public class TargetTableTest {
 
     @Test
     public void _ctor() throws Exception {
-        TargetTable table = new TargetTable("schema", "table", "bucket", "prefix");
+        TargetTable table = new TargetTable("schema", "table", "schema.table", "bucket", "prefix");
         table = entityManager.persist(table);
         assertEquals("bucket", table.getBucket());
         assertEquals("prefix", table.getPrefix());
