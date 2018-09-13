@@ -1,5 +1,6 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.object.*;
+import org.bricolages.streaming.table.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;
@@ -15,6 +16,7 @@ import lombok.*;
 public class PacketRouterTest {
     PacketRouter newRouter(PacketRouter.Entry... entries) {
         val router = new PacketRouter(Arrays.asList(entries));
+        router.tableRepos = tableRepos;
         router.streamRepos = streamRepos;
         router.streamBundleRepos = bundleRepos;
         return router;
@@ -81,17 +83,20 @@ public class PacketRouterTest {
     }
 
     @Autowired TestEntityManager entityManager;
+    @Autowired TargetTableRepository tableRepos;
     @Autowired PacketStreamRepository streamRepos;
     @Autowired StreamBundleRepository bundleRepos;
 
     @Test
     public void route() throws Exception {
-        val s = new PacketStream("schema.table");
+        val t = new TargetTable("schema", "table", "dest-bucket-2", "dest-prefix-2");
+        entityManager.persist(t);
+        val s = new PacketStream("schema.table", t);
         s.initialized = true;
         s.columnInitialized = true;
         entityManager.persist(s);
         val stream = streamRepos.findStream("schema.table");
-        entityManager.persist(new StreamBundle(stream, "src-bucket", "0000.schema.table_2", "dest-bucket-2", "dest-prefix-2"));
+        entityManager.persist(new StreamBundle(stream, "src-bucket", "0000.schema.table_2"));
         val bundle = bundleRepos.findStreamBundle("src-bucket-2", "src-prefix-2");
 
         val router = newRouter(entry("s3://src-bucket/(0000.(schema\\.table))/(2017/11/28)/(.*\\.gz)", "$2", "$1", "dest-bucket", "dest/$1", "$2", "$3"));

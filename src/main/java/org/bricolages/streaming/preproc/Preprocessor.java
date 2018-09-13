@@ -1,6 +1,7 @@
 package org.bricolages.streaming.preproc;
 import org.bricolages.streaming.event.*;
 import org.bricolages.streaming.stream.*;
+import org.bricolages.streaming.table.*;
 import org.bricolages.streaming.object.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -187,8 +188,8 @@ public class Preprocessor implements EventHandlers {
         PreprocMessage msg = acceptMessage(event);
 
         S3ObjectLocator src = event.getLocator();
-        BoundStream stream = router.route(src);
-        if (stream == null) {
+        Route route = router.route(src);
+        if (route == null) {
             // packet routing failed; this means invalid event or bad configuration.
             // We should remove invalid events from queue and
             // we must fix bad configuration by hand.
@@ -198,39 +199,39 @@ public class Preprocessor implements EventHandlers {
             deleteMessage(msg, event);
             return;
         }
-        if (stream.isBlackhole()) {
+        if (route.isBlackhole()) {
             // Should be removed by explicit configuration
             log.info("ignore event: {}", src.toString());
             deleteMessage(msg, event);
             return;
         }
 
-        streamDetected(msg, stream);
-        val dest = stream.getDestLocator();
-        if (stream.doesDefer()) {
+        streamDetected(msg, route.getStream());
+        val dest = route.getDestLocator();
+        if (route.doesDefer()) {
             // Processing is temporary disabled; process objects later
             return;
         }
-        if (stream.doesDiscard()) {
+        if (route.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
             log.info("discard event: {}", event.getLocator().toString());
             deleteMessage(msg, event);
             return;
         }
 
-        PreprocJob job = jobStarted(msg, event, stream);
+        PreprocJob job = jobStarted(msg, event, route.getStream());
         try {
-            PacketFilterResult result = stream.processLocator(src, dest);
+            PacketFilterResult result = route.applyFilter();
             log.debug("src: {}, dest: {}, in: {}, out: {}, err: {}", src.toString(), dest.toString(), result.getInputRows(), result.getOutputRows(), result.getErrorRows());
-            Chunk chunk = jobSucceeded(job, stream, result);
+            Chunk chunk = jobSucceeded(job, route.getTable(), (ChunkProperties)result);
 
-            if (!event.doesNotDispatch() && !stream.doesNotDispatch()) {
+            if (!event.doesNotDispatch() && !route.doesNotDispatch()) {
                 dispatch(result, chunk);
             }
 
             deleteMessage(msg, event);
 
-            columnRepos.saveUnknownColumns(stream.getStream(), result.getUnknownColumns());
+            columnRepos.saveUnknownColumns(route.getStream(), result.getUnknownColumns());
         }
         catch (ObjectIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
@@ -242,8 +243,8 @@ public class Preprocessor implements EventHandlers {
         return msgRepos.upsert(new PreprocMessage(event.getMessageId(), event.getObjectMetadata()));
     }
 
-    void streamDetected(PreprocMessage msg, BoundStream stream) {
-        msg.changeStateToStreamDetected(stream.getStream());
+    void streamDetected(PreprocMessage msg, PacketStream stream) {
+        msg.changeStateToStreamDetected(stream);
         msgRepos.save(msg);
     }
 
@@ -254,14 +255,14 @@ public class Preprocessor implements EventHandlers {
         msgRepos.save(msg);
     }
 
-    PreprocJob jobStarted(PreprocMessage msg, S3Event event, BoundStream stream) {
+    PreprocJob jobStarted(PreprocMessage msg, S3Event event, PacketStream stream) {
         Packet packet = packetRepos.upsert(new Packet(event.getObjectMetadata(), stream));
         msg.changeStateToJobStarted(packet);   // defer to save
         return jobRepos.save(new PreprocJob(msg, packet));
     }
 
-    Chunk jobSucceeded(PreprocJob job, BoundStream stream, PacketFilterResult result) {
-        Chunk chunk = chunkRepos.upsert(new Chunk(stream.getTableId(), result));
+    Chunk jobSucceeded(PreprocJob job, TargetTable table, ChunkProperties props) {
+        Chunk chunk = chunkRepos.upsert(new Chunk(table, props));
 
         Packet packet = job.getPacket();
         packet.changeStateToProcessed(chunk);

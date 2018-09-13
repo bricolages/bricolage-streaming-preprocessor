@@ -1,4 +1,4 @@
-package org.bricolages.streaming.stream;
+package org.bricolages.streaming.table;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import lombok.*;
