@@ -18,7 +18,7 @@ public class PacketRouterTest {
         val router = new PacketRouter(Arrays.asList(entries));
         router.tableRepos = tableRepos;
         router.streamRepos = streamRepos;
-        router.streamBundleRepos = bundleRepos;
+        router.bundleRepos = bundleRepos;
         return router;
     }
 
