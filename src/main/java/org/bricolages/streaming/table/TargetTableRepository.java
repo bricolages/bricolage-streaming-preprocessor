@@ -12,9 +12,9 @@ public interface TargetTableRepository extends JpaRepository<TargetTable, Long> 
         return findBySchemaNameAndTableName(schemaName, tableName);
     }
 
-    default TargetTable findOrCreate(String schemaName, String tableName, String bucket, String prefix, Logger log) {
+    default TargetTable findOrCreate(String schemaName, String tableName, String dataSourceId, String bucket, String prefix, Logger log) {
         try {
-            val table = new TargetTable(schemaName, tableName, bucket, prefix);
+            val table = new TargetTable(schemaName, tableName, dataSourceId, bucket, prefix);
             save(table);
             logNewTable(log, table.getId(), schemaName, tableName);
             return table;

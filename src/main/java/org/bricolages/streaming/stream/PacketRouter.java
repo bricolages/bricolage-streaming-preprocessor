@@ -132,7 +132,7 @@ public class PacketRouter {
             // If a stream does not exist, its corresponding table does not exist, too.
             // In other words, a stream and a table is coupled tightly.
             val name = TableSpec.parse(components.streamName);
-            val table = tableRepos.findOrCreate(name.schema, name.table, components.destBucket, components.destPrefix, log);
+            val table = tableRepos.findOrCreate(name.schema, name.table, components.streamName, components.destBucket, components.destPrefix, log);
             stream = streamRepos.createForce(components.streamName, table, log);
         }
         val bundle = bundleRepos.findOrCreate(stream, components.srcBucket, components.srcPrefix, log);
@@ -144,7 +144,7 @@ public class PacketRouter {
         val components = matchRoutes(src);
         if (components == null) return null;
         val names = components.streamName.split("\\.");
-        val table = new TargetTable(names[0], names[1], components.destBucket, components.destPrefix);
+        val table = new TargetTable(names[0], names[1], components.streamName, components.destBucket, components.destPrefix);
         val stream = new PacketStream(components.streamName, table);
         val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix);
         return new Route(filterFactory, stream, bundle, components.objectPrefix, components.objectName);

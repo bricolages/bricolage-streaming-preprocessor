@@ -80,7 +80,7 @@ public class PacketRouterTest {
 
     @Test
     public void routeByPatterns_find() throws Exception {
-        val table0 = entityManager.persist(new TargetTable("schema", "activity_log", "dest-bucket", "f34b.logger.activity.schema.activity_log"));
+        val table0 = entityManager.persist(new TargetTable("schema", "activity_log", "schema.activity_log", "dest-bucket", "f34b.logger.activity.schema.activity_log"));
         val stream0 = entityManager.persist(new PacketStream("schema.activity_log", table0));
         val bundle0 = entityManager.persist(new StreamBundle(stream0, "src-bucket", "f34b.logger.activity.schema.activity_log"));
 
@@ -138,7 +138,7 @@ public class PacketRouterTest {
 
     @Test
     public void route() throws Exception {
-        val t = new TargetTable("schema", "table", "dest-bucket-2", "dest-prefix-2");
+        val t = new TargetTable("schema", "table", "schema.table", "dest-bucket-2", "dest-prefix-2");
         entityManager.persist(t);
         val s = new PacketStream("schema.table", t);
         s.initialized = true;
