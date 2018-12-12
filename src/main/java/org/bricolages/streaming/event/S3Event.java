@@ -32,7 +32,7 @@ public class S3Event extends Event {
         }
 
         @Override
-        public Event parse(Message msg) throws MessageParseException {
+        public S3Event parse(Message msg) throws MessageParseException {
             val body = msg.getBody();
             if (isSnsWrappedS3Message(body)) {
                 val mapper = new ObjectMapper();
@@ -56,6 +56,9 @@ public class S3Event extends Event {
                 throw new MessageParseException("FATAL: SQS message record size is not 1" + body.getRecords().size());
             }
             S3EventNotification.S3EventNotificationRecord rec = body.getRecords().get(0);
+            if (rec.getS3() == null || rec.getS3().getObject() == null) {
+                throw new MessageParseException("S3 event message parse error: missing .s3 object");
+            }
             return new S3Event(
                 msg,
                 rec.getEventName(),
@@ -79,11 +82,11 @@ public class S3Event extends Event {
     final S3EventNotification.S3EventNotificationRecord record;
     final boolean noDispatch;
 
-    S3Event(Message msg, String eventName, S3ObjectLocator locator, long objectSize, S3EventNotification.S3EventNotificationRecord record, boolean noDispatch) {
+    S3Event(Message msg, String eventName, S3ObjectLocator locator, Long objectSize, S3EventNotification.S3EventNotificationRecord record, boolean noDispatch) {
         super(msg);
         this.eventName = eventName;
         this.locator = locator;
-        this.objectSize = objectSize;
+        this.objectSize = objectSize == null ? 0 : objectSize;
         this.record = record;
         this.noDispatch = noDispatch;
     }

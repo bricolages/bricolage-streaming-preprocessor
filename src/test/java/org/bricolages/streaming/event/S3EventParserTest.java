@@ -1,9 +1,10 @@
 package org.bricolages.streaming.event;
-import org.junit.Test;
 
 import com.amazonaws.services.sqs.model.Message;
 
+import org.junit.Test;
 import static org.junit.Assert.*;
+
 import lombok.*;
 
 public class S3EventParserTest {
@@ -34,5 +35,14 @@ public class S3EventParserTest {
         val msg = new Message();
         msg.setBody(msgBody);
         parser.parse(msg);
+    }
+
+    @Test
+    public void parse_no_size() throws Exception {
+        val msgBody = "{\"Records\":[{\"eventVersion\":\"2.0\",\"eventSource\":\"bricolage:preprocessor\",\"eventTime\":\"2016-09-06T13:52:49Z\",\"eventName\":\"ObjectCreated:Put\",\"s3\":{\"s3SchemaVersion\":\"1.0\",\"bucket\":{\"name\":\"test-bucket\"},\"object\":{\"key\":\"test-prefix/test-file.json.gz\",\"eTag\":\"bfa868a9c00376f6704f41d6a9e0da20\"}}}]}";
+        val msg = new Message();
+        msg.setBody(msgBody);
+        val event = new S3Event.Parser().parse(msg);
+        assertEquals(0, event.objectSize);
     }
 }
