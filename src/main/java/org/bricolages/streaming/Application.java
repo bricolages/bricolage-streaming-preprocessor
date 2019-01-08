@@ -55,6 +55,7 @@ public class Application {
         boolean checkOnly = false;
         boolean domainsReference = false;
         boolean dumpRoutes = false;
+        boolean testRun = false;
 
         for (int i = 0; i < args.length; i++) {
             if (Objects.equals(args[i], "--oneshot")) {
@@ -89,6 +90,9 @@ public class Application {
             }
             else if (Objects.equals(args[i], "--dump-routes")) {
                 dumpRoutes = true;
+            }
+            else if (Objects.equals(args[i], "--test-run")) {
+                testRun = true;
             }
             else if (Objects.equals(args[i], "--help")) {
                 printUsage(System.out);
@@ -129,15 +133,22 @@ public class Application {
                 System.exit(1);
             }
         }
-        else {   // preprocessor
-            if (dumpRoutes) {
-                val router = router();
-                for (val ent : router.getEntries()) {
-                    System.out.println(ent.description());
-                }
-                System.exit(0);
+        else if (domainsReference) {
+            new ReferenceGenerator().generate();
+            System.exit(0);
+        }
+        else if (dumpRoutes) {
+            val router = router();
+            for (val ent : router.getEntries()) {
+                System.out.println(ent.description());
             }
-
+            System.exit(0);
+        }
+        else if (testRun) {
+            doTestRun();
+            System.exit(0);
+        }
+        else {   // preprocessor
             if (mapUrl != null) {
                 val src = S3ObjectLocator.parse(mapUrl);
                 val route = router().routeWithoutDB(src);
@@ -183,9 +194,6 @@ public class Application {
             else if (oneshot) {
                 preproc.runOneshot();
             }
-            else if (domainsReference) {
-                new ReferenceGenerator().generate();
-            }
             else {
                 preproc.run();
             }
@@ -220,6 +228,16 @@ public class Application {
         try (val f = Files.newBufferedWriter(flagPath)) {
             ;
         }
+    }
+
+    void doTestRun() {
+        System.err.println("");
+        System.err.println("*** TEST ***");
+
+        // test code here
+
+        System.err.println("OK");
+        System.err.println("");
     }
 
     @Autowired
