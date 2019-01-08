@@ -234,7 +234,10 @@ public class Application {
         System.err.println("");
         System.err.println("*** TEST ***");
 
-        // test code here
+        for (int i = 0; i < 3; i++) {
+            val num = sequentialNumberRepository.allocate();
+            System.err.println("next=" + num.getNextValue() + ", last=" + num.getLastValue());
+        }
 
         System.err.println("OK");
         System.err.println("");
