@@ -82,5 +82,5 @@ test {
 
 uploadArchives.repositories.mavenDeployer {
     repository url: "$System.env.MAVEN_REPO"
-    pom.version = "1.10.8"
+    pom.version = "1.10.9"
 }
