@@ -207,7 +207,12 @@ public class Preprocessor implements EventHandlers {
 
         streamDetected(msg, stream);
         val dest = stream.getDestLocator();
-        if (stream.doesDefer()) {
+        if (stream.isNotInitialized()) {
+            log.info("discard event for uninitialized stream: {}", event.getLocator().toString());
+            deleteMessage(msg, event);
+            return;
+        }
+        if (stream.isDisabled()) {
             // Processing is temporary disabled; process objects later
             return;
         }

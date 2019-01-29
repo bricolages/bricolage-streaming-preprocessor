@@ -61,8 +61,12 @@ public class PacketStream {
         return this.no_dispatch;
     }
 
-    public boolean doesDefer() {
-        return this.disabled || !this.initialized;
+    public boolean isNotInitialized() {
+        return !this.initialized;
+    }
+
+    public boolean isDisabled() {
+        return this.disabled;
     }
 
     public PacketStream(String streamName) {
