@@ -43,8 +43,12 @@ public class BoundStream {
         return stream.getTableId();
     }
 
-    public boolean doesDefer() {
-        return stream.doesDefer();
+    public boolean isNotInitialized() {
+        return stream.isNotInitialized();
+    }
+
+    public boolean isDisabled() {
+        return stream.isDisabled();
     }
 
     public boolean doesDiscard() {
