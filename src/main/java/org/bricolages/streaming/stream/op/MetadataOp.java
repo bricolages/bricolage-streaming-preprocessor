@@ -46,18 +46,19 @@ public class MetadataOp extends Op {
 
     MetadataOp(OperatorDefinition def, String component, boolean overwrite, String streamPrefix) {
         super(def);
-        this.component= component;
+        this.component = component;
         this.overwrite = overwrite;
+        this.value = computeValue(component, streamPrefix);
+    }
 
+    String computeValue(String component, String streamPrefix) {
         switch (Component.intern(component)) {
         case TABLE_NAME:
-            this.value = getTableName(streamPrefix);
-            break;
+            return getTableName(streamPrefix);
         case SCHEMA_NAME:
-            this.value = getSchemaName(streamPrefix);
-            break;
+            return getSchemaName(streamPrefix);
         default:
-            this.value = null;
+            return null;
         }
     }
 
@@ -79,7 +80,7 @@ public class MetadataOp extends Op {
     public Record apply(Record record) {
         String column = getColumnName();
         if (this.value != null) {
-            if (overwrite || record.get(column) != null) {
+            if (overwrite || record.get(column) == null) {
                 record.put(column, value);
             }
         }
