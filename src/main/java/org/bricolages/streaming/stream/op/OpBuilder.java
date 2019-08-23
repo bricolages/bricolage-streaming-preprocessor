@@ -1,19 +1,15 @@
 package org.bricolages.streaming.stream.op;
-import lombok.extern.slf4j.Slf4j;
+import org.bricolages.streaming.exception.ConfigError;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.BiFunction;
-import org.bricolages.streaming.exception.ConfigError;
 import lombok.val;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OpBuilder {
-    private final SequencialNumberRepository sequencialNumberRepository;
-
-    public OpBuilder(SequencialNumberRepository repo) {
-        this.sequencialNumberRepository = repo;
+    public OpBuilder() {
         registerAll();
     }
 
@@ -46,7 +42,6 @@ public class OpBuilder {
     }
 
     final public Op build(OperatorDefinition def, OpContext ctx) {
-        ctx.setSequencialNumberRepository(sequencialNumberRepository);
         val builder = builders.get(def.getOperatorId());
         if (builder == null) {
             throw new ConfigError("unknown operator ID: " + def.getOperatorId());

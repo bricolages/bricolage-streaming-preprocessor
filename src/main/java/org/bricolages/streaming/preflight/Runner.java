@@ -9,7 +9,8 @@ import org.bricolages.streaming.exception.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import lombok.*;
+import lombok.val;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class Runner {

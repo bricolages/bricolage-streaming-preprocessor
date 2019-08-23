@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
 import lombok.val;
 
-class PacketFilterGenerator implements ProcessorContext {
+class PacketFilterGenerator {
     final PacketFilterFactory factory;
     final StreamDefinitionEntry streamDef;
 
@@ -28,8 +29,7 @@ class PacketFilterGenerator implements ProcessorContext {
     public PacketFilter generate() {
         val ops = generateOperators();
         val procs = generateProcessors();
-        val ctx = new PacketFilterFactory.OpContextImpl("t1.t2.sample_schema.sample_table");
-        return factory.compose(ops, procs, ctx);
+        return factory.compose(ops, procs, "t1.t2.sample_schema.sample_table");
     }
 
     List<OperatorDefinition> generateOperators() {
@@ -50,7 +50,7 @@ class PacketFilterGenerator implements ProcessorContext {
     }
 
     List<StreamColumnProcessor> generateProcessors() {
-        ProcessorContext ctx = this;
+        ProcessorContext ctx = new ProcessorContextImpl(streamDef);
         val procs = new ArrayList<StreamColumnProcessor>();
         for (val column : streamDef.getColumns()) {
             try {
@@ -64,8 +64,13 @@ class PacketFilterGenerator implements ProcessorContext {
         return procs;
     }
 
-    // implements ProcessorContext
-    public Set<String> getStreamColumns() {
-        return streamDef.getColumns().stream().map(col -> col.getOriginalName()).collect(Collectors.toSet());
+    @RequiredArgsConstructor
+    static final class ProcessorContextImpl implements ProcessorContext {
+        final StreamDefinitionEntry streamDef;
+
+        @Override
+        public Set<String> getStreamColumns() {
+            return streamDef.getColumns().stream().map(col -> col.getOriginalName()).collect(Collectors.toSet());
+        }
     }
 }

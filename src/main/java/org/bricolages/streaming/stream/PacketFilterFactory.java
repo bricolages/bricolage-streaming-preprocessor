@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -20,18 +21,20 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PacketFilterFactory {
-    @Autowired
-    OpBuilder builder;
+    // to avoid duplicated op registeration
+    static final OpBuilder builder = new OpBuilder();
+
+    @Autowired ObjectIOManager ioManager;
+    @Autowired StreamColumnRepository columnRepos;
+    @Autowired SequencialNumberRepository sequencialNumberRepository;
 
     @Autowired
-    ObjectIOManager ioManager;
-
-    @Autowired
-    StreamColumnRepository columnRepos;
+    public PacketFilterFactory() {
+    }
 
     public PacketFilter load(BoundStream route) {
         val stream = route.getStream();
-        val ctx = new OpContextImpl(route.getBundle().getPrefix());
+        val ctx = new OpContextImpl(route.getBundle().getPrefix(), sequencialNumberRepository);
         val ops = buildOperators(stream.getOperatorDefinitions(), ctx);
         if (stream.doesUseColumn()) {
             log.debug("enables column processor: {}", stream.getStreamName());
@@ -43,7 +46,9 @@ public class PacketFilterFactory {
         }
     }
 
-    public PacketFilter compose(List<OperatorDefinition> opDefs, List<StreamColumnProcessor> procs, OpContext ctx) {
+    // For preflight
+    public PacketFilter compose(List<OperatorDefinition> opDefs, List<StreamColumnProcessor> procs, String streamPrefix) {
+        val ctx = new OpContextImpl(streamPrefix, sequencialNumberRepository);
         val ops = buildOperators(opDefs, ctx);
         return new PacketFilter(ioManager, ops, procs);
     }
@@ -52,10 +57,11 @@ public class PacketFilterFactory {
         return defs.stream().map(def -> builder.build(def, ctx)).collect(Collectors.toList());
     }
 
+    @AllArgsConstructor
     @RequiredArgsConstructor
     static public class OpContextImpl implements OpContext {
         @Getter final String streamPrefix;
-        @Getter @Setter SequencialNumberRepository sequencialNumberRepository;
+        @Getter SequencialNumberRepository sequencialNumberRepository = null;
     }
 
     List<StreamColumnProcessor> buildProcessors(PacketStream stream) {

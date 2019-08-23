@@ -234,10 +234,7 @@ public class Application {
         System.err.println("");
         System.err.println("*** TEST ***");
 
-        for (int i = 0; i < 3; i++) {
-            val num = sequentialNumberRepository.allocate();
-            System.err.println("next=" + num.getNextValue() + ", last=" + num.getLastValue());
-        }
+        // write test code here
 
         System.err.println("OK");
         System.err.println("");
@@ -286,13 +283,5 @@ public class Application {
     @Bean
     public PacketFilterFactory filterFactory() {
         return new PacketFilterFactory();
-    }
-
-    @Autowired
-    SequencialNumberRepository sequentialNumberRepository;
-
-    @Bean
-    public OpBuilder opBuilder() {
-        return new OpBuilder(sequentialNumberRepository);
     }
 }
