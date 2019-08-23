@@ -6,8 +6,6 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class SequenceOpTest {
-    OpBuilder builder = new OpBuilder();
-
     @Test
     public void apply() throws Exception {
         val def = new OperatorDefinition("sequence", "schema.table", "seq", "{}");

@@ -6,12 +6,12 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class FloatOpTest {
-    OpBuilder builder = new OpBuilder();
+    TestOpBuilder builder = new TestOpBuilder();
 
     @Test
     public void apply() throws Exception {
         val def = new OperatorDefinition("float", "schema.table", "n", "{}");
-        val op = (FloatOp) builder.build(def);
+        val op = (FloatOp) builder.buildWithDefaultContext(def);
         {
             val rec = Record.parse("{\"n\":1.5}");
             val out = op.apply(rec);

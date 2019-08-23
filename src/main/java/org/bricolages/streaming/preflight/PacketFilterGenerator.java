@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.*;
+import lombok.val;
 
 class PacketFilterGenerator implements ProcessorContext {
     final PacketFilterFactory factory;
@@ -28,7 +28,8 @@ class PacketFilterGenerator implements ProcessorContext {
     public PacketFilter generate() {
         val ops = generateOperators();
         val procs = generateProcessors();
-        return factory.compose(ops, procs);
+        val ctx = new PacketFilterFactory.OpContextImpl("t1.t2.sample_schema.sample_table");
+        return factory.compose(ops, procs, ctx);
     }
 
     List<OperatorDefinition> generateOperators() {

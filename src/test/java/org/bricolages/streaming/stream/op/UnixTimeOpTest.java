@@ -7,12 +7,12 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class UnixTimeOpTest {
-    OpBuilder builder = new OpBuilder();
+    TestOpBuilder builder = new TestOpBuilder();
 
     @Test
     public void build() throws Exception {
         val def = new OperatorDefinition("unixtime", "schema.table", "ut_col", "{\"zoneOffset\":\"+09:00\"}");
-        val op = (UnixTimeOp)builder.build(def);
+        val op = (UnixTimeOp)builder.buildWithDefaultContext(def);
         assertEquals("ut_col", op.targetColumnName());
         assertEquals(ZoneOffset.of("+09:00"), op.zoneOffset);
     }

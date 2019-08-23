@@ -7,12 +7,12 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class TimeZoneOpTest {
-    OpBuilder builder = new OpBuilder();
+    TestOpBuilder builder = new TestOpBuilder();
 
     @Test
     public void build() throws Exception {
         val def = new OperatorDefinition("timezone", "schema.table", "tz_col", "{\"sourceOffset\":\"+00:00\",\"targetOffset\":\"+09:00\"}");
-        val op = (TimeZoneOp)builder.build(def);
+        val op = (TimeZoneOp)builder.buildWithDefaultContext(def);
         assertEquals("tz_col", op.targetColumnName());
         assertEquals(ZoneOffset.of("+00:00"), op.sourceOffset);
         assertEquals(ZoneOffset.of("+09:00"), op.targetOffset);
