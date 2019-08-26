@@ -161,6 +161,39 @@ Minero Aoki
 
 # Release Note
 
+## version 1.10.11
+- new op: metadata
+
+## version 1.10.9
+- [fix] sequence op: Do not generate overwrapped sequence. (rev.2)
+
+## version 1.10.8
+- [fix] fix null pointer exception for bad S3 events
+
+## version 1.10.7
+- [fix] Reduces lazy loading.
+
+## version 1.10.6
+- [fix] sequence op: Do not generate overwrapped sequence.
+
+## version 1.10.5
+- [fix] Reject invalid S3 objects whose object size equals 0.
+
+## version 1.10.4
+- [fix] Update chunks records only when it is really changed.
+
+## version 1.10.3
+- [fix] preflight: Allows partition_source property for timestamp domains.
+
+## version 1.10.2
+- [fix] Load PreprocMessage records first to reduce duplicated rows error.
+
+## version 1.10.1
+- [fix] Use Long object type instead of primitive long type because table_id may be null.
+
+## version 1.10.0
+- [CHANGE] Splits big preproc_log table into 4 small tables: strload_preproc_messages, strload_preproc_jobs, strload_packets, strload_chunks.
+
 ## version 1.9.0
 - Records unknown, incoming columns to strload_columns as "unknown" column type.
   Preprocessor just ignores "unknown" columns.  In next version, preprocessor disables
