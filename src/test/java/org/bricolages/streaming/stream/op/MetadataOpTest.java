@@ -8,21 +8,22 @@ public class MetadataOpTest {
     @Test
     public void computeValue() throws Exception {
         val op = new MetadataOp(null, "", false, "");
-        assertEquals("table", op.computeValue("tableName", "a.b.schema.table"));
+        assertEquals("table", op.computeValue("streamName", "a.b.schema.table"));
+        assertEquals("table", op.computeValue("streamName", "a.b.schema.table/extra"));
     }
 
     @Test
-    public void getTableName() throws Exception {
+    public void getStreamName() throws Exception {
         val op = new MetadataOp(null, "", false, "");
-        assertEquals("table", op.getTableName("a.b.schema.table"));
-        assertEquals("table", op.getTableName("a.schema.table"));
-        assertEquals("table", op.getTableName("schema.table"));
+        assertEquals("table", op.getStreamName("a.b.schema.table"));
+        assertEquals("table", op.getStreamName("a.schema.table"));
+        assertEquals("table", op.getStreamName("schema.table"));
     }
 
     @Test
     public void apply() throws Exception {
         val def = new OperatorDefinition("metadata", null, "col", null);
-        val op = new MetadataOp(def, "tableName", false, "a.b.schema.table");
+        val op = new MetadataOp(def, "streamName", false, "a.b.schema.table");
         assertEquals("col", op.getColumnName());
         assertEquals("table", op.value);
 
@@ -38,7 +39,7 @@ public class MetadataOpTest {
     @Test
     public void apply_overwrite() throws Exception {
         val def = new OperatorDefinition("metadata", null, "col", null);
-        val op = new MetadataOp(def, "tableName", true, "a.b.schema.table");
+        val op = new MetadataOp(def, "streamName", true, "a.b.schema.table");
 
         val rec = Record.parse("{}");
         val out = op.apply(rec);

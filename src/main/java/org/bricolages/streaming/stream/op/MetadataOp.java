@@ -19,16 +19,12 @@ public class MetadataOp extends Op {
     }
 
     static enum Component {
-        TABLE_NAME,
-        SCHEMA_NAME,
+        STREAM_NAME,
         NONE;
 
         static public final Component intern(String name) {
-            if (Objects.equals(name, "tableName")) {
-                return Component.TABLE_NAME;
-            }
-            else if (Objects.equals(name, "schemaName")) {
-                return Component.SCHEMA_NAME;
+            if (Objects.equals(name, "streamName")) {
+                return Component.STREAM_NAME;
             }
             else {
                 return Component.NONE;
@@ -53,27 +49,17 @@ public class MetadataOp extends Op {
 
     String computeValue(String component, String streamPrefix) {
         switch (Component.intern(component)) {
-        case TABLE_NAME:
-            return getTableName(streamPrefix);
-        case SCHEMA_NAME:
-            return getSchemaName(streamPrefix);
+        case STREAM_NAME:
+            return getStreamName(streamPrefix);
         default:
             return null;
         }
     }
 
-    String getTableName(String s3UrlPrefix) {
-        String[] tags = getFirstPrefix(s3UrlPrefix).split("\\.");
+    String getStreamName(String prefix) {
+        String firstPrefix = prefix.split("/")[0];
+        String[] tags = firstPrefix.split("\\.");
         return tags[tags.length - 1];
-    }
-
-    String getSchemaName(String s3UrlPrefix) {
-        String[] tags = getFirstPrefix(s3UrlPrefix).split("\\.");
-        return tags[tags.length - 2];
-    }
-
-    String getFirstPrefix(String s3UrlPrefix) {
-        return s3UrlPrefix.replaceFirst("^s3://", "").split("/", 2)[0];
     }
 
     @Override
