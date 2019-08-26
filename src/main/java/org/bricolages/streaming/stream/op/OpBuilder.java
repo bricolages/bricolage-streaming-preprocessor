@@ -28,6 +28,7 @@ public class OpBuilder {
         SequenceOp.register(this);
         DupOp.register(this);
         FloatOp.register(this);
+        MetadataOp.register(this);
     }
 
     private Map<String, BiFunction<OperatorDefinition, OpContext, Op>> builders = new HashMap<String, BiFunction<OperatorDefinition, OpContext, Op>>();
