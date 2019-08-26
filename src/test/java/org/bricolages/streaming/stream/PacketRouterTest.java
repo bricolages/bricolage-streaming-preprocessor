@@ -13,8 +13,14 @@ import lombok.*;
 @DataJpaTest
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PacketRouterTest {
+    @Autowired TestEntityManager entityManager;
+    @Autowired PacketFilterFactory filterFactory;
+    @Autowired PacketStreamRepository streamRepos;
+    @Autowired StreamBundleRepository bundleRepos;
+
     PacketRouter newRouter(PacketRouter.Entry... entries) {
         val router = new PacketRouter(Arrays.asList(entries));
+        router.filterFactory = filterFactory;
         router.streamRepos = streamRepos;
         router.streamBundleRepos = bundleRepos;
         return router;
@@ -79,10 +85,6 @@ public class PacketRouterTest {
         val router = newRouter(entry("****", "$1", "src-prefix", "dest-bucket", "dest-prefix/$1", "", "$2"));
         router.check();
     }
-
-    @Autowired TestEntityManager entityManager;
-    @Autowired PacketStreamRepository streamRepos;
-    @Autowired StreamBundleRepository bundleRepos;
 
     @Test
     public void route() throws Exception {

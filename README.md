@@ -143,6 +143,13 @@ Duplicate the column specified in `from` param to `target_column`.
 
 Similar to `int` or `bigint`, but this operator accepts floating-point numbers.
 
+### `metadata`: Put metadata into records
+
+Puts metadata such as table name, schema name (infered from stream prefix) into data records.
+
+- `component`: The component to put.  `tableName` or `schemaName`.
+- `overwrite`: Overwrites the target value while it already exists.  Default is false.
+
 ## License
 
 MIT license. See LICENSE file for details.

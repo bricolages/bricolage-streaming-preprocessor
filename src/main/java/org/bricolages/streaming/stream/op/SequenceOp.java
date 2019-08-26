@@ -5,8 +5,8 @@ import lombok.*;
 
 public class SequenceOp extends SingleColumnOp {
     static final void register(OpBuilder builder) {
-        builder.registerOperator("sequence", (def) ->
-            new SequenceOp(def, new SequencialNumberAllocatorImpl(builder.sequencialNumberRepository))
+        builder.registerOperator("sequence", (def, ctx) ->
+            new SequenceOp(def, new SequencialNumberAllocatorImpl(ctx.getSequencialNumberRepository()))
         );
     }
 

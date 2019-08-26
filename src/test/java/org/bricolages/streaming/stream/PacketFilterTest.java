@@ -9,13 +9,13 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class PacketFilterTest {
-    OpBuilder builder = new OpBuilder();
+    TestOpBuilder builder = new TestOpBuilder();
 
     PacketFilter newFilter() {
         val ops = new ArrayList<Op>();
-        ops.add(builder.build(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
-        ops.add(builder.build(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
-        ops.add(builder.build(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
+        ops.add(builder.buildWithDefaultContext(new OperatorDefinition("int", "schema.table", "int_col", "{}")));
+        ops.add(builder.buildWithDefaultContext(new OperatorDefinition("bigint", "schema.table", "bigint_col", "{}")));
+        ops.add(builder.buildWithDefaultContext(new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}")));
         return new PacketFilter(null, ops);
     }
 
@@ -111,7 +111,7 @@ public class PacketFilterTest {
         val procs = new ArrayList<StreamColumnProcessor>();
         procs.add(new ObjectColumnProcessor(StreamColumn.forName("x"), 20));
         val ops = new ArrayList<Op>();
-        ops.add(builder.build(new OperatorDefinition("aggregate", "schema.table", "x", "{\"targetColumns\":\"^q_\", \"aggregatedColumn\":\"x\"}")));
+        ops.add(builder.buildWithDefaultContext(new OperatorDefinition("aggregate", "schema.table", "x", "{\"targetColumns\":\"^q_\", \"aggregatedColumn\":\"x\"}")));
         PacketFilter f = new PacketFilter(null, ops, procs);
 
         assertTrue(f.useProcessor);

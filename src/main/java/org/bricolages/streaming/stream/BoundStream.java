@@ -60,7 +60,7 @@ public class BoundStream {
     }
 
     public PacketFilter loadFilter() {
-        return filterFactory.load(stream);
+        return filterFactory.load(this);
     }
 
     public PacketFilterResult processLocator(S3ObjectLocator src, S3ObjectLocator dest) throws ObjectIOException, ConfigError {

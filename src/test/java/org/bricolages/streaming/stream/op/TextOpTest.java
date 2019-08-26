@@ -5,12 +5,12 @@ import static org.junit.Assert.*;
 import lombok.*;
 
 public class TextOpTest {
-    OpBuilder builder = new OpBuilder();
+    TestOpBuilder builder = new TestOpBuilder();
 
     @Test
     public void build() throws Exception {
         val def = new OperatorDefinition("text", "schema.table", "text_col", "{\"maxByteLength\":10,\"dropIfOverflow\":true}");
-        val op = (TextOp)builder.build(def);
+        val op = (TextOp)builder.buildWithDefaultContext(def);
         assertEquals("text_col", op.targetColumnName());
         assertEquals(10, op.maxByteLength);
         assertEquals(true, op.dropIfOverflow);
