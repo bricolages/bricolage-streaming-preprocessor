@@ -161,8 +161,11 @@ Minero Aoki
 
 # Release Note
 
+## version 1.10.12
+- [fix] Register metadata op
+
 ## version 1.10.11
-- new op: metadata
+- [new] New operator "metadata".
 
 ## version 1.10.9
 - [fix] sequence op: Do not generate overwrapped sequence. (rev.2)
