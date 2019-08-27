@@ -1,13 +1,13 @@
 buildscript {
     ext {
-        springBootVersion = '1.5.8.RELEASE'
+        springBootVersion = '2.1.7.RELEASE'
     }
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.8.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.7.RELEASE"
     }
 }
 
@@ -18,8 +18,8 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'maven'
 
 group 'org.bricolages.streaming'
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 dependencyManagement {
     imports {
@@ -39,41 +39,40 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.2'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.2'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.2'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.6.6'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.6.6'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.6.6'
-    compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.9.9'
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'org.apache.derby', name: 'derby', version: '10.14.1.0'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.236'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.236'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.236'
-    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '1.11.9.RELEASE'
-    compile group: 'org.springframework.data', name: 'spring-data-commons', version: '1.13.9.RELEASE'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.5.8.RELEASE'
-    compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212'
-    compile group: 'org.yaml', name: 'snakeyaml', version: '1.19'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.618'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.618'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.618'
+    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '2.1.10.RELEASE'
+    compile group: 'org.springframework.data', name: 'spring-data-commons', version: '2.1.10.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.1.7.RELEASE'
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.25'
     compile group: 'com.getsentry.raven', name: 'raven-logback', version: '8.0.3'
-    compile group: 'org.projectlombok', name: 'lombok', version: '1.16.18'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.16.18'
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.8.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-test-autoconfigure', version: '1.5.8.RELEASE'
-    testCompile group: 'org.projectlombok', name: 'lombok', version: '1.16.18'
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.16.18'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.7.RELEASE'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-test-autoconfigure', version: '2.1.7.RELEASE'
+    testCompile group: 'org.apache.derby', name: 'derby', version: '10.14.1.0'
+    testCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
 }
 
 ///// xjar //////////////////////////////////////////////////////////////////////////////
 
-jar.baseName = 'bricolage-streaming-preprocessor'
 mainClassName = 'org.bricolages.streaming.Application'
-springBoot.backupSource = false
-bootRepackage.classifier = "executable"
+bootJar.baseName = 'bricolage-streaming-preprocessor'
+bootJar.classifier = 'executable'
 
 ///// test ///////////////////////////////////////////////////////////////////////////////
 
