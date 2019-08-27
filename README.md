@@ -4,18 +4,22 @@ Bricolage Streaming Preprocessor service processes JSON data stream (S3 to S3).
 
 This software is written in working time in Cookpad, Inc.
 
+## Pre-requisites
+
+- OpenJDK 11
+
 ## Development (Local)
 
 Building Executable JAR file and running all tests:
 ```
-% gradle build
+% ./script/build
 ```
 
 To run the application, you must copy config/*.example files to config/* and edit them.
 Execute:
 ```
 % (cd db && bundle && ./ridgepole.sh --merge)   # Migrates database schema
-% java -jar build/libs/bricolage-streaming-preprocessor.jar
+% ./script/server
 ```
 
 ## Building Docker Image
@@ -30,7 +34,7 @@ All config files has the corresponding example file (*.example), just copy and e
 
 Then build image:
 ```
-% gradle build
+% ./gradlew build
 % docker-compose build
 ```
 

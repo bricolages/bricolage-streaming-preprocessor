@@ -1,4 +1,11 @@
-#!/bin/sh
+#!/bin/bash
+
+. $(dirname $0)/set-jdk-version.sh
+
+$(dirname $0)/build || exit 1
+
+SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-"development"}
+LOGBACK_CONFIG=${LOGBACK_CONFIG:-"config/logback.xml"}
 
 JAVAOPTS=${JAVAOPTS:-""}
 if [[ -n $LOGBACK_CONFIG ]]

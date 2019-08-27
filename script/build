@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. $(dirname $0)/set-jdk-version.sh
+
+exec ./gradlew build "$@"

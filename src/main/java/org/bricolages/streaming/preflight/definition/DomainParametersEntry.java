@@ -1,19 +1,24 @@
 package org.bricolages.streaming.preflight.definition;
+
 import org.bricolages.streaming.stream.StreamColumn;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.*;
+import lombok.val;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class DomainParametersEntry implements DomainParameters {
     @JsonProperty("<<") // TRICK: override merge `<<` operator
-    protected final DomainParameters parent;
-    protected final String type;
-    protected final ColumnEncoding encoding;
-    protected final List<OperatorDefinitionEntry> filter;
-    protected final List<OperatorDefinitionEntry> prependFilter;
-    protected final List<OperatorDefinitionEntry> appendFilter;
+    protected DomainParameters parent;
+    protected String type;
+    protected ColumnEncoding encoding;
+    @Getter protected List<OperatorDefinitionEntry> filter;
+    @Getter protected List<OperatorDefinitionEntry> prependFilter;
+    @Getter protected List<OperatorDefinitionEntry> appendFilter;
 
     public String getType() {
         if (type != null) { return type; }
