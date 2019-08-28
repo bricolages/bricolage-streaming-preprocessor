@@ -165,6 +165,14 @@ Minero Aoki
 
 # Release Note
 
+## version 1.12.0
+- Upgrade Java (8 -> 11)
+- Upgrade Spring Boot (1.5 -> 2.1)
+- Upgrade Spring (4.3 -> 5.1)
+
+## version 1.11.0
+cancelled
+
 ## version 1.10.12
 - [fix] Register metadata op
 
