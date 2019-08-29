@@ -5,76 +5,69 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.8.RELEASE"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.7.RELEASE"
-    }
 }
 
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'maven'
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}"
+}
 
+///// Build ///////////////////////////////////////////////////////////////////////
+
+version = '1.12.0'
 group 'org.bricolages.streaming'
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
 
-dependencyManagement {
-    imports {
-        mavenBom 'com.amazonaws:aws-java-sdk-bom:1.10.47'
-    }
-}
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 compileJava {
     options.deprecation = true
     options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 }
 
-///// dependency //////////////////////////////////////////////////////////////////
-
 repositories {
     jcenter()
 }
 
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.9'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.9'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.9.9'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.9'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.9.9'
-    compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-core', version: '1.11.618'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.618'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.618'
-    compile group: 'org.springframework.data', name: 'spring-data-jpa', version: '2.1.10.RELEASE'
-    compile group: 'org.springframework.data', name: 'spring-data-commons', version: '2.1.10.RELEASE'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '2.1.7.RELEASE'
-    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
-    compile group: 'org.yaml', name: 'snakeyaml', version: '1.25'
-    compile group: 'com.getsentry.raven', name: 'raven-logback', version: '8.0.3'
-    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.1.7.RELEASE'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-test-autoconfigure', version: '2.1.7.RELEASE'
-    testCompile group: 'org.apache.derby', name: 'derby', version: '10.14.1.0'
-    testCompile group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
-    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.8'
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.data:spring-data-jpa'
+    implementation 'org.springframework.data:spring-data-commons'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
+    implementation 'org.yaml:snakeyaml'
+    implementation 'org.postgresql:postgresql'
+    implementation 'org.slf4j:slf4j-api'
+    implementation 'ch.qos.logback:logback-classic'
+    implementation 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+    testImplementation 'junit:junit'
+    testImplementation 'org.apache.derby:derby'
+    testImplementation 'org.projectlombok:lombok'
+
+    annotationProcessor platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testAnnotationProcessor platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    implementation platform('com.amazonaws:aws-java-sdk-bom:1.11.618')
+    implementation 'com.amazonaws:aws-java-sdk-core'
+    implementation 'com.amazonaws:aws-java-sdk-s3'
+    implementation 'com.amazonaws:aws-java-sdk-sqs'
+
+    // no BOM
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    implementation group: 'com.getsentry.raven', name: 'raven-logback', version: '8.0.3'
 }
 
-///// xjar //////////////////////////////////////////////////////////////////////////////
-
-mainClassName = 'org.bricolages.streaming.Application'
-bootJar.baseName = 'bricolage-streaming-preprocessor'
-bootJar.classifier = 'executable'
-
-///// test ///////////////////////////////////////////////////////////////////////////////
+///// Test ///////////////////////////////////////////////////////////////////////////////
 
 test {
     testLogging {
@@ -83,7 +76,11 @@ test {
     }
 }
 
-uploadArchives.repositories.mavenDeployer {
-    repository url: "$System.env.MAVEN_REPO"
-    pom.version = "1.12.0"
+///// Executable Jar ////////////////////////////////////////////////////////////////////
+
+bootJar {
+    baseName = 'bricolage-streaming-preprocessor'
+    classifier = 'boot'
+    version = 'LATEST'
+    mainClassName = 'org.bricolages.streaming.Application'
 }
