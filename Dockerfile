@@ -21,6 +21,6 @@ RUN mkdir -p /app
 WORKDIR /app
 
 COPY config.docker/ config/
-COPY --from=build-image /app/build/libs/bricolage-streaming-preprocessor-executable.jar ./bricolage-streaming-preprocessor-executable.jar
+COPY --from=build-image /app/build/libs/bricolage-streaming-preprocessor-LATEST-boot.jar ./bricolage-streaming-preprocessor.jar
 
 CMD ["java", "-Dlogging.config=config/logback.xml", "-jar", "bricolage-streaming-preprocessor.jar"]

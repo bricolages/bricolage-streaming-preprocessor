@@ -84,3 +84,19 @@ bootJar {
     version = 'LATEST'
     mainClassName = 'org.bricolages.streaming.Application'
 }
+
+///// Docker ////////////////////////////////////////////////////////////////////////////
+
+if (!project.hasProperty("DOCKER_REPOSITORY")) {
+    ext.DOCKER_REPOSITORY = "bricolage"
+}
+
+task dockerBuild(dependsOn: build, type: Exec) {
+    description 'Build the Docker image.'
+    commandLine "docker", "build", "--tag=${DOCKER_REPOSITORY}/${project.name}:${project.version}", "."
+}
+
+task dockerPush(dependsOn: dockerBuild, type: Exec) {
+    description 'Push the Docker image.'
+    commandLine "docker", "push", "${DOCKER_REPOSITORY}/${project.name}:${project.version}"
+}

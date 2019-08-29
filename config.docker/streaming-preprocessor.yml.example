@@ -1,8 +1,0 @@
-queue:
-    url: https://sqs.YOUR_REGION.amazonaws.com/ACCOUNT_ID/QUEUE_NAME
-
-mapping:
-    -
-      src: "s3://SRC_BUCKET_NAME/ANY_PREFIX/([\\w.]+)/(.*\\.gz)"
-      dest: "s3://DEST_BUCKET_NAME/ANY_PREFIX/$1/$2"
-      table: $1
