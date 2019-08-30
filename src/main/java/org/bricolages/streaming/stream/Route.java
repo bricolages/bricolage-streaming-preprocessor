@@ -75,8 +75,8 @@ public class Route {
 
     public S3ObjectLocator getDestLocator() {
         if (stream == null) return null;
-        if (bundle == null) return null;
         val table = stream.getTable();
+        if (table == null) return null;
         return new S3ObjectLocator(table.getBucket(), Paths.get(table.getPrefix(), objectPrefix, objectName).toString());
     }
 
