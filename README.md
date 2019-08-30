@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.13.1
+- [fix] strload_tables record may not exist for the disabled streams or blackhole streams
+
 ## version 1.13.0
 - [CHANGE] Moves columns strload_stream_bundles.dest_bucket, .dest_prefix to strload_tables (Only one dest prefix per stream).
 
