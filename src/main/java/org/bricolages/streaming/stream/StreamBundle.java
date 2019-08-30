@@ -27,19 +27,9 @@ public class StreamBundle {
     @Getter
     String prefix;
 
-    @Column(name="dest_bucket", nullable=false)
-    @Getter
-    String destBucket;
-
-    @Column(name="dest_prefix", nullable=false)
-    @Getter
-    String destPrefix;
-
-    public StreamBundle(PacketStream stream, String bucket, String prefix, String destBucket, String destPrefix) {
+    public StreamBundle(PacketStream stream, String bucket, String prefix) {
         this.stream = stream;
         this.bucket = bucket;
         this.prefix = prefix;
-        this.destBucket = destBucket;
-        this.destPrefix = destPrefix;
     }
 }

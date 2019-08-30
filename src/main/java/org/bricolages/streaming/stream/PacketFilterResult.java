@@ -1,4 +1,5 @@
 package org.bricolages.streaming.stream;
+import org.bricolages.streaming.table.ChunkProperties;
 import org.bricolages.streaming.object.S3ObjectMetadata;
 import java.time.Instant;
 import java.util.Set;
@@ -6,7 +7,7 @@ import java.util.HashSet;
 import lombok.*;
 
 @NoArgsConstructor
-public class PacketFilterResult {
+public class PacketFilterResult implements ChunkProperties {
     @Getter
     int inputRows = 0;
 
@@ -30,6 +31,11 @@ public class PacketFilterResult {
 
     public long getObjectSize() {
         return objectMetadata.size();
+    }
+
+    // for ChunkProperties
+    public int getObjectRows() {
+        return outputRows;
     }
 
     final Set<String> unknownColumns = new HashSet<String>();

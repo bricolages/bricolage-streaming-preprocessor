@@ -32,9 +32,9 @@ public class PacketFilterFactory {
     public PacketFilterFactory() {
     }
 
-    public PacketFilter load(BoundStream route) {
+    public PacketFilter load(Route route) {
         val stream = route.getStream();
-        val ctx = new OpContextImpl(route.getBundle().getPrefix(), sequencialNumberRepository);
+        val ctx = new OpContextImpl(route.getPrefix(), sequencialNumberRepository);
         val ops = buildOperators(stream.getOperatorDefinitions(), ctx);
         if (stream.doesUseColumn()) {
             log.debug("enables column processor: {}", stream.getStreamName());

@@ -1,5 +1,6 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.object.S3ObjectLocator;
+import org.bricolages.streaming.table.*;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -75,7 +76,7 @@ public class PacketRouter {
         }
     }
 
-    public BoundStream route(S3ObjectLocator src) throws ConfigError {
+    public Route route(S3ObjectLocator src) throws ConfigError {
         val r1 = routeBySavedRoutes(src);
         if (r1 != null) return r1;
         val r2 = routeByPatterns(src);
@@ -86,10 +87,13 @@ public class PacketRouter {
     }
 
     @Autowired
+    TargetTableRepository tableRepos;
+
+    @Autowired
     PacketStreamRepository streamRepos;
 
     @Autowired
-    StreamBundleRepository streamBundleRepos;
+    StreamBundleRepository bundleRepos;
 
     /**
      * Expects URL like: s3://src-bucket/prefix1/prefix2/prefix3/.../YYYY/MM/DD/objectName.gz
@@ -97,7 +101,7 @@ public class PacketRouter {
      * objectPrefix: "YYYY/MM/DD"
      * objectName: "objectName.gz"
      */
-    BoundStream routeBySavedRoutes(S3ObjectLocator src) {
+    Route routeBySavedRoutes(S3ObjectLocator src) {
         val components = src.key().split("/");
         if (components.length < 5) {
             log.info("could not apply routeBySavedRoutes: {}", src);
@@ -110,30 +114,40 @@ public class PacketRouter {
         val objName = components[components.length - 1];
         log.debug("parsed url: prefix={}, objPrefix={}, objName={}", prefix, objPrefix, objName);
 
-        val bundle = streamBundleRepos.findStreamBundle(src.bucket(), prefix);
+        val bundle = bundleRepos.findStreamBundle(src.bucket(), prefix);
         if (bundle == null) return null;
         val stream = bundle.getStream();
         if (stream == null) throw new ApplicationError("FATAL: could not get stream for stream_bundle: stream_bundle_id=" + bundle.getId());
 
-        return new BoundStream(filterFactory, stream, bundle, objPrefix, objName);
+        return new Route(filterFactory, stream, bundle, objPrefix, objName);
     }
 
-    BoundStream routeByPatterns(S3ObjectLocator src) throws ConfigError {
+    Route routeByPatterns(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
-        if (components.isEmpty()) return BoundStream.makeBlackhole();
-        val stream = findOrCreateStream(components.streamName);
-        val bundle = findOrCreateStreamBundle(stream, components);
-        return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
+        if (components.isEmpty()) return Route.makeBlackhole();
+
+        PacketStream stream = streamRepos.findStream(components.streamName);
+        if (stream == null) {
+            // If a stream does not exist, its corresponding table does not exist, too.
+            // In other words, a stream and a table is coupled tightly.
+            val name = TableSpec.parse(components.streamName);
+            val table = tableRepos.findOrCreate(name.schema, name.table, components.streamName, components.destBucket, components.destPrefix, log);
+            stream = streamRepos.createForce(components.streamName, table, log);
+        }
+        val bundle = bundleRepos.findOrCreate(stream, components.srcBucket, components.srcPrefix, log);
+        return new Route(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
     // For preflight
-    public BoundStream routeWithoutDB(S3ObjectLocator src) throws ConfigError {
+    public Route routeWithoutDB(S3ObjectLocator src) throws ConfigError {
         val components = matchRoutes(src);
         if (components == null) return null;
-        val stream = new PacketStream(components.streamName);
-        val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix, components.destBucket, components.destPrefix);
-        return new BoundStream(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
+        val names = components.streamName.split("\\.");
+        val table = new TargetTable(names[0], names[1], components.streamName, components.destBucket, components.destPrefix);
+        val stream = new PacketStream(components.streamName, table);
+        val bundle = new StreamBundle(stream, components.srcBucket, components.srcPrefix);
+        return new Route(filterFactory, stream, bundle, components.objectPrefix, components.objectName);
     }
 
     RouteComponents matchRoutes(S3ObjectLocator src) throws ConfigError {
@@ -185,55 +199,15 @@ public class PacketRouter {
         }
     }
 
-    PacketStream findOrCreateStream(String streamName) {
-        PacketStream stream = streamRepos.findStream(streamName);
-        if (stream == null) {
-            try {
-                // create new stream with disabled (to avoid to produce non preprocessed output)
-                stream = new PacketStream(streamName);
-                streamRepos.save(stream);
-                logNewStream(stream.getId(), streamName);
-            }
-            catch (DataIntegrityViolationException ex) {
-                stream = streamRepos.findStream(streamName);
-            }
-            log.info("new data packet for unconfigured stream: stream_id={}, stream_name={}", stream.getId(), streamName);
-        }
-        return stream;
-    }
+    @AllArgsConstructor
+    static final class TableSpec {
+        public final String schema;
+        public final String table;
 
-    StreamBundle findOrCreateStreamBundle(PacketStream stream, RouteComponents components) {
-        val srcBucket = components.srcBucket;
-        val srcPrefix = components.srcPrefix;
-        val destBucket = components.destBucket;
-        val destPrefix = components.destPrefix;
-
-        StreamBundle bundle = streamBundleRepos.findStreamBundle(stream, srcBucket, srcPrefix);
-        if (bundle == null) {
-            try {
-                bundle = new StreamBundle(stream, srcBucket, srcPrefix, destBucket, destPrefix);
-                streamBundleRepos.save(bundle);
-                logNewStreamBundle(stream.getId(), srcPrefix);
-            }
-            catch (DataIntegrityViolationException ex) {
-                bundle = streamBundleRepos.findStreamBundle(stream, srcBucket, srcPrefix);
-            }
+        static public TableSpec parse(String spec) {
+            val names = spec.split("\\.");
+            return new TableSpec(names[0], names[1]);
         }
-        if (! Objects.equals(bundle.getDestBucket(), destBucket)) {
-            throw new ApplicationError("FATAL: assertion failed: dest_bucket is different: bundle=" + bundle.getDestBucket() + ", incoming=" + destBucket);
-        }
-        if (! Objects.equals(bundle.getDestPrefix(), destPrefix)) {
-            throw new ApplicationError("FATAL: assertion failed: dest_prefix is different: bundle=" + bundle.getDestPrefix() + ", incoming=" + destPrefix);
-        }
-        return bundle;
-    }
-
-    public void logNewStream(long streamId, String streamName) {
-        log.warn("new stream: stream_id={}, stream_name={}", streamId, streamName);
-    }
-
-    public void logNewStreamBundle(long streamId, String streamPrefix) {
-        log.warn("new stream bundle: stream_id={}, stream_prefix={}", streamId, streamPrefix);
     }
 
     public void logUnknownS3Object(S3ObjectLocator loc) {
