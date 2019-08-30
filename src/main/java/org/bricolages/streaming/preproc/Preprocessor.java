@@ -207,7 +207,6 @@ public class Preprocessor implements EventHandlers {
         }
 
         streamDetected(msg, route.getStream());
-        val dest = route.getDestLocator();
         if (route.isNotInitialized()) {
             log.info("discard event for uninitialized stream: {}", event.getLocator().toString());
             deleteMessage(msg, event);
@@ -220,6 +219,13 @@ public class Preprocessor implements EventHandlers {
         if (route.doesDiscard()) {
             // Just ignore without processing, do not keep SQS messages.
             log.info("discard event: {}", event.getLocator().toString());
+            deleteMessage(msg, event);
+            return;
+        }
+
+        val dest = route.getDestLocator();
+        if (dest == null) {
+            log.warn("missing dest object location: stream={}", route.getStreamName());
             deleteMessage(msg, event);
             return;
         }
