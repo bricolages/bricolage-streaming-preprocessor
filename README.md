@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.13.0
+- [CHANGE] Moves columns strload_stream_bundles.dest_bucket, .dest_prefix to strload_tables (Only one dest prefix per stream).
+
 ## version 1.12.0
 - Upgrade Java (8 -> 11)
 - Upgrade Spring Boot (1.5 -> 2.1)
