@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.14.0
+- [new] New column strload_columns.time_unit to support microseconds for unix times (default: seconds)
+
 ## version 1.13.1
 - [fix] strload_tables record may not exist for the disabled streams or blackhole streams
 

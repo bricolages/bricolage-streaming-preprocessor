@@ -14,7 +14,7 @@ plugins {
 
 ///// Build ///////////////////////////////////////////////////////////////////////
 
-version = '1.13.1'
+version = '1.14.0'
 group 'org.bricolages.streaming'
 
 sourceCompatibility = '11'
