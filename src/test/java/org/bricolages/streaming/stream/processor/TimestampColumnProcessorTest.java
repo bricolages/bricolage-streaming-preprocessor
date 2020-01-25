@@ -58,7 +58,19 @@ public class TimestampColumnProcessorTest {
     }
 
     @Test
-    public void s_build_timeunit() throws Exception {
+    public void s_build_timeunit_default() throws Exception {
+        val params = new StreamColumn.Params();
+        params.name = "x";
+        params.type = "timestamp";
+        params.zoneOffset = "+09:00";
+        params.sourceOffset = "+00:00";
+        params.timeUnit = null;
+        val proc = TimestampColumnProcessor.build(StreamColumn.forParams(params), new NullContext());
+        assertEquals(TimeUnit.SECONDS, proc.getTimeUnit());
+    }
+
+    @Test
+    public void s_build_timeunit_milli() throws Exception {
         val params = new StreamColumn.Params();
         params.name = "x";
         params.type = "timestamp";
