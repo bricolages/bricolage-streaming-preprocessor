@@ -1,8 +1,12 @@
 package org.bricolages.streaming.stream.op;
+
 import org.bricolages.streaming.stream.processor.Cleanse;
 import org.bricolages.streaming.stream.processor.CleanseException;
 import org.bricolages.streaming.object.Record;
+
 import java.time.*;
+import java.util.concurrent.TimeUnit;
+
 import lombok.*;
 
 public class UnixTimeOp extends SingleColumnOp {
@@ -33,10 +37,10 @@ public class UnixTimeOp extends SingleColumnOp {
     public Object applyValue(Object value, Record record) throws OpException, CleanseException {
         if (value == null) return null;
         if (Cleanse.isFloat(value)) {
-            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getDouble(value), zoneOffset));
+            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getDouble(value), zoneOffset, TimeUnit.SECONDS));
         }
         else {
-            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getInteger(value), zoneOffset));
+            return Cleanse.formatSqlTimestamp(Cleanse.unixTimeToOffsetDateTime(Cleanse.getInteger(value), zoneOffset, TimeUnit.SECONDS));
         }
     }
 }

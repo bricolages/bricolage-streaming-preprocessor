@@ -7,4 +7,5 @@ public interface ProcessorParams {
     Integer getLength();
     String getSourceOffset();
     String getZoneOffset();
+    String getTimeUnit();
 }
