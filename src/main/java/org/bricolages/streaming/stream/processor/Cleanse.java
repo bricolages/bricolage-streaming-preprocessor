@@ -1,7 +1,10 @@
 package org.bricolages.streaming.stream.processor;
+
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
+
 import lombok.*;
 
 public final class Cleanse {
@@ -141,30 +144,47 @@ public final class Cleanse {
         }
     }
 
-    static public OffsetDateTime getLocalOffsetDateTime(Object value, ZoneOffset sourceOffset, ZoneOffset zoneOffset) throws CleanseException {
+    static public OffsetDateTime getLocalOffsetDateTime(Object value, ZoneOffset sourceOffset, ZoneOffset zoneOffset, TimeUnit unit) throws CleanseException {
         if (isFloat(value)) {
-            return unixTimeToOffsetDateTime(getDouble(value), zoneOffset);
+            return unixTimeToOffsetDateTime(getDouble(value), zoneOffset, unit);
         }
         else if (isInteger(value)) {
-            return unixTimeToOffsetDateTime(getInteger(value), zoneOffset);
+            return unixTimeToOffsetDateTime(getInteger(value), zoneOffset, unit);
+        }
+        else if (value instanceof String) {
+            return getOffsetDateTime(value, sourceOffset).withOffsetSameInstant(zoneOffset);
         }
         else {
-            return getOffsetDateTime(value, sourceOffset, true).withOffsetSameInstant(zoneOffset);
+            throw new CleanseException("is not an integer, a float or a string: " + value);
         }
     }
 
-    static public OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset) throws CleanseException {
+    static public OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset, TimeUnit unit) throws CleanseException {
         try {
-            return Instant.ofEpochSecond(t).atOffset(offset);
+            switch (unit) {
+            case SECONDS:
+                return Instant.ofEpochSecond(t).atOffset(offset);
+            case MILLISECONDS:
+                return Instant.ofEpochMilli(t).atOffset(offset);
+            default:
+                throw new RuntimeException("BUG: unsupported time unit for unix time: " + unit);
+            }
         }
         catch (DateTimeException ex) {
             throw new CleanseException(ex);
         }
     }
 
-    static public OffsetDateTime unixTimeToOffsetDateTime(double t, ZoneOffset offset) throws CleanseException {
+    static public OffsetDateTime unixTimeToOffsetDateTime(double t, ZoneOffset offset, TimeUnit unit) throws CleanseException {
         try {
-            return Instant.ofEpochMilli((long)(t * 1000)).atOffset(offset);
+            switch (unit) {
+            case SECONDS:
+                return Instant.ofEpochMilli((long)(t * 1000.0)).atOffset(offset);
+            case MILLISECONDS:
+                return Instant.ofEpochMilli((long)t).atOffset(offset);
+            default:
+                throw new RuntimeException("BUG: unsupported time unit for unix time: " + unit);
+            }
         }
         catch (DateTimeException ex) {
             throw new CleanseException(ex);
@@ -197,7 +217,7 @@ public final class Cleanse {
 
     static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|\\w{1,5}|[+-]\\d{2}:?\\d{2})?");
 
-    static public OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset, boolean truncate) throws CleanseException {
+    static public OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset) throws CleanseException {
         if (! (value instanceof String)) {
             throw new CleanseException("is not a string: " + value);
         }
@@ -223,7 +243,7 @@ public final class Cleanse {
 
     static final DateTimeFormatter ISO_INSTANT_2 = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS][ ]xxxx");
 
-    /* "2016-07-01T12:34:56Z": Fluentd default.  This representation appears most
+    /* "2016-07-01T12:34:56Z": Fluentd default.  This representation appears most frequently.
      * ISO_INSTANT supports milliseconds
      */
     static public OffsetDateTime tryParsingIsoInstant(String str) {
@@ -321,7 +341,7 @@ public final class Cleanse {
             return LocalDate.parse(str, DateTimeFormatter.ISO_DATE);
         }
         catch (DateTimeException e) {
-            val dt = getOffsetDateTime(str, defaultOffset, true);
+            val dt = getOffsetDateTime(str, defaultOffset);
             return (targetOffset != null ? dt.withOffsetSameInstant(targetOffset) : dt).toLocalDate();
         }
     }

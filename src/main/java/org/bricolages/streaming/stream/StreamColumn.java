@@ -49,18 +49,22 @@ public class StreamColumn implements ProcessorParams {
     @Column(name="create_time", nullable=false)
     Timestamp createTime;
 
+    @Column(name="time_unit", nullable=true)
+    @Getter
+    String timeUnit;
+
     public String getSourceName() {
         return (sourceName == null ? name : sourceName);
     }
 
     /* For tests */
     static public StreamColumn forName(String name) {
-        return new StreamColumn(-1, -1, name, null, "dummy_type", null, null, null, null);
+        return new StreamColumn(-1, -1, name, null, "dummy_type", null, null, null, null, null);
     }
 
     /* For tests */
     static public StreamColumn forNames(String name, String sourceName) {
-        return new StreamColumn(-1, -1, name, sourceName, "dummy_type", null, null, null, null);
+        return new StreamColumn(-1, -1, name, sourceName, "dummy_type", null, null, null, null, null);
     }
 
     static public StreamColumn forParams(Params params) {
@@ -73,7 +77,8 @@ public class StreamColumn implements ProcessorParams {
             params.length,
             params.sourceOffset,
             params.zoneOffset,
-            params.createTime
+            params.createTime,
+            params.timeUnit
         );
     }
 
@@ -88,6 +93,7 @@ public class StreamColumn implements ProcessorParams {
         public String sourceOffset = null;
         public String zoneOffset = null;
         public Timestamp createTime = null;
+        public String timeUnit = null;
     }
 
     public StreamColumnProcessor buildProcessor(ProcessorContext ctx) {

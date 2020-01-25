@@ -38,6 +38,6 @@ public class TimeZoneOp extends SingleColumnOp {
     @Override
     public Object applyValue(Object value, Record record) throws OpException, CleanseException {
         if (value == null) return null;
-        return Cleanse.formatSqlTimestamp(Cleanse.getOffsetDateTime(value, sourceOffset, true).withOffsetSameInstant(targetOffset));
+        return Cleanse.formatSqlTimestamp(Cleanse.getOffsetDateTime(value, sourceOffset).withOffsetSameInstant(targetOffset));
     }
 }
