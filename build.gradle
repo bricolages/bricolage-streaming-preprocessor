@@ -45,6 +45,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api'
     implementation 'ch.qos.logback:logback-classic'
     implementation 'org.projectlombok:lombok'
+    implementation 'org.apache.derby:derby'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
     testImplementation 'junit:junit'
