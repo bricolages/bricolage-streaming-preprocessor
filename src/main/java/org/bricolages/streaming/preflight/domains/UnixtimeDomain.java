@@ -18,6 +18,8 @@ public class UnixtimeDomain extends PrimitiveDomain {
     @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
+    @Getter private String timeUnit;
+
     // This is necessary to accept empty value
     @JsonCreator public UnixtimeDomain(String nil) { /* noop */ }
 
@@ -26,6 +28,7 @@ public class UnixtimeDomain extends PrimitiveDomain {
         params.type = "timestamp";
         params.sourceOffset = "+00:00";
         params.zoneOffset = zoneOffset;
+        params.timeUnit = timeUnit;
         return params;
     }
 }
