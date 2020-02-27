@@ -9,7 +9,7 @@ import lombok.*;
 @JsonTypeName("double")
 @MultilineDescription("64bit floating point number")
 public class DoubleDomain extends PrimitiveDomain {
-    @Getter private final String type = "float";
+    @Getter private final String type = "double";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     // This is necessary to accept null value
