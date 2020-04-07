@@ -2,9 +2,9 @@
 
 . $(dirname $0)/set-jdk-version.sh
 
-$(dirname $0)/build || exit 1
+$(dirname $0)/gradle assemble || exit 1
 
-SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-"development"}
+export SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-"development"}
 LOGBACK_CONFIG=${LOGBACK_CONFIG:-"config/logback.xml"}
 
 JAVAOPTS=${JAVAOPTS:-""}

@@ -1,3 +1,4 @@
 #!/bin/bash
 
-exec $(dirname $0)/gradle build "$@"
+# Running tests with SPRING_PROFILES_ACTIVE=development causes resetting local Postgres, avoid it!!
+SPRING_PROFILES_ACTIVE= exec $(dirname $0)/gradle build "$@"
