@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.15.1
+- [fix] Configure Sentry stacktrace.app.packaages to supress warning.
+
 ## version 1.15.0
 - [new] Migrates to new Sentry client: from raven-logback to sentry-logback.
 
