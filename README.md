@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.15.0
+- [new] Migrates to new Sentry client: from raven-logback to sentry-logback.
+
 ## version 1.14.0
 - [new] New column strload_columns.time_unit to support microseconds for unix times (default: seconds)
 
