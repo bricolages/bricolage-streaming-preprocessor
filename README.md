@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.16.0
+- Detects Unix times in milliseconds and converts it as milliseconds, automatically.
+
 ## version 1.15.1
 - [fix] Configure Sentry stacktrace.app.packaages to supress warning.
 
