@@ -159,11 +159,22 @@ public final class Cleanse {
         }
     }
 
+    // This is 49503-02-10T02:40:00Z if we assume it is an epoch seconds,
+    // but is 2017-07-14T02:40:00Z if we assume it is an epoch milliseconds.
+    // It must be milliseconds.
+    static final long TOO_BIG_EPOCH_SECONDS = 1500000000000L;
+    static final double TOO_BIG_EPOCH_SECONDS_D = 1500000000000.0D;
+
     static public OffsetDateTime unixTimeToOffsetDateTime(long t, ZoneOffset offset, TimeUnit unit) throws CleanseException {
         try {
             switch (unit) {
-            case SECONDS:
-                return Instant.ofEpochSecond(t).atOffset(offset);
+            case SECONDS:   // default
+                if (t > TOO_BIG_EPOCH_SECONDS) {
+                    return Instant.ofEpochMilli(t).atOffset(offset);
+                }
+                else {
+                    return Instant.ofEpochSecond(t).atOffset(offset);
+                }
             case MILLISECONDS:
                 return Instant.ofEpochMilli(t).atOffset(offset);
             default:
@@ -179,7 +190,12 @@ public final class Cleanse {
         try {
             switch (unit) {
             case SECONDS:
-                return Instant.ofEpochMilli((long)(t * 1000.0)).atOffset(offset);
+                if (t > TOO_BIG_EPOCH_SECONDS_D) {
+                    return Instant.ofEpochMilli((long)t).atOffset(offset);
+                }
+                else {
+                    return Instant.ofEpochMilli((long)(t * 1000.0)).atOffset(offset);
+                }
             case MILLISECONDS:
                 return Instant.ofEpochMilli((long)t).atOffset(offset);
             default:
