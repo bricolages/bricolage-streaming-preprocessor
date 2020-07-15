@@ -115,6 +115,10 @@ public class TimestampColumnProcessorTest {
         // with fractional seconds
         assertEquals("2016-07-01T16:41:06.246+09:00", proc.processValue(Double.valueOf(1467358866.246D)));
         assertEquals("2016-07-01T16:41:06.246+09:00", proc.processValue("1467358866.246"));
+
+        // milliseconds for seconds
+        assertEquals("2020-07-15T18:53:53.123+09:00", proc.processValue(1594806833123L));
+        assertEquals("2020-07-15T18:53:53.123+09:00", proc.processValue(Double.valueOf(1594806833123L)));
     }
 
     @Test
