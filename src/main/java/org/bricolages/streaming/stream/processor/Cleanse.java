@@ -231,7 +231,7 @@ public final class Cleanse {
         }
     }
 
-    static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)? ?(?:Z|\\w{1,5}|[+-]\\d{2}:?\\d{2})?");
+    static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3,9})? ?(?:Z|\\w{1,5}|[+-]\\d{2}:?\\d{2})?");
 
     static public OffsetDateTime getOffsetDateTime(Object value, ZoneOffset defaultOffset) throws CleanseException {
         if (! (value instanceof String)) {
@@ -308,8 +308,7 @@ public final class Cleanse {
         }
     }
 
-    static final DateTimeFormatter RAILS_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-    static final DateTimeFormatter RAILS_DATE_TIME_FRAC = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS z");
+    static final DateTimeFormatter RAILS_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS] z");
 
     /* "2016-07-01 12:34:56 UTC": Rails TimeWithZone#to_s
      */
@@ -317,13 +316,8 @@ public final class Cleanse {
         try {
             return ZonedDateTime.parse(str, RAILS_DATE_TIME).toOffsetDateTime();
         }
-        catch (DateTimeException e1) {
-            try {
-                return ZonedDateTime.parse(str, RAILS_DATE_TIME_FRAC).toOffsetDateTime();
-            }
-            catch (DateTimeException e2) {
-                return null;
-            }
+        catch (DateTimeException e) {
+            return null;
         }
     }
 
