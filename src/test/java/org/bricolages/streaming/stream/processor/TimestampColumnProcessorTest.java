@@ -94,11 +94,15 @@ public class TimestampColumnProcessorTest {
         assertEquals("2016-07-01T19:41:06+09:00", proc.processValue("2016-07-01 10:41:06 +0000"));
         assertEquals("2016-07-01T19:41:06+09:00", proc.processValue("2016-07-01 10:41:06 UTC"));
 
-        // with fractional seconds
+        // with milli seconds
         assertEquals("2016-07-01T19:41:06.246+09:00", proc.processValue("2016-07-01T10:41:06.246Z"));
         assertEquals("2016-07-01T19:41:06.246+09:00", proc.processValue("2016-07-01T10:41:06.246+00:00"));
         assertEquals("2016-07-01T19:41:06.246+09:00", proc.processValue("2016-07-01 10:41:06.246 +0000"));
         assertEquals("2016-07-01T19:41:06.246+09:00", proc.processValue("2016-07-01 10:41:06.246 UTC"));
+
+        // with nano seconds (ISO format only)
+        assertEquals("2016-07-01T19:41:06.246124+09:00", proc.processValue("2016-07-01T10:41:06.246124Z"));
+        assertEquals("2016-07-01T19:41:06.246124+09:00", proc.processValue("2016-07-01T10:41:06.246124+00:00"));
 
         // trailing TZ
         assertEquals("2012-09-11T04:34:11+09:00", proc.processValue("2012-09-10T12:34:11-07:00[America/Los_Angeles]"));
