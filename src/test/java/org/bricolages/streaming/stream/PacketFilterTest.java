@@ -25,6 +25,7 @@ public class PacketFilterTest {
             "{\"int_col\":1,\"bigint_col\":99}\n" +
             "{\n" +
             "{\"int_col\":1,\"bigint_col\":\"b\"}\n" +
+            "{\"text_col\":\"" + "a".repeat(4194304) + "\"}\n" +
             "{\"text_col\":\"aaaaaaaaaaaaaaaaaaaaaaaaa\"}\n";
         val in = new BufferedReader(new StringReader(src));
 
@@ -40,7 +41,7 @@ public class PacketFilterTest {
         bufOut.close();
 
         assertEquals(expected, out.toString());
-        assertEquals(5, r.getInputRows());
+        assertEquals(6, r.getInputRows());
         assertEquals(3, r.getOutputRows());
         assertEquals(1, r.getErrorRows());
     }
