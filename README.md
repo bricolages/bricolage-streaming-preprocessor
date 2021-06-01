@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.16.1
+- [new] Drops too long JSON rows (>4MB) not to stop Redshift loading (COPY).
+
 ## version 1.16.0
 - Detects Unix times in milliseconds and converts it as milliseconds, automatically.
 
