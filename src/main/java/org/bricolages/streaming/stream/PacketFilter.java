@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.PrintWriter;
 import java.util.regex.Pattern;
+import java.nio.charset.StandardCharsets;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -95,7 +96,10 @@ public class PacketFilter {
         }
     }
 
+    static final long REDSHIFT_LOAD_RECORD_LIMIT = 4194304;  // 4MB
+
     public String processJSON(String json, PacketFilterResult result) throws JSONParseException {
+        if (json.getBytes(StandardCharsets.UTF_8).length > REDSHIFT_LOAD_RECORD_LIMIT) return null;
         Record record = Record.parse(json);
         if (record == null) return null;
         Record outRecord = processRecord(record, result);
