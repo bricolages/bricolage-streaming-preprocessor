@@ -1,7 +1,6 @@
 #### Build #####################################################################
-FROM adoptopenjdk/openjdk11:x86_64-ubuntu-jdk-11.0.11_9 AS build-image
+FROM amazoncorretto:11 AS build-image
 
-RUN mkdir -p /app
 WORKDIR /app
 
 COPY gradlew .
@@ -14,10 +13,8 @@ COPY src ./src
 RUN ./gradlew assemble
 
 #### Runtime ###################################################################
-FROM adoptopenjdk/openjdk11:x86_64-ubuntu-jre-11.0.11_9
-MAINTAINER Minero Aoki <minero-aoki@cookpad.com>
+FROM amazoncorretto:11-alpine
 
-RUN mkdir -p /app
 WORKDIR /app
 
 COPY config.docker/ config/
