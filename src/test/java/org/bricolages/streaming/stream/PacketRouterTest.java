@@ -171,4 +171,21 @@ public class PacketRouterTest {
         assertNotNull(result);
         assertEquals(true, result.isBlackhole());
     }
+
+    @Test
+    public void isBadStreamName() throws Exception {
+        assertFalse(PacketRouter.isBadStreamName("schema.table"));
+        assertFalse(PacketRouter.isBadStreamName("schema_name.table_name"));
+        assertFalse(PacketRouter.isBadStreamName("schema_name.table2"));
+        assertFalse(PacketRouter.isBadStreamName("schema_name.table_name2"));
+        assertFalse(PacketRouter.isBadStreamName("a_bit_long_schema_name.really_very_long_log_table_name"));
+
+        assertTrue(PacketRouter.isBadStreamName(""));
+        assertTrue(PacketRouter.isBadStreamName("stream"));
+        assertTrue(PacketRouter.isBadStreamName("stream_name"));
+        assertTrue(PacketRouter.isBadStreamName("schema.123456"));
+        assertTrue(PacketRouter.isBadStreamName("schema.table-name"));
+        assertTrue(PacketRouter.isBadStreamName("schema.stream[new]"));
+        assertTrue(PacketRouter.isBadStreamName("42.log_table_name"));
+    }
 }
