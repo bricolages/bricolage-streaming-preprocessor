@@ -127,6 +127,11 @@ public class PacketRouter {
         if (components == null) return null;
         if (components.isEmpty()) return Route.makeBlackhole();
 
+        if (isBadStreamName(components.streamName)) {
+            logBadStreamName(components.streamName);
+            return null;
+        }
+
         PacketStream stream = streamRepos.findStream(components.streamName);
         if (stream == null) {
             // If a stream does not exist, its corresponding table does not exist, too.
@@ -212,5 +217,15 @@ public class PacketRouter {
 
     public void logUnknownS3Object(S3ObjectLocator loc) {
         log.warn("unknown S3 object URL: {}", loc);
+    }
+
+    static final Pattern STREAM_NAME = Pattern.compile("[a-zA-Z]\\w*\\.[a-zA-Z]\\w*");
+
+    static boolean isBadStreamName(String streamName) {
+        return ! STREAM_NAME.matcher(streamName).matches();
+    }
+
+    public void logBadStreamName(String streamName) {
+        log.warn("bad stream name, ignore: {}", streamName);
     }
 }
