@@ -2,10 +2,7 @@ package org.bricolages.streaming.stream;
 import org.bricolages.streaming.util.SQLUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.dao.DataIntegrityViolationException;
-import java.util.Date;
-import java.util.Set;
 import java.util.List;
-import java.sql.Timestamp;
 import lombok.*;
 
 public interface StreamColumnRepository extends JpaRepository<StreamColumn, Long> {
@@ -14,12 +11,6 @@ public interface StreamColumnRepository extends JpaRepository<StreamColumn, Long
     }
 
     List<StreamColumn> findByStreamIdOrderById(long streamId);
-
-    public default void saveUnknownColumns(PacketStream stream, Set<String> names) {
-        for (String name : names) {
-            saveUnknownColumn(stream, name);
-        }
-    }
 
     public default StreamColumn saveUnknownColumn(PacketStream stream, String name) {
         val params = new StreamColumn.Params();

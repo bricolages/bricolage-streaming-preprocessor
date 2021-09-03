@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.Objects;
+import java.util.Set;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -242,7 +243,7 @@ public class Preprocessor implements EventHandlers {
 
             deleteMessage(msg, event);
 
-            columnRepos.saveUnknownColumns(route.getStream(), result.getUnknownColumns());
+            saveUnknownColumns(route.getStream(), result.getUnknownColumns());
         }
         catch (ObjectIOException | ConfigError ex) {
             log.error("src: {}, error: {}", src.toString(), ex.getMessage());
@@ -295,5 +296,13 @@ public class Preprocessor implements EventHandlers {
 
         chunk.changeStateToDispatched();
         chunkRepos.save(chunk);
+    }
+
+    void saveUnknownColumns(PacketStream stream, Set<String> columns) {
+        for (String column : columns) {
+           if (StreamColumn.isValidColumnName(column)) {
+               columnRepos.saveUnknownColumn(stream, column);
+            }
+        }
     }
 }

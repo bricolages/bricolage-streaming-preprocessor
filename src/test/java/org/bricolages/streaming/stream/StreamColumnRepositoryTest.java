@@ -1,21 +1,12 @@
 package org.bricolages.streaming.stream;
 import org.bricolages.streaming.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.boot.test.autoconfigure.orm.jpa.*;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.sql.Timestamp;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
-import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
-import org.hibernate.Hibernate;
+import lombok.val;
 
 @DataJpaTest
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -25,12 +16,15 @@ public class StreamColumnRepositoryTest {
     @Autowired StreamColumnRepository columnRepos;
 
     @Test
-    public void saveUnknownColumns() throws Exception {
+    public void saveUnknownColumn() throws Exception {
         val s = new PacketStream("schema.table");
         s.initialized = true;
         s.columnInitialized = true;
         val stream = entityManager.persist(s);
-        columnRepos.saveUnknownColumns(stream, nameSet("a", "b", "c"));
+
+        columnRepos.saveUnknownColumn(stream, "a");
+        columnRepos.saveUnknownColumn(stream, "b");
+        columnRepos.saveUnknownColumn(stream, "c");
 
         val columns = columnRepos.findColumns(stream);
         assertEquals(3, columns.size());
@@ -46,8 +40,10 @@ public class StreamColumnRepositoryTest {
         s.columnInitialized = true;
         val stream = entityManager.persist(s);
 
-        columnRepos.saveUnknownColumns(stream, nameSet("a", "b"));
-        columnRepos.saveUnknownColumns(stream, nameSet("b", "c"));
+        columnRepos.saveUnknownColumn(stream, "a");
+        columnRepos.saveUnknownColumn(stream, "b");
+        columnRepos.saveUnknownColumn(stream, "b");
+        columnRepos.saveUnknownColumn(stream, "c");
 
         entityManager.clear();
         val columns = columnRepos.findColumns(stream);
@@ -55,13 +51,5 @@ public class StreamColumnRepositoryTest {
         assertEquals("a", columns.get(0).getName());
         assertEquals("b", columns.get(1).getName());
         assertEquals("c", columns.get(2).getName());
-    }
-
-    Set<String> nameSet(String... names) {
-        val set = new HashSet<String>();
-        for (val n : names) {
-            set.add(n);
-        }
-        return set;
     }
 }

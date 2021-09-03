@@ -4,8 +4,11 @@ import org.bricolages.streaming.stream.processor.ProcessorParams;
 import org.bricolages.streaming.stream.processor.ProcessorContext;
 import org.bricolages.streaming.exception.*;
 import java.sql.Timestamp;
+import java.util.regex.Pattern;
 import javax.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor
@@ -14,6 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 @Entity
 @Table(name="strload_columns", uniqueConstraints=@UniqueConstraint(columnNames={"stream_id", "column_name"}))
 public class StreamColumn implements ProcessorParams {
+    static final Pattern VALID_NAME = Pattern.compile("[a-zA-Z]\\w*");
+
+    static public boolean isValidColumnName(String name) {
+        return VALID_NAME.matcher(name).matches();
+    }
+
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="column_id", nullable=false)
