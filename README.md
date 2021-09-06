@@ -165,6 +165,10 @@ Minero Aoki
 
 # Release Note
 
+## version 1.17.0
+- [new] Ignores incoming streams that have invalid name.
+- [new] Ignores incoming columns that have invalid name.
+
 ## version 1.16.1
 - [new] Drops too long JSON rows (>4MB) not to stop Redshift loading (COPY).
 
