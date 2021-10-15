@@ -129,7 +129,7 @@ public class PacketRouter {
 
         if (isBadStreamName(components.streamName)) {
             logBadStreamName(components.streamName);
-            return null;
+            return Route.makeBlackhole();
         }
 
         PacketStream stream = streamRepos.findStream(components.streamName);
@@ -226,6 +226,6 @@ public class PacketRouter {
     }
 
     public void logBadStreamName(String streamName) {
-        log.warn("bad stream name, ignore: {}", streamName);
+        log.info("bad stream name, ignore: {}", streamName);
     }
 }
