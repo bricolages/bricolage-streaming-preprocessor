@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.17.1
+- [fix] Reduces log level for bad stream name (warn -> info).
+
 ## version 1.17.0
 - [new] Ignores incoming streams that have invalid name.
 - [new] Ignores incoming columns that have invalid name.
