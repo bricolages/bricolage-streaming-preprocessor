@@ -13,7 +13,7 @@ COPY src ./src
 RUN ./gradlew assemble
 
 #### Runtime ###################################################################
-FROM amazoncorretto:11-alpine
+FROM amazoncorretto:11
 
 WORKDIR /app
 
