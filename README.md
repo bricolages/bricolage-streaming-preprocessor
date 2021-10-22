@@ -165,6 +165,9 @@ Minero Aoki
 
 # Release Note
 
+## version 1.17.2
+- [new] Uses Eclipse Temurin for a Docker base image. (no code had changed)
+
 ## version 1.17.1
 - [fix] Reduces log level for bad stream name (warn -> info).
 
