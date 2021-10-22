@@ -1,5 +1,5 @@
 #### Build #####################################################################
-FROM amazoncorretto:11 AS build-image
+FROM eclipse-temurin:11-jdk-focal AS build-image
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ COPY src ./src
 RUN ./gradlew assemble
 
 #### Runtime ###################################################################
-FROM amazoncorretto:11
+FROM eclipse-temurin:11-jre-focal
 
 WORKDIR /app
 
