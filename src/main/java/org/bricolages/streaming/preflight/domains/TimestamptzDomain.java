@@ -19,7 +19,7 @@ public class TimestamptzDomain extends PrimitiveDomain {
     @MultilineDescription("Target timezone, given by the string like '+09:00'")
     private String targetOffset;
 
-    @Getter private final String type = "timestamptz";
+    @Getter private final String type = "timestamp";
     @Getter private final ColumnEncoding encoding = ColumnEncoding.ZSTD;
 
     @Getter private final boolean partitionSource = false;
