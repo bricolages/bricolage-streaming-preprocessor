@@ -2,11 +2,11 @@
 
 Bricolage Streaming Preprocessor service processes JSON data stream (S3 to S3).
 
-This software is written in working time in Cookpad, Inc.
+This software is developped at Cookpad in working time.
 
 ## Pre-requisites
 
-- OpenJDK 11
+- OpenJDK 11 (Temurin)
 
 ## Development (Local)
 
