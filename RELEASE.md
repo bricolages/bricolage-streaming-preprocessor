@@ -1,5 +1,8 @@
 # Release Note
 
+## version 1.17.3
+- [fix] Upgrades Log4J to avoid zero day attack
+
 ## version 1.17.2
 - [new] Uses Eclipse Temurin for a Docker base image. (no code had changed)
 
